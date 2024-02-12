@@ -1,9 +1,5 @@
 ## DELTA-GREEN-STATS
 
-<div align="center">
-    <img src="https://github.com/PigeonFX/DELTA-GREEN-STATS/blob/main/pigeon%20logo.png?raw=true" width="150" height="150">
-</div>
-
 ## Overview
 DELTA-GREEN-STATS is a straightforward tool designed to facilitate the creation of player characters and NPCs for the Delta Green Role-Playing System. With a focus on ease of use and accessibility, this project introduces a single HTML file solution that supports various methods of character creation through a user-friendly interface.
 
@@ -36,6 +32,9 @@ As a project built by a beginner and held together with "sticky tape and AI logi
 This project is open source and available under the MIT license. Feel free to use, modify, and distribute as you see fit, keeping in mind the spirit of role-playing games and community collaboration.
 
 ---
+<div align="center">
+    <img src="https://github.com/PigeonFX/DELTA-GREEN-STATS/blob/main/pigeon%20logo.png?raw=true" width="150" height="150">
+</div>
 
 Built with ❤️ by [Pigeon](https://github.com/PigeonFX) for Delta Green enthusiasts and role-playing game fans everywhere.
 
