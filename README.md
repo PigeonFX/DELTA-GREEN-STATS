@@ -36,5 +36,8 @@ This project is open source and available under the MIT license. Feel free to us
     <img src="https://github.com/PigeonFX/DELTA-GREEN-STATS/blob/main/pigeon%20logo.png?raw=true" width="150" height="150">
 </div>
 
-Built with ❤️ by [Pigeon](https://github.com/PigeonFX) for Delta Green enthusiasts and role-playing game fans everywhere.
+<p align="center">
+  Built with ❤️ by <a href="https://github.com/PigeonFX">Pigeon</a> for Delta Green enthusiasts and role-playing game fans everywhere.
+</p>
+
 
