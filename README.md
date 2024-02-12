@@ -1,15 +1,36 @@
-# DELTA-GREEN-STATS
-A simple tool to create Delt Green player stat through point-buy or random dice rolls.
+## DELTA-GREEN-STATS
 
-This project is based on creating a simple single HTML file that can easily be shared and edited to fit your or your group's athletics.
+## Overview
+DELTA-GREEN-STATS is a straightforward tool designed to facilitate the creation of player characters and NPCs for the Delta Green Role-Playing System. With a focus on ease of use and accessibility, this project introduces a single HTML file solution that supports various methods of character creation through a user-friendly interface.
 
-The page facilitates three character creation options, Point Buy, Random Point Buy and Random Dice Roll options for quick and easy Agent or NPC builds for the Delta Green Role Play System:
+### Features
+- **Point Buy System**: Manually distribute a fixed number of points across different stats to shape your character.
+- **Random Point Buy**: Automatically allocates points across stats for quick character creation.
+- **Random Dice Roll**: Simulates rolling dice to determine stat values, adding an element of chance to character creation.
+- **Reset Functionality**: Resets all stats to a base value, allowing for a fresh start in character customization.
+- **Simplicity and Portability**: Encapsulated in a single HTML file, making it easy to share and edit.
+- **Built for Delta Green**: Tailored to fit the unique requirements of the Delta Green RPG system.
 
-'RANDOM POINT BUY' Will randomly allocate all 72-point buy points between your Stats.
+## How It Works
+The DELTA-GREEN-STATS tool provides a seamless interface for creating and customizing characters. Choose between point buy or dice roll methods to set your character's stats, with options for automatic or manual distribution. The tool also includes a reset feature to clear all inputs and start anew, as well as a random bond generator to add depth to your characters.
 
-'RANDOM DICE ROLL' Will roll 4xD6 and ignore the lowest number dividing the remaining points randomly between your stats. 
+## Technologies Used
+- HTML
+- CSS
+- JavaScript
 
-'RESET' Will set all Stats to 3 by default so you can manually add to your Stats with the 72-point buy points.  
+This project leverages basic web technologies to ensure that it can be easily run in any modern web browser without the need for additional software or installations.
 
-This project is made by a noob and held together with sticky tape and AI logic. 
-In keeping with simplicity the project is contained in a single HTML file only using HTML, CCS, and Java. 
+## Getting Started
+To use DELTA-GREEN-STATS, simply download the HTML file and open it in your preferred web browser. The intuitive layout guides you through the character creation process, allowing for quick and straightforward character generation.
+
+## Contributions
+As a project built by a beginner and held together with "sticky tape and AI logic," contributions are warmly welcomed. Whether it's improving the logic, enhancing the design, or adding new features, feel free to fork the repository and submit your pull requests.
+
+## License
+This project is open source and available under the MIT license. Feel free to use, modify, and distribute as you see fit, keeping in mind the spirit of role-playing games and community collaboration.
+
+---
+
+Built with ❤️ by [Pigeon](https://github.com/PigeonFX) for Delta Green enthusiasts and role-playing game fans everywhere.
+
