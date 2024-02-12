@@ -3,6 +3,8 @@
 ## Overview
 DELTA-GREEN-STATS is a straightforward tool designed to facilitate the creation of player characters and NPCs for the Delta Green Role-Playing System. With a focus on ease of use and accessibility, this project introduces a single HTML file solution that supports various methods of character creation through a user-friendly interface.
 
+<img src="https://github.com/PigeonFX/DELTA-GREEN-STATS/blob/main/Screenshot.png?raw=true" alt="Screenshot" style="max-width: 100%; height: auto;">
+
 ### Features
 - **Point Buy System**: Manually distribute a fixed number of points across different stats to shape your character.
 - **Random Point Buy**: Automatically allocates points across stats for quick character creation.
