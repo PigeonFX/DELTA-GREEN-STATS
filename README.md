@@ -10,7 +10,6 @@ DELTA-GREEN-STATS is a straightforward tool designed to facilitate the creation 
 - **Random Point Buy**: Automatically allocates points across stats for quick character creation.
 - **Random Dice Roll**: Simulates rolling dice to determine stat values, adding an element of chance to character creation.
 - **Reset Functionality**: Resets all stats to a base value, allowing for a fresh start in character customization.
-- **Simplicity and Portability**: Encapsulated in a single HTML file, making it easy to share and edit.
 - **Bond Prompts**: A collection of prewritten 'Bonds' to cut and paste or use as writing prompts.
 - **Built for Delta Green**: Tailored to fit the unique requirements of the Delta Green RPG system.
 
