@@ -1,0 +1,223 @@
+/* General body styling for the entire page */
+body {
+    font-family: Courier New;
+    /* Sets the font to Courier New for a typewriter-like appearance */
+    background-color: #000000;
+    /* Sets background color to black */
+    color: #FFFFFF;
+    /* Sets text color to white for readability */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-weight: bold;
+    /* Makes the entire text bold for emphasis */
+}
+
+/* Styling for the main content area */
+.content {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    max-width: 1400px;
+    width: 100%;
+}
+
+/* Styling for sections that contain statistics */
+.stats-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+}
+
+/* Style for the page title */
+.page-title {
+    font-size: 32px;
+    /* Larger font size for the title */
+    font-weight: bold;
+    color: #006512;
+    /* Green color for the title */
+    text-align: center;
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+/* Style for secondary headings */
+h2 {
+    font-size: 18px;
+    color: #006512;
+    /* Green color to match the theme */
+    margin: 0 0 20px 0;
+    padding-left: 20px;
+    width: 100%;
+}
+
+/* Container for individual stats */
+.stat-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    margin-right: 20px;
+}
+
+/* Labels for stats, aligning text to the left */
+.stat-label,
+.x5-label {
+    text-align: left;
+    color: #006512;
+    /* Green text color for labels */
+    min-width: 50px;
+    margin-right: 10px;
+}
+
+/* Styling for the calculated x5 labels and values */
+.x5-label {
+    margin-left: 20px;
+    /* Additional margin for separation */
+}
+
+/* Values for stats, centered */
+.stat-value,
+.x5-value {
+    text-align: center;
+    color: #ffffff;
+    /* White text for values */
+    min-width: 50px;
+    margin-right: 10px;
+}
+
+.x5-value {
+    margin-left: 10px;
+    /* Consistent margin for alignment */
+}
+
+/* Descriptor for additional information */
+.descriptor {
+    text-align: center;
+    color: #006512;
+    /* Green color for consistency */
+    width: 160px;
+    min-width: 80px;
+    margin-right: 30px;
+    /* Adjusted margin for spacing */
+}
+
+.attributes {
+    text-align: right;
+    color: #006512;
+    flex-grow: 1;
+}
+
+.attribute-values {
+    text-align: right;
+    color: #ffffff;
+    min-width: 50px;
+    margin-right: 10px;
+
+}
+
+/* Logo image styling */
+.logo-image {
+    height: 200px;
+    width: 200px;
+    object-fit: cover;
+    margin-left: 20px;
+    margin-top: 30px;
+}
+
+/* Button styling for interactivity */
+.adjust-button,
+button {
+    background-color: #ffffff;
+    /* White background for buttons */
+    color: #006512;
+    /* Green text color for contrast */
+    border: 2px solid #ffffff;
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    /* Changes cursor to pointer on hover for usability */
+    transition: all 0.3s ease;
+    /* Smooth transition for hover effects */
+}
+
+/* Hover effect for buttons */
+.adjust-button:hover,
+button:hover {
+    background-color: #006512;
+    /* Green background on hover */
+    color: #ffffff;
+    /* White text color on hover for visibility */
+}
+
+/* Container for buttons to align them properly */
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 50px;
+}
+
+/* Styling for informational text below buttons or inputs */
+.info-text {
+    color: #ffffff;
+    /* White color for readability */
+    margin-top: 10px;
+    height: 20px;
+}
+
+/* Style for displaying total points */
+.total-points {
+    font-weight: bold;
+    color: #006512;
+    /* Green color for emphasis */
+    margin-top: 30px;
+    padding-left: 20px;
+    width: 100%;
+}
+
+/* Text box styling for input or display */
+.text-box {
+    width: 500px;
+    height: 100px;
+    background-color: #ffffff;
+    /* White background for contrast */
+    color: #000000;
+    /* Black text color for readability */
+    border: 2px solid #006512;
+    /* Green border to match the theme */
+    margin-top: 70px;
+    margin-left: -10px;
+    /* Adjusted margin for layout purposes */
+    padding: 10px;
+    overflow-y: auto;
+    /* Allows scrolling for overflow text */
+}
+
+.github-link-container {
+    margin-top: 50px;
+    /* Adds space above the link */
+    text-align: center;
+    /* Centers the link horizontally */
+    width: 100%;
+}
+
+.github-link-container a {
+    color: #FFFFFF;
+    /* Sets link color to white */
+    font-weight: bold;
+    /* Makes the link text bold */
+    text-decoration: none;
+    /* Removes underline from the link */
+    font-family: Courier New;
+    /* Ensures font consistency */
+}
+
+.github-link-container a:hover {
+    color: #006512;
+    /* Changes link color to green on hover */
+    text-decoration: underline;
+    /* Adds underline on hover for emphasis */
+}
