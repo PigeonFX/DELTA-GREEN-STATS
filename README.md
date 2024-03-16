@@ -26,7 +26,7 @@ The DELTA-GREEN-STATS tool provides a seamless interface for creating and custom
 This project leverages basic web technologies to ensure that it can be easily run in any modern web browser without the need for additional software or installations.
 
 ## Getting Started
-To use DELTA-GREEN-STATS, simply download the HTML file and open it in your preferred web browser. The intuitive layout guides you through the character creation process, allowing for quick and straightforward character generation.
+To use DELTA-GREEN-STATS, simply open the URL https://pigeonfx.github.io/DELTA-GREEN-STATS/ in your preferred web browser. The intuitive layout guides you through the character creation process, allowing for quick and straightforward character generation.
 
 ## Contributions
 As a project built by a beginner and held together with "sticky tape and AI logic," contributions are warmly welcomed. Whether it's improving the logic, enhancing the design, or adding new features, feel free to fork the repository and submit your pull requests.
