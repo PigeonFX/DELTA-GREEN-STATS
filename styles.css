@@ -1,17 +1,13 @@
 /* General body styling for the entire page */
 body {
     font-family: Courier New;
-    /* Sets the font to Courier New for a typewriter-like appearance */
     background-color: #000000;
-    /* Sets background color to black */
     color: #FFFFFF;
-    /* Sets text color to white for readability */
     padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-weight: bold;
-    /* Makes the entire text bold for emphasis */
+    font-weight: normal; 
 }
 
 /* Styling for the main content area */
@@ -34,10 +30,8 @@ body {
 /* Style for the page title */
 .page-title {
     font-size: 32px;
-    /* Larger font size for the title */
     font-weight: bold;
-    color: #006512;
-    /* Green color for the title */
+    color: #00b521;
     text-align: center;
     width: 100%;
     margin-bottom: 30px;
@@ -46,11 +40,11 @@ body {
 /* Style for secondary headings */
 h2 {
     font-size: 18px;
-    color: #006512;
-    /* Green color to match the theme */
+    color: #00b521;
     margin: 0 0 20px 0;
     padding-left: 20px;
     width: 100%;
+    font-weight: bold;
 }
 
 /* Container for individual stats */
@@ -58,98 +52,91 @@ h2 {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
-    margin-right: 20px;
+    margin-right: 10px;
 }
 
 /* Labels for stats, aligning text to the left */
-.stat-label,
-.x5-label {
+.stat-label {
     text-align: left;
-    color: #006512;
-    /* Green text color for labels */
+    color: #00b521;
     min-width: 50px;
     margin-right: 10px;
+    font-weight: bold;
 }
 
-/* Styling for the calculated x5 labels and values */
 .x5-label {
-    margin-left: 20px;
-    /* Additional margin for separation */
+    text-align: left;
+    color: #00b521;
+    min-width: 30px;
+    margin-right: 10px;
+    margin-left: 10px;
+    font-weight: bold;
 }
 
 /* Values for stats, centered */
-.stat-value,
-.x5-value {
+.stat-value {
     text-align: center;
     color: #ffffff;
-    /* White text for values */
     min-width: 50px;
-    margin-right: 10px;
+    margin-right: 0px;
+    font-weight: bold;
 }
 
 .x5-value {
-    margin-left: 10px;
-    /* Consistent margin for alignment */
+    text-align: center;
+    color: #ffffff;
+    min-width: 30px;
+    margin-right: 10px;
+    margin-left: 0px;
+    font-weight: bold;
 }
 
 /* Descriptor for additional information */
 .descriptor {
     text-align: center;
-    color: #006512;
-    /* Green color for consistency */
-    width: 160px;
+    color: #00b521;
+    width: 140px;
     min-width: 80px;
-    margin-right: 30px;
-    /* Adjusted margin for spacing */
+    margin-right: 0px;
+    font-weight: bold;
 }
 
 .attributes {
     text-align: right;
-    color: #006512;
-    flex-grow: 1;
+    color: #00b521;
+    min-width: 220px;
+    font-weight: bold;
+    margin-right: 0px;
+    margin-left: 0px;
 }
 
 .attribute-values {
     text-align: right;
     color: #ffffff;
     min-width: 50px;
-    margin-right: 10px;
-
-}
-
-/* Logo image styling */
-.logo-image {
-    height: 200px;
-    width: 200px;
-    object-fit: cover;
-    margin-left: 20px;
-    margin-top: 30px;
+    margin-right: 20px;
+    margin-left: 0px;
+    font-weight: bold;
 }
 
 /* Button styling for interactivity */
 .adjust-button,
 button {
-    background-color: #ffffff;
-    /* White background for buttons */
-    color: #006512;
-    /* Green text color for contrast */
-    border: 2px solid #ffffff;
+    background-color: #000000;
+    color: #00b521;
+    border: 2px solid #00b521;
     padding: 8px 12px;
     font-size: 14px;
     border-radius: 4px;
     cursor: pointer;
-    /* Changes cursor to pointer on hover for usability */
     transition: all 0.3s ease;
-    /* Smooth transition for hover effects */
 }
 
 /* Hover effect for buttons */
 .adjust-button:hover,
 button:hover {
-    background-color: #006512;
-    /* Green background on hover */
-    color: #ffffff;
-    /* White text color on hover for visibility */
+    background-color: #00b521;
+    color: #000000;
 }
 
 /* Container for buttons to align them properly */
@@ -162,62 +149,134 @@ button:hover {
 
 /* Styling for informational text below buttons or inputs */
 .info-text {
-    color: #ffffff;
-    /* White color for readability */
-    margin-top: 10px;
-    height: 20px;
+    text-align: center; 
+    width: 100%; 
 }
 
 /* Style for displaying total points */
 .total-points {
-    font-weight: bold;
-    color: #006512;
-    /* Green color for emphasis */
+    color: #00b521;
     margin-top: 30px;
     padding-left: 20px;
     width: 100%;
+    font-weight: bold;
 }
 
-/* Text box styling for input or display */
 .text-box {
-    width: 500px;
-    height: 100px;
-    background-color: #ffffff;
-    /* White background for contrast */
-    color: #000000;
-    /* Black text color for readability */
-    border: 2px solid #006512;
-    /* Green border to match the theme */
-    margin-top: 70px;
-    margin-left: -10px;
-    /* Adjusted margin for layout purposes */
+    width: 800px;
+    height: 250px;
+    background-color: #000000;
+    color: #00b521;
+    border: 2px solid #00b521;
+    margin-top: 30px;
     padding: 10px;
-    overflow-y: auto;
-    /* Allows scrolling for overflow text */
+    overflow-x: hidden; 
+    overflow-y: visible; 
+    position: relative;
+    color: #00b521; 
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 1);
+    font-weight: bold;
+}
+
+.text-box::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('DG_logo.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 200px 200px; 
+    opacity: 0.1; 
+    pointer-events: none;
+    font-weight: bold;
 }
 
 .github-link-container {
     margin-top: 50px;
-    /* Adds space above the link */
     text-align: center;
-    /* Centers the link horizontally */
     width: 100%;
+    padding: 10px;
 }
 
 .github-link-container a {
-    color: #FFFFFF;
-    /* Sets link color to white */
+    color: #00b521;
     font-weight: bold;
-    /* Makes the link text bold */
     text-decoration: none;
-    /* Removes underline from the link */
     font-family: Courier New;
-    /* Ensures font consistency */
 }
 
 .github-link-container a:hover {
-    color: #006512;
-    /* Changes link color to green on hover */
+    color: #00b521;
     text-decoration: underline;
-    /* Adds underline on hover for emphasis */
+}
+
+/* Blinking cursor effect */
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
+.blinking-cursor {
+    animation: blink 1s step-start 5s infinite;
+}
+
+@keyframes textFlicker {
+    0%, 100% {
+      text-shadow: 0 0 4px rgba(0, 255, 0, 0.4),
+                   0 0 11px rgba(0, 255, 0, 0.2),
+                   0 0 19px rgba(0, 255, 0, 0.1),
+                   0 0 40px rgba(0, 255, 0, 0.05);
+      opacity: 0.99;
+    }
+    25%, 75% {
+      text-shadow: none;
+      opacity: 0.99;
+    }
+}
+
+body, body * {
+  animation: textFlicker 20s infinite;
+}
+
+
+/* Bond categories styling */
+.bond-categories {
+    margin-top: 30px;
+    margin-right: 0px; 
+    margin-left: 10px;
+    min-width: 200px;
+    color: #00b521;
+    font-weight: bold;
+}
+
+.bond-categories label {
+    display: block; /* This ensures each label is on its own line */
+    margin-bottom: 10px; /* Adjust the bottom margin as needed for spacing */
+}
+
+.bond-categories input[type="checkbox"] {
+    display: inline-block; /* Ensure each checkbox is displayed as an inline-block */
+    margin-right: 5px; /* Add some spacing between checkbox and label */
+}
+
+input[type="checkbox"] {
+    display: none; /* Hide checkbox */
+}
+
+input[type="checkbox"] + label {
+    background-color: #eee; 
+    padding: 5px;
+    border-radius: 5px;
+}
+
+input[type="checkbox"]:checked + label {
+    background-color: #00b521;
+    color: white; 
 }
