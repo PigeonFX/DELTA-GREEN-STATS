@@ -5,35 +5,66 @@
     <meta charset="UTF-8">
     <!-- Title of the webpage -->
     <title>Delta Green Point Buy</title>
+    <meta name="description" content="Delta Green Point Buy allows you to strategically allocate stats for your Delta Green characters. Explore options for PISCES (UK), DELTA GREEN (US), and more.">
     <link rel="stylesheet" href="styles.css">
+    <script type="application/ld+json">
+        {
+          "@context": "http://schema.org",
+          "@type": "WebApplication",
+          "name": "Delta Green Point Buy",
+          "description": "Delta Green Point Buy allows you to strategically allocate stats for your Delta Green characters. Explore options for PISCES (UK), DELTA GREEN (US), and more.",
+          "url": "https://pigeonfx.github.io/DELTA-GREEN-STATS/"
+        }
+        </script>
 </head>
 
 <body>
-    <div class="page-title">DELTA GREEN STATS TERMINAL...>_</div>
+    <div class="page-title">DELTA GREEN STATS TERMINAL...&gt;<span class="blinking-cursor">_</span></div>
     <div class="content">
         <div class="stats-section">
             <h2>STATISTICS:</h2>
             <div id="stats"></div>
             <div class="total-points">Remaining Points: <span id="totalPoints">72</span></div>
         </div>
-        <div class="text-box" id="bondText"></div>
-        <img class="logo-image" src="https://raw.githubusercontent.com/PigeonFX/DELTA-GREEN-STATS/main/DG_logo.png"
-            alt="Logo Image">
+        <!-- Move the text box to the left -->
+        <div class="text-box text-box-left" id="bondText"></div>
+        <!-- Move the bond categories form to the right -->
+        <form id="bond-categories" class="bond-categories">
+            <label for="PISCES_UK">
+                <input type="checkbox" id="PISCES_UK" name="bond-category" value="PISCES_UK">
+                PISCES (UK)
+            </label>
+            <label for="DELTA_GREEN">
+                <input type="checkbox" id="DELTA_GREEN" name="bond-category" value="DELTA_GREEN" checked>
+                DELTA GREEN (US)
+            </label>
+            <label for="FRIENDS_FAMALY">
+                <input type="checkbox" id="FRIENDS_FAMALY" name="bond-category" value="FRIENDS_FAMILY">
+                FRIENDS & FAMALY
+            </label>
+            <label for="UNDERWORLD">
+                <input type="checkbox" id="UNDERWORLD" name="bond-category" value="UNDERWORLD">
+                UNDERWROLD
+            </label>
+            <label for="LGBTQ">
+                <input type="checkbox" id="LGBTQ" name="bond-category" value="LGBTQ">
+                LGBTQ
     </div>
     <div class="button-container">
-        <button id="random-point-buy" onmouseover="showInfo('point')" onmouseout="clearInfo()"
-            onclick="randomStats()">RANDOM POINT BUY</button>
-        <button id="random-dice-roll" onmouseover="showInfo('dice')" onmouseout="clearInfo()"
-            onclick="randomDiceRoll()">RANDOM DICE ROLL</button>
-        <button id="reset-button" onmouseover="showInfo('reset')" onmouseout="clearInfo()"
-            onclick="resetStats()">RESET</button>
-        <button id="bonds-button" onmouseover="showInfo('bonds')" onmouseout="clearInfo()"
-            onclick="generateRandomBond()">BONDS</button>
+        <button type="button" id="random-point-buy" onmouseover="showInfo('pointBuy')" onmouseout="clearInfo()" onclick="randomStats()">RANDOM POINT BUY</button>
+        <button type="button" id="random-dice-roll" onmouseover="showInfo('dice')" onmouseout="clearInfo()" onclick="randomDiceRoll()">RANDOM DICE ROLL</button>
+        <button type="button" id="reset-button" onmouseover="showInfo('reset')" onmouseout="clearInfo()" onclick="resetStats()">RESET</button>
+        <button type="button" id="bonds-button" onmouseover="showInfo('bonds')" onmouseout="clearInfo()" onclick="generateRandomBond()">BONDS</button>
+        <button onclick="generateCharacterSheet()">Download Character Sheet</button>
+      
     </div>
     <div class="github-link-container">
         <a href="https://github.com/PigeonFX/DELTA-GREEN-STATS" target="_blank">GitHub</a>
     </div>
     <div class="info-text" id="infoText"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="bonds.js"></script>
     <script src="scripts.js"></script>
 </body>
+
 </html>
