@@ -16,9 +16,8 @@ function calculateAttributes() {
 
 function updateAttributesValues() {
     const attributes = calculateAttributes();
-    // Update based on stat positions, ensuring only the first four have corresponding attributes
     stats.forEach((stat, index) => {
-        if (index < 4) { // Only the first four stats have corresponding attributes
+        if (index < 4) {
             document.getElementById(`${stat}-attribute-value`).innerText = attributes[index];
         }
     });
@@ -80,23 +79,22 @@ function updateTotalPoints() {
 }
 
 function randomStats() {
-    // Reset stats to minimum value to start distribution
     stats.forEach(stat => {
         document.getElementById(`${stat}-value`).innerText = '3';
     });
 
-    let remainingPoints = 72 - (stats.length * 3); // Calculate remaining points after initializing stats to 3
+    let remainingPoints = 72 - (stats.length * 3);
 
     while (remainingPoints > 0) {
         for (let stat of stats) {
-            if (remainingPoints <= 0) break; // Exit if no points remain
+            if (remainingPoints <= 0) break;
 
             let currentValue = parseInt(document.getElementById(`${stat}-value`).innerText);
-            if (currentValue < 18) { // Only add points if stat is less than 18
-                const pointsToAdd = Math.min(remainingPoints, 18 - currentValue); // Determine points to add
-                const add = Math.floor(Math.random() * pointsToAdd) + 1; // Randomize points to add
+            if (currentValue < 18) {
+                const pointsToAdd = Math.min(remainingPoints, 18 - currentValue);
+                const add = Math.floor(Math.random() * pointsToAdd) + 1;
                 currentValue += add;
-                remainingPoints -= add; // Decrement remaining points
+                remainingPoints -= add;
 
                 document.getElementById(`${stat}-value`).innerText = currentValue.toString();
                 document.getElementById(`${stat}-x5-value`).innerText = (currentValue * 5).toString();
@@ -105,23 +103,22 @@ function randomStats() {
         }
     }
 
-    updateAttributesValues(); // Recalculate and display new attribute values based on updated stats
-    updateTotalPoints(); // Update remaining points display
+    updateAttributesValues();
+    updateTotalPoints();
 }
 
 function randomDiceRoll() {
     stats.forEach(stat => {
-        let rolls = Array.from({ length: 4 }, () => Math.floor(Math.random() * 6) + 1);
-        rolls.sort((a, b) => b - a);
-        rolls.pop();
-        const sum = rolls.reduce((a, b) => a + b, 0);
-        const finalValue = Math.max(3, Math.min(sum, 18));
+        const rolls = Array.from({length: 4}, () => Math.floor(Math.random() * 6) + 1)
+                           .sort((a, b) => b - a)
+                           .slice(0, 3);
+        const finalValue = Math.max(3, Math.min(rolls.reduce((a, b) => a + b), 18));
         document.getElementById(`${stat}-value`).innerText = finalValue;
         document.getElementById(`${stat}-x5-value`).innerText = finalValue * 5;
         document.getElementById(`${stat}-descriptor`).innerText = getDescriptor(stat, finalValue);
     });
     updateAttributesValues();
-    updateTotalPoints(true); // Force update in case of special handling
+    updateTotalPoints();
 }
 
 function resetStats() {
@@ -137,177 +134,76 @@ function resetStats() {
 function showInfo(type) {
     const infoText = document.getElementById('infoText');
     if (type === 'dice') {
-        infoText.textContent = "'RANDOM DICE ROLL' Will roll 4xD6 and ignore the lowest number dividing the remaining points randomly between your stats.";
-    } else if (type === 'point') {
-        infoText.textContent = "'RANDOM POINT BUY' Will randomly allocate all 72 point buy points between your Stats.";
+        infoText.textContent = "'RANDOM DICE ROLL' Will roll 6xD6 and keep the three highest rolls. It will then update the value of each stat, recalculate the attribute values, and update the total remaining points.";
+    } else if (type === 'pointBuy') {
+        infoText.textContent = "'RANDOM POINT BUY' Will distribute 72 points across the six stats using a random allocation algorithm.";
     } else if (type === 'reset') {
-        infoText.textContent = "'RESET' Will set all Stats to 3 by default so you can manually add to your Stats with the 72 point buy points.";
+        infoText.textContent = "'RESET' Will reset all stats to their default value of 3 and take yoi back to the Point Buy system with 54 points to spend on your stats for a total of 72 point.";
     } else if (type === 'bonds') {
-        infoText.textContent = "'BONDS' Will generate a random bond and display it in the text box to the right.";
+        infoText.textContent = "'BONDS' Will randomly generate a bond based on the selected categories (DELTA GREEN, FRIENDS & FAMILY) and display it in the text box.";
     }
 }
 
 function clearInfo() {
-    document.getElementById('infoText').textContent = '';
+    const infoText = document.getElementById('infoText');
+    infoText.textContent = '';
+}
+
+function generateCharacterSheet() {
+    var wb = XLSX.utils.book_new(),
+        wsData = [["Stat", "Value", "Multiplier (x5)", "Descriptor"]];
+
+    stats.forEach(stat => {
+        let value = document.getElementById(`${stat}-value`).innerText;
+        let x5 = document.getElementById(`${stat}-x5-value`).innerText;
+        let descriptor = document.getElementById(`${stat}-descriptor`).innerText;
+        wsData.push([stat, value, x5, descriptor]);
+    });
+
+    // Attributes part can be added similarly
+    // wsData.push(["Attribute Name", "Value"]);
+
+    var ws = XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(wb, ws, "Character Stats");
+
+    XLSX.writeFile(wb, "DeltaGreenCharacterSheet.xlsx");
 }
 
 function generateRandomBond() {
-    const bonds = [
-        "Spouse (Alex, High School Sweetheart): Stability and love amidst secret work.",
-        "Military Buddy (Sgt. Mike Johnson): Unbreakable bond from shared battles.",
-        "Daughter (Emily, Age 7): Light of life, symbolizing what's at stake.",
-        "Mentor (Dr. Helen Ramirez, Paranormal Researcher): Guided into the occult.",
-        "FBI Partner (Special Agent John Carter): Trust and respect from shared cases.",
-        "College Friend (Sarah Lee, Journalist): Bonded over dreams and late studies.",
-        "Support Group (Veterans of Foreign Wars): Brotherhood in post-combat life.",
-        "Therapist (Dr. Marcus Finch): Mental health support amid chaos.",
-        "Siblings (Twin Brother, David): Deep, unspoken understanding and support.",
-        "Local Bar Owner (Eddie, The Hideaway): Solace without questions, just support.",
-        "Childhood Mentor (Mrs. Greene, Librarian): Inspired early curiosity and learning.",
-        "College Debate Team Partner (Raj, Lawyer): Mutual respect, intellectual camaraderie.",
-        "Neighbor and Gardening Enthusiast (Clara): Wisdom and peace in shared hobbies.",
-        "Old Flame (Alex, Chef): Bond through culinary arts and nostalgic dinners.",
-        "Music Teacher (Mr. Leonard, Retired Musician): Discipline and escape through music.",
-        "Adventurous Uncle (Uncle Joe, Archaeologist): Inspired wonder and adventure.",
-        "Chess Rival (Elena, Computer Scientist): Mental sharpness, friendly competition.",
-        "Survival Course Instructor (Sgt. Harper, Ex-Special Forces): Respect through tough lessons.",
-        "Journal Club Member (Dr. Kim, Biologist): Scientific curiosity and shared learning.",
-        "Political Activist (Marcus): Deep friendship from shared ideals and actions.",
-        "Antique Bookshop Owner (Mrs. Langley): Rare texts, key mission information.",
-        "Yoga Instructor (Anika): Balance and sanctuary from stress.",
-        "Startup Co-Founder (Brian, Engineer): Enduring bond from creating together.",
-        "Long-Lost Cousin (Sophia): New family ties and belonging.",
-        "Retired Investigator (Mr. Dawson): Cold case insights and inspiration.",
-        "Online Gaming Friend (ShadowRaven): Personal connection through digital battles.",
-        "Local Historian (George): Unexpectedly useful knowledge and friendship.",
-        "Mountain Climbing Buddy (Hannah): Trust and encouragement from shared climbs.",
-        "Craft Beer Enthusiast Group (The Brew Crew): Relaxation and community outside work.",
-        "Childhood Rival Turned Ally (Nick): Strong friendship from past competition.",
-        "Childhood Librarian (Mrs. Foster, Keeper of Stories): Fostering a love for mysteries.",
-        "High School Debate Coach (Mr. Hughes, Strategist): The art of persuasion mastered together.",
-        "University Lab Partner (Dr. Lena Nguyen, Quantum Physicist): Late nights, breakthroughs shared.",
-        "Emergency Room Nurse (Sam Taylor, Lifesaver): Bonded through vulnerability and care.",
-        "Ex-Military Instructor (Sgt. Carl Mason, Survival Expert): Lessons in resilience and survival.",
-        "Foreign Correspondent (Nadia Rossi, War Journalist): Insights from conflict zones, broadening perspectives.",
-        "Hiking Club Friend (Jake Sullivan, Trailblazer): Bonded over love for nature and the great outdoors.",
-        "Jazz Musician Neighbor (Ella Franklin, Saxophonist): Soulful melodies offering an artistic escape and connection.",
-        "Antiquarian Book Dealer (Mr. Hawthorne, Keeper of Secrets): Access to rare texts, sharing a love for history.",
-        "Retired Police Detective (Diane Wells, Consultant): Insights from years on the force, a mentor in investigative techniques.",
-        "Old Gaming Buddy (Eric Chen, Software Developer): Digital escape and enduring friendship despite distance.",
-        "Martial Arts Instructor (Master Li, Zen Warrior): Discipline, control, and balance, both physical and mental.",
-        "Community Theater Director (Julia Santos, Creative Soul): Encouraged exploration of different facets, fostering creativity.",
-        "Childhood Best Friend (Maggie Peterson, Environmental Lawyer): Unbreakable bond from shared adventures and secrets.",
-        "Hostage Negotiation Trainer (Agent Derek Lee, Persuader): Skills in high-stakes conversations, saving lives with words.",
-        "Brewmaster Uncle (Uncle Joe, Craft Beer Connoisseur): Passion for brewing, stories of beer lore adding richness.",
-        "College Philosophy Professor (Dr. Simon Black, Thinker): Challenged to question everything, influencing analytical approach.",
-        "Astronomy Hobbyist (Alice Murray, Star Gazer): Shared fascination with the cosmos, offering perspective and wonder.",
-        "Nonprofit Volunteer Coordinator (Tara Singh, Humanitarian): Connection to grassroots impact and the human side.",
-        "Undercover Training Partner (Agent Alex Torres, Mirror Image): Learned to trust and read each other under stress.",
-        "Wildlife Conservationist (Zoe Harrison, Protector of the Wild): Inspired to preserve the natural world amidst battles.",
-        "Vintage Car Restorer (Mike Davidson, Time Traveler): Link to history and shared hobby offering a break.",
-        "Local Diner Waitress (Jenny Clark, Morning Sunshine): Normalcy and warmth in a place where everyone knows your name.",
-        "Urban Explorer (Carlos Mendez, City Sleuth): Camaraderie in curiosity, exploring hidden urban spaces together.",
-        "Historical Reenactor (Elizabeth \"Beth\" Moore, Timekeeper): Unique perspective on history's impact on the present.",
-        "Community Garden Organizer (Hannah Kim, Earth Mother): Connection to life's cycle and community welfare through gardening.",
-        "Amateur Astronomer (Neil Gupta, Star Chaser): Night sky shared fascination, grounding with a universal perspective.",
-        "Bartender at the Old Pub (Dave O'Neill, Keeper of Secrets): Refuge where tales are shared without divulging too much.",
-        "Long-Distance Runner (Tara Evans, Endurance Spirit): Silent runs for reflection, pushing limits together.",
-        "Retired Librarian (Margaret \"Maggie\" Walsh, Guardian of Knowledge): Wisdom from years among the stacks, sharing history.",
-        "Second-Hand Bookstore Owner (Simon Lee, Curator of Stories): Recommending perfect books, creating a literary sanctuary.",
-        "Chess Club Mentor (Victor Chen, Grandmaster): Strategic mind and lessons offering mental discipline and philosophical approach.",
-        "Local Beekeeper (Emily Watson, Hive Mind): Lessons in teamwork and the importance of roles from nature.",
-        "School Music Teacher (Aaron Goldberg, Maestro): Encouragement in music as expression, sharing melodies and creativity.",
-        "Art Gallery Curator (Sophia Martinez, Visionary): Inspiration to seek hidden meanings, fostering appreciation for art.",
-        "Old Book Club Member (George Bennett, Literary Sage): Insights into human nature from literary discussions.",
-        "Mountain Guide (Liam Scott, Pathfinder): Guidance through challenges, both literal and metaphorical, in treks and life.",
-        "Peace Corps Volunteer (Anna Nguyen, World Healer): Resilience, compassion, and change tales from abroad.",
-        "Scuba Diving Instructor (Rachel Adams, Aquatic Explorer): Introduction to the mysteries of the deep sea.",
-        "Antique Clock Restorer (Henry Clarke, Keeper of Time): Philosophical musings on time's passage, offering perspective.",
-        "Gourmet Chef Friend (Olivia Martin, Culinary Artist): Comfort through food, sharing a taste of home.",
-        "Private Investigator (James \"Jim\" Keller, Truth Seeker): Work in the shadows, a valuable ally in field.",
-        "Documentary Filmmaker (Sara Hughes, Storyteller): Quest to uncover truths, resonating with your character's search.",
-        "Rooftop Gardener (Mia Wong, Urban Oasis Creator): Transforming city spaces into green sanctuaries, sharing life's persistence.",
-        "Disaster Relief Worker (Carlos Ramirez, Humanitarian Hero): Inspiration from selflessness and courage in crisis.",
-        "Professional Climber (Elena Scott, Summit Chaser): Lessons on overcoming obstacles from mountain peaks to life's challenges.",
-        "Ethical Hacker (Nikhil Patel, Cyber Guardian): Cybersecurity insights and protection against digital threats.",
-        "Veterinary Technician (Rachel Kim, Animal Healer): Warmth and grounding presence through care for animals.",
-        "Museum Curator (Alexander Thompson, Keeper of History): Enriching understanding of cultural and historical contexts.",
-        "Urban Planner (Sophie Larson, City Visionary): Insights into city design, affecting operational environments.",
-        "Retired Judge (William \"Bill\" Davis, Pillar of Justice): Guidance and moral compass from legal experience.",
-        "Small Business Owner (Luisa Gomez, Café Proprietor): Solace and listening ear in a homey café.",
-        "Freelance Journalist (Tom Evans, Truth Digger): Investigative work mirroring quest for truth, an intriguing acquaintance.",
-        "Aeronautical Engineer (Nadia Ivanova, Sky Architect): Inspiration from technology and exploration possibilities.",
-        "Antiquities Dealer (Marco Bianchi, Treasure Hunter): Knowledge of artifact origins, adding depth to investigations.",
-        "Children's Book Author (Emma Clarke, Dream Weaver): Stories of hope and wonder, a reminder of innocence.",
-        "Park Ranger (Derek Lee, Wilderness Protector): Wilderness knowledge and survival skills for remote missions.",
-        "Nonprofit Founder (Aisha Mohammed, Change Maker): Motivation from vision of a healthier planet and social causes.",
-        "Liberal Arts College Dean (Dr. Harold Jenkins, Academic Leader): Broad knowledge and philosophical discussions offering insights.",
-        "High School Biology Teacher (Ms. Lauren Fisher, Life Educator): Spark of curiosity and wonder in science discovery.",
-        "Public Library Archivist (Simon Grant, Memory Keeper): Preserving documents and uncovering forgotten tales.",
-        "Community Theater Actor (Julie Martinez, Emotion Explorer): Exploration of human psyche through performance, offering perspective.",
-        "Street Artist (Alex Rivera, Urban Visionary): Challenges societal norms, expressing the unseen, inspiring perspective.",
-        "Local Historian (Mrs. Eleanor Wright, Time Traveler): Ties to place and history through deep knowledge.",
-        "Yacht Captain (Captain Jack Sullivan, Sea Wanderer): Stories of the sea and navigation, inspiring freedom and resilience.",
-        "Craft Brewery Owner (Evan Mitchell, Ale Alchemist): Community and relaxation through craft beer passion.",
-        "Sommelier (Isabelle Girard, Wine Whisperer): Sensory escape and stories through wine flavors.",
-        "Nature Photographer (Liam Wong, Visual Storyteller): Capturing natural world's beauty and brutality, reminding stakes.",
-        "Architectural Conservator (Grace Kim, History Preserver): Insights into preserving history through buildings.",
-        "Experimental Physicist (Dr. Raj Patel, Quantum Explorer): Mind-bending theories challenging reality's understanding.",
-        "Backyard Astronomer (Neil Richardson, Cosmic Guide): Reflection and wonder at the cosmos's mysteries.",
-        "Crisis Negotiator (Samira Khan, Peacekeeper): Insights into conflict resolution and calm under pressure.",
-        "Herbalist Neighbor (Fiona Green, Plant Whisperer): Connection to earth through plants and natural remedies.",
-        "Indie Game Developer (Marcus Lee, Pixel Storyteller): Narrative creativity and digital escapism in gaming.",
-        "Retired Coast Guard Captain (James Peterson, Sea Guardian): Duty and resilience tales from sea rescue operations.",
-        "Puzzle Room Designer (Elena Vasquez, Mastermind): Problem-solving skills and entertainment through crafted puzzles.",
-        "Genealogist (Henry Clarke, Ancestry Sleuth): Exploring roots and identity through family histories.",
-        "Microbrewery Owner (Tom Nguyen, Hop Innovator): Relaxation and local culture through brewing passion.",
-        "Local News Reporter (Sarah Jennings, Truth Hunter): Local story pursuit, uncovering corruption, mirroring truth quest.",
-        "Sustainable Farmer (Mia Roberts, Earth Steward): Vision for healthier planet through sustainable agriculture.",
-        "Vintage Bookstore Owner (Oliver Smith, Literary Guardian): Sanctuary of calm and knowledge in rare books.",
-        "Community College Professor (Dr. Lisa Chang, Educator): Valuing knowledge and continuous learning inspiration.",
-        "Professional Magician (Adrian Knight, Illusionist): Insights into misdirection and secrecy, parallels in covert operations.",
-        "Urban Farming Activist (Zoe Alvarez, Green Revolutionary): Change potential in urban transformation through farming.",
-        "Conservation Biologist (Dr. Aaron Lee, Wildlife Protector): Understanding of natural world's fragility, inspiring preservation.",
-        "Recovery Group Facilitator (Mike Reynolds, Support Anchor): Healing space and understanding personal struggles.",
-        "Traditional Carpenter (Elijah Brown, Woodcraft Artisan): Appreciation for craftsmanship and creating with hands.",
-        "Children's Librarian (Julia Santos, Imagination Cultivator): Hope for future through fostering reading in children.",
-        "Local Historian (Gregory Allen, Time Keeper): Connection to place and continuity through history knowledge.",
-        "Public Defender (Nadia Hussein, Justice Advocate): Fighting for justice, reminding importance of standing for right.",
-        "Community Organizer (Luis Rodriguez, Change Agent): Power of collective action and improving lives inspiration.",
-        "Bicycle Repair Shop Owner (Anna Kim, Cycle Guru): Simple pleasures and sustainable transport through cycling passion.",
-        "High School Chess Coach (Dmitri Petrov, Strategy Mentor): Strategic thinking and anticipation lessons, valuable in clandestine work.",
-        "Volunteer Firefighter (Ethan Walker, Braveheart): Community duty and bravery in facing danger.",
-        "Art Therapist (Sophie Martin, Creative Healer): New perspective on traumas and power of expression.",
-        "Outdoor Survival Instructor (Jack Morrison, Wilderness Guide): Invaluable survival knowledge for field operations.",
-        "Social Worker (Angela Davis, Empathy Warrior): Insights into human resilience and complexities.",
-        "Jazz Club Owner (Raymond Clarke, Music Maestro): Cultural hub and brief escape in music.",
-        "Antique Map Collector (Henry Thomson, Cartography Enthusiast): Imagination ignition and historical investigation aids.",
-        "Oceanographer (Dr. Maya Singh, Sea Explorer): Adventure sense and unexplored frontiers reminder.",
-        "Street Gang Leader (Maria \"Viper\" Rodriguez, Urban Queen): Protection or intelligence from street-level crime insights.",
-        "Black Ops Veteran (Ethan \"Ghost\" Walker, Shadow Warrior): Insights into government-sanctioned operations on legality fringes.",
-        "Underworld Informant (Danny \"Ears\" Thompson, The Listener): Staying ahead with secrets from criminal underworld.",
-        "Shadowy Fixer (Helena \"The Broker\" Ivanova, Deal Maker): Facilitating unlikely alliances, access to rare resources.",
-        "Dissident Journalist (Lara \"The Pen\" Mikhailov, Truth's Edge): Committed to exposing truth, knowledgeable ally.",
-        "Former Smuggler (Miguel Alvarez, Hidden Paths Expert): Covert routes and tactics insights, moving undetected.",
-        "Underground Hacker (Lena \"Zero\" Kowalski, Digital Ghost): Cyber espionage expertise, unearthing secrets.",
-        "Retired Hitman (Viktor Sokolov, Cold Shadow): Stealth and survival lessons from a past life.",
-        "Black Market Art Dealer (Isabella Fontaine, Keeper of Lost Beauties): Tracking occult artifacts movement.",
-        "Undercover Agent (Sam Chen, Living Mask): Direct line to underworld activities and trends.",
-        "Loan Shark (Eddie \"The Bank\" Morris, Money's Edge): Financial underpinnings of crime revelation.",
-        "Fence (Tara \"TJ\" Johnson, Treasure Networker): Pulse on underworld through stolen goods trade.",
-        "Gang Insider (Marco Rodriguez, Street Scholar): Street-level operations and conflicts insights.",
-        "Forged Document Specialist (Nina Petrova, Paper Phantom): Crucial for undercover operations, escaping notice.",
-        "Money Launderer (Alan Wright, Clean Slate Financier): Economic dimensions of the underworld shedding light.",
-        "Drug Chemist (Dr. Emily Shaw, Shadow Alchemist): Understanding biochemical threats through synthetic drugs knowledge.",
-        "Illegal Arms Dealer (Omar Khalid, War Merchant): Weapons and equipment for dangerous missions.",
-        "Professional Thief (Jackie \"The Cat\" DuPont, Silent Intruder): Consulting for bypassing security measures.",
-        "Pirate Radio Operator (Dylan \"Voice\" Turner, Signal Rebel): Disinformation spread, intelligence gathering from fringes.",
-        "Human Trafficker Turned Informant (Sofia Martinez, Broken Chains): Inside view of underworld's darkest corners.",
-        "Bounty Hunter (Logan Pierce, Tracker): Unique skills for locating persons of interest.",
-        "Cult Escapee (Eva \"Luna\" Thompson, Whispered Truths): Rare perspective on occult groups, aiding thwarting plans."
-    ];
-    const randomBond = bonds[Math.floor(Math.random() * bonds.length)];
-    document.getElementById('bondText').innerText = randomBond;
+    const bondButton = document.getElementById('bonds-button');
+    bondButton.disabled = true;
+
+    const selectedCategories = Array.from(document.querySelectorAll('input[name="bond-category"]:checked')).map(checkbox => checkbox.value);
+    const availableBonds = selectedCategories.flatMap(category => bonds[category] || []);
+
+    const bondTextElement = document.getElementById('bondText');
+    bondTextElement.innerHTML = ''; // Clear previous text
+
+    if (availableBonds.length > 0) {
+        let randomBond = availableBonds[Math.floor(Math.random() * availableBonds.length)];
+        // Correctly replace ^ with <br> before typing effect starts
+        randomBond = randomBond.replace(/\^/g, '<br>');
+
+        let i = 0;
+        function typeChar() {
+            if (randomBond.substring(i, i + 4) === '<br>') {
+                bondTextElement.innerHTML += '<br>';
+                i += 4; // Skip past the <br> tag
+            } else if (i < randomBond.length) {
+                bondTextElement.innerHTML += randomBond[i];
+                i++;
+            }
+            if (i < randomBond.length) {
+                setTimeout(typeChar, 25); // Adjust typing speed as needed
+            } else {
+                bondButton.disabled = false; // Re-enable the button after typing
+            }
+        }
+        typeChar(); // Start typing effect
+    } else {
+        bondTextElement.innerHTML = "No bond available.";
+        bondButton.disabled = false;
+    }
 }
 
 window.onload = generateStatContainers;
