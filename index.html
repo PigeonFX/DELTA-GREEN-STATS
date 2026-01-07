@@ -70,13 +70,17 @@
                 LGBTQ
     </div>
     <div class="button-container">
-        <button type="button" id="random-point-buy" title="Will distribute 72 points across the six stats using a random allocation algorithm."
-            onclick="randomPointBuy()">RANDOM POINT BUY</button>
-        <button type="button" id="random-dice-roll" title="Will roll 4xD6 and keep the three highest rolls. It will then update the value of each stat."
+        <button type="button" id="random-point-buy"
+            title="Will distribute 72 points across the six stats using a random allocation algorithm."
+            onclick="randomStats()">RANDOM POINT BUY</button>
+        <button type="button" id="random-dice-roll"
+            title="Will roll 4xD6 and keep the three highest rolls. It will then update the value of each stat."
             onclick="randomDiceRoll()">RANDOM DICE ROLL</button>
-        <button type="button" id="reset-button" title="Will reset all stats to their default value of 3 and take you back to the Point Buy system with 54 points to spend on your stats for a total of 72 points."
-            onclick="resetSheet()">RESET</button>
-        <button type="button" id="bonds-button" title="Will randomly generate a bond based on the selected categories and display it in the text box."
+        <button type="button" id="reset-button"
+            title="Will reset all stats to their default value of 3 and take you back to the Point Buy system with 54 points to spend on your stats for a total of 72 points."
+            onclick="resetStats()">RESET</button>
+        <button type="button" id="bonds-button"
+            title="Will randomly generate a bond based on the selected categories and display it in the text box."
             onclick="generateRandomBond()">GENERATE BOND</button>
         <button type="button" id="add-bond-button" title="Add the generated bond to your character sheet."
             onclick="addBondToSheet()">ADD TO SHEET</button>
@@ -112,7 +116,8 @@
                 <fieldset class="panel panel-skills" style="margin-top:8px;border:1px solid #00b521;padding:8px;">
                     <legend>Skills</legend>
                     <div id="cs-skills"> <!-- skill inputs created by JS --> </div>
-                    <button type="button" id="add-skill-button" onclick="addCustomSkill()" style="margin-top:12px;padding:6px 12px;width:auto;">Add Skill</button>
+                    <button type="button" id="add-skill-button" onclick="addCustomSkill()"
+                        style="margin-top:12px;padding:6px 12px;width:auto;">Add Skill</button>
                     <div id="cs-custom-skills"></div>
                 </fieldset>
 

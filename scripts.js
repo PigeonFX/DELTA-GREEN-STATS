@@ -364,14 +364,14 @@ function populateCharacterSheetForm() {
 function addCustomSkill() {
     const customSkillsDiv = document.getElementById('cs-custom-skills');
     const skillId = 'cs-custom-skill-' + Date.now();
-    
+
     const skillRow = document.createElement('div');
     skillRow.className = 'custom-skill-row';
     skillRow.style.display = 'flex';
     skillRow.style.gap = '8px';
     skillRow.style.marginTop = '8px';
     skillRow.style.alignItems = 'center';
-    
+
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
     nameInput.placeholder = 'Skill Name';
@@ -380,7 +380,7 @@ function addCustomSkill() {
     nameInput.style.padding = '4px 8px';
     nameInput.style.borderRadius = '4px';
     nameInput.style.border = '1px solid rgba(255,255,255,0.2)';
-    
+
     const valueInput = document.createElement('input');
     valueInput.type = 'number';
     valueInput.placeholder = '0';
@@ -392,14 +392,14 @@ function addCustomSkill() {
     valueInput.style.borderRadius = '4px';
     valueInput.style.border = '1px solid rgba(255,255,255,0.2)';
     valueInput.style.textAlign = 'center';
-    
+
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.textContent = 'Remove';
     removeBtn.style.padding = '4px 8px';
     removeBtn.style.width = 'auto';
     removeBtn.onclick = () => skillRow.remove();
-    
+
     skillRow.appendChild(nameInput);
     skillRow.appendChild(valueInput);
     skillRow.appendChild(removeBtn);
@@ -414,7 +414,7 @@ function getCustomSkills() {
     const customSkillsDiv = document.getElementById('cs-custom-skills');
     const customSkills = [];
     const rows = customSkillsDiv.querySelectorAll('.custom-skill-row');
-    
+
     rows.forEach(row => {
         const nameInput = row.querySelector('.custom-skill-name');
         const valueInput = row.querySelector('.custom-skill-value');
@@ -425,7 +425,7 @@ function getCustomSkills() {
             });
         }
     });
-    
+
     return customSkills;
 }
 
@@ -498,7 +498,7 @@ function buildFoundryJSON() {
         // Also add to typedSkills for consistency
         typedSkillsObj[customSkillId] = { label: customSkill.name, group: 'Custom', proficiency: customSkill.value, failure: false };
     });
-    
+
     // Prototype token and items JSON (allow raw editing)
     let items = [];
     try { items = JSON.parse(document.getElementById('cs-items-json').value); } catch (e) { items = []; }
