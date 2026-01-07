@@ -5,7 +5,7 @@ https://pigeonfx.github.io/DELTA-GREEN-STATS/
 ## Overview
 DELTA-GREEN-STATS is a straightforward tool designed to facilitate the creation of player characters and NPCs for the Delta Green Role-Playing System. With a focus on ease of use and accessibility, this project introduces a single HTML file solution that supports various methods of character creation through a user-friendly interface.
 
-<img src="https://github.com/PigeonFX/DELTA-GREEN-STATS/blob/main/Screenshot.png?raw=true" alt="Screenshot" style="max-width: 100%; height: auto;">
+<img src="assets/art/Screenshit.png" alt="Screenshot" style="max-width: 100%; height: auto;"> 
 
 ### Features
 - **Point Buy System**: Manually distribute a fixed number of points across different stats to shape your character.
@@ -36,7 +36,7 @@ This project is open source and available under the MIT license. Feel free to us
 
 ---
 <div align="center">
-    <img src="https://github.com/PigeonFX/DELTA-GREEN-STATS/blob/main/pigeon%20logo.png?raw=true" width="150" height="150">
+    <img src="assets/art/icon.png" width="150" height="150">
 </div>
 
 <p align="center">

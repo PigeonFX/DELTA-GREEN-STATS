@@ -7,7 +7,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-weight: normal; 
+    font-weight: normal;
 }
 
 /* Styling for the main content area */
@@ -149,8 +149,8 @@ button:hover {
 
 /* Styling for informational text below buttons or inputs */
 .info-text {
-    text-align: center; 
-    width: 100%; 
+    text-align: center;
+    width: 100%;
 }
 
 /* Style for displaying total points */
@@ -170,10 +170,10 @@ button:hover {
     border: 2px solid #00b521;
     margin-top: 30px;
     padding: 10px;
-    overflow-x: hidden; 
-    overflow-y: visible; 
+    overflow-x: hidden;
+    overflow-y: visible;
     position: relative;
-    color: #00b521; 
+    color: #00b521;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 1);
     font-weight: bold;
 }
@@ -185,11 +185,11 @@ button:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('DG_logo.png');
+    background-image: url('assets/art/logo.png');
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 200px 200px; 
-    opacity: 0.1; 
+    background-size: 200px 200px;
+    opacity: 0.1;
     pointer-events: none;
     font-weight: bold;
 }
@@ -215,9 +215,12 @@ button:hover {
 
 /* Blinking cursor effect */
 @keyframes blink {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 1;
     }
+
     50% {
         opacity: 0;
     }
@@ -228,28 +231,33 @@ button:hover {
 }
 
 @keyframes textFlicker {
-    0%, 100% {
-      text-shadow: 0 0 4px rgba(0, 255, 0, 0.4),
-                   0 0 11px rgba(0, 255, 0, 0.2),
-                   0 0 19px rgba(0, 255, 0, 0.1),
-                   0 0 40px rgba(0, 255, 0, 0.05);
-      opacity: 0.99;
+
+    0%,
+    100% {
+        text-shadow: 0 0 4px rgba(0, 255, 0, 0.4),
+            0 0 11px rgba(0, 255, 0, 0.2),
+            0 0 19px rgba(0, 255, 0, 0.1),
+            0 0 40px rgba(0, 255, 0, 0.05);
+        opacity: 0.99;
     }
-    25%, 75% {
-      text-shadow: none;
-      opacity: 0.99;
+
+    25%,
+    75% {
+        text-shadow: none;
+        opacity: 0.99;
     }
 }
 
-body, body * {
-  animation: textFlicker 20s infinite;
+body,
+body * {
+    animation: textFlicker 20s infinite;
 }
 
 
 /* Bond categories styling */
 .bond-categories {
     margin-top: 30px;
-    margin-right: 0px; 
+    margin-right: 0px;
     margin-left: 10px;
     min-width: 200px;
     color: #00b521;
@@ -257,26 +265,31 @@ body, body * {
 }
 
 .bond-categories label {
-    display: block; /* This ensures each label is on its own line */
-    margin-bottom: 10px; /* Adjust the bottom margin as needed for spacing */
+    display: block;
+    /* This ensures each label is on its own line */
+    margin-bottom: 10px;
+    /* Adjust the bottom margin as needed for spacing */
 }
 
 .bond-categories input[type="checkbox"] {
-    display: inline-block; /* Ensure each checkbox is displayed as an inline-block */
-    margin-right: 5px; /* Add some spacing between checkbox and label */
+    display: inline-block;
+    /* Ensure each checkbox is displayed as an inline-block */
+    margin-right: 5px;
+    /* Add some spacing between checkbox and label */
 }
 
 input[type="checkbox"] {
-    display: none; /* Hide checkbox */
+    display: none;
+    /* Hide checkbox */
 }
 
-input[type="checkbox"] + label {
-    background-color: #eee; 
+input[type="checkbox"]+label {
+    background-color: #eee;
     padding: 5px;
     border-radius: 5px;
 }
 
-input[type="checkbox"]:checked + label {
+input[type="checkbox"]:checked+label {
     background-color: #00b521;
-    color: white; 
+    color: white;
 }
