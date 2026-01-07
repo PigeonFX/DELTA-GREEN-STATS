@@ -1,6 +1,6 @@
 ## DELTA-GREEN-STATS
 
-https://pigeonfx.github.io/DELTA-GREEN-STATS/
+https://pigeon-labs-stack.github.io/DELTA-GREEN-STATS/
 
 ## Overview
 DELTA-GREEN-STATS is a comprehensive character creation and management tool for the Delta Green Role-Playing System. Built with vanilla HTML/CSS/JavaScript, it provides multiple character creation methods, bond management, and seamless integration with Foundry VTT through JSON export functionality.
@@ -67,7 +67,7 @@ DELTA-GREEN-STATS is a comprehensive character creation and management tool for 
 ## Getting Started
 
 ### Usage
-1. Open https://pigeonfx.github.io/DELTA-GREEN-STATS/ in any modern browser
+1. Open https://pigeon-labs-stack.github.io/DELTA-GREEN-STATS/ in any modern browser
 2. Create your character using Point Buy, Random Point Buy, or Dice Roll
 3. Fill in your character details in the Character Sheet section
 4. (Optional) Generate bonds and add them to your sheet
@@ -205,7 +205,7 @@ This project is open source and available under the MIT License. Feel free to us
 </div>
 
 <p align="center">
-  Built with ❤️ by <a href="https://github.com/PigeonFX">Pigeon</a> for Delta Green enthusiasts and role-playing game fans everywhere.
+  Built with ❤️ by <a href="https://github.com/pigeon-labs-stack">Pigeon Labs Stack</a> for Delta Green enthusiasts and role-playing game fans everywhere.
 </p>
 
 
