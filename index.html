@@ -70,22 +70,18 @@
                 LGBTQ
     </div>
     <div class="button-container">
-        <button type="button" id="random-point-buy" onmouseover="showInfo('pointBuy')" onmouseout="clearInfo()"
-            onclick="randomStats()">RANDOM POINT BUY</button>
-        <button type="button" id="random-dice-roll" onmouseover="showInfo('dice')" onmouseout="clearInfo()"
+        <button type="button" id="random-point-buy" title="Will distribute 72 points across the six stats using a random allocation algorithm."
+            onclick="randomPointBuy()">RANDOM POINT BUY</button>
+        <button type="button" id="random-dice-roll" title="Will roll 4xD6 and keep the three highest rolls. It will then update the value of each stat."
             onclick="randomDiceRoll()">RANDOM DICE ROLL</button>
-        <button type="button" id="reset-button" onmouseover="showInfo('reset')" onmouseout="clearInfo()"
-            onclick="resetStats()">RESET</button>
-        <button type="button" id="bonds-button" onmouseover="showInfo('bonds')" onmouseout="clearInfo()"
+        <button type="button" id="reset-button" title="Will reset all stats to their default value of 3 and take you back to the Point Buy system with 54 points to spend on your stats for a total of 72 points."
+            onclick="resetSheet()">RESET</button>
+        <button type="button" id="bonds-button" title="Will randomly generate a bond based on the selected categories and display it in the text box."
             onclick="generateRandomBond()">GENERATE BOND</button>
-        <button type="button" id="add-bond-button" onmouseover="showInfo('addBond')" onmouseout="clearInfo()"
+        <button type="button" id="add-bond-button" title="Add the generated bond to your character sheet."
             onclick="addBondToSheet()">ADD TO SHEET</button>
 
     </div>
-    <div class="github-link-container">
-        <a href="https://github.com/PigeonFX/DELTA-GREEN-STATS" target="_blank">GitHub</a>
-    </div>
-    <div class="info-text" id="infoText"></div>
     <!-- Character sheet section -->
     <div class="content">
         <div class="stats-section">
@@ -172,13 +168,15 @@
         </div>
     </div>
     <!-- Theme selector -->
-    <div id="theme-selector"
-        style="width:980px;max-width:100%;margin:18px auto 40px;display:flex;justify-content:flex-end;gap:12px;align-items:center;">
-        <label style="color:#00b521;font-weight:bold;">Theme:</label>
+    <div id="theme-selector">
+        <label>Theme:</label>
         <select id="cs-theme-select" aria-label="Theme selector">
             <option value="xfiles">X-Files</option>
             <option value="modern">Modern</option>
         </select>
+    </div>
+    <div class="github-link-container">
+        <a href="https://github.com/PigeonFX/DELTA-GREEN-STATS" target="_blank">GitHub</a>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="bonds.js"></script>

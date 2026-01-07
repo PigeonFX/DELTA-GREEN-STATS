@@ -174,23 +174,6 @@ function resetStats() {
     updateTotalPoints();
 }
 
-function showInfo(type) {
-    const infoText = document.getElementById('infoText');
-    if (type === 'dice') {
-        infoText.textContent = "'RANDOM DICE ROLL' Will roll 4xD6 and keep the three highest rolls. It will then update the value of each stat";
-    } else if (type === 'pointBuy') {
-        infoText.textContent = "'RANDOM POINT BUY' Will distribute 72 points across the six stats using a random allocation algorithm.";
-    } else if (type === 'reset') {
-        infoText.textContent = "'RESET' Will reset all stats to their default value of 3 and take you back to the Point Buy system with 54 points to spend on your stats for a total of 72 points.";
-    } else if (type === 'bonds') {
-        infoText.textContent = "'BONDS' Will randomly generate a bond based on the selected categories (DELTA GREEN, FRIENDS & FAMILY) and display it in the text box.";
-    }
-}
-
-function clearInfo() {
-    const infoText = document.getElementById('infoText');
-    infoText.textContent = '';
-}
 
 function generateCharacterSheet() {
     var wb = XLSX.utils.book_new(),
