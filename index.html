@@ -61,6 +61,25 @@
         <a href="https://github.com/PigeonFX/DELTA-GREEN-STATS" target="_blank">GitHub</a>
     </div>
     <div class="info-text" id="infoText"></div>
+    <!-- Character sheet section -->
+    <div class="content">
+        <div class="stats-section">
+            <h2>CHARACTER SHEET (Foundry VTT export)</h2>
+            <div id="character-sheet">
+                <label>Name: <input type="text" id="cs-name" value="Agent"></label><br>
+                <label>Image URL: <input type="text" id="cs-img" value="assets/art/logo.png"></label><br>
+                <label>Type: <input type="text" id="cs-type" value="agent"></label><br>
+                <div id="cs-stats">
+                    <!-- stat fields populated by JS -->
+                </div>
+                <div style="margin-top:10px;">
+                    <button type="button" onclick="populateCharacterJSON()">Preview Foundry JSON</button>
+                    <button type="button" onclick="exportCharacterJSON()">Export Foundry JSON</button>
+                </div>
+                <pre id="cs-json" style="white-space:pre-wrap;background:#000;border:1px solid #00b521;padding:10px;margin-top:10px;max-height:300px;overflow:auto;color:#00b521"></pre>
+            </div>
+        </div>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="bonds.js"></script>
     <script src="scripts.js"></script>

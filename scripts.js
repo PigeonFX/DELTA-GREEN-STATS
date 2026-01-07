@@ -169,6 +169,124 @@ function generateCharacterSheet() {
     XLSX.writeFile(wb, "DeltaGreenCharacterSheet.xlsx");
 }
 
+/* Character sheet export helpers */
+function populateCharacterSheetForm() {
+    const csStatsDiv = document.getElementById('cs-stats');
+    csStatsDiv.innerHTML = '';
+    stats.forEach(stat => {
+        const value = document.getElementById(`${stat}-value`).innerText;
+        csStatsDiv.innerHTML += `
+            <label style="display:block; margin-top:6px;">${stat}: <input type="number" id="cs-${stat}" value="${value}" min="3" max="18"></label>`;
+    });
+}
+
+function buildFoundryJSON() {
+    // Gather basic fields
+    const name = document.getElementById('cs-name').value || 'Agent';
+    const img = document.getElementById('cs-img').value || 'icons/svg/mystery-man.svg';
+    const type = document.getElementById('cs-type').value || 'agent';
+
+    // Compute attributes from current or sheet values
+    const statsObj = {};
+    stats.forEach(stat => {
+        const valInput = document.getElementById(`cs-${stat}`);
+        const value = valInput ? parseInt(valInput.value) : parseInt(document.getElementById(`${stat}-value`).innerText);
+        const key = stat.toLowerCase();
+        statsObj[key] = {
+            value: value,
+            distinguishing_feature: ''
+        };
+    });
+
+    // health/wp derived from STR/CON/POW
+    const hp = Math.ceil((statsObj.str.value + statsObj.con.value) / 2);
+    const wp = statsObj.pow.value;
+
+    // Minimal skills object (user can edit later if needed)
+    const defaultSkills = {
+        "accounting": {"label":"Accounting","proficiency":10,"failure":false},
+        "alertness": {"label":"Alertness","proficiency":20,"failure":false},
+        "athletics": {"label":"Athletics","proficiency":30,"failure":false},
+        "dodge": {"label":"Dodge","proficiency":30,"failure":false},
+        "drive": {"label":"Drive","proficiency":20,"failure":false},
+        "firearms": {"label":"Firearms","proficiency":20,"failure":false},
+        "persuade": {"label":"Persuade","proficiency":20,"failure":false}
+    };
+
+    const foundry = {
+        name: name,
+        type: type,
+        prototypeToken: {
+            actorLink: true,
+            name: name,
+            displayName: 0,
+            appendNumber: false,
+            prependAdjective: false,
+            width: 1,
+            height: 1,
+            texture: { src: img, anchorX: 0.5, anchorY: 0.5, offsetX: 0, offsetY: 0, fit: "contain", scaleX: 1, scaleY: 1, rotation: 0, tint: "#ffffff", alphaThreshold: 0.75 },
+            hexagonalShape: 0,
+            lockRotation: false,
+            rotation: 0,
+            alpha: 1,
+            disposition: -1,
+            displayBars: 0,
+            bar1: { attribute: "health" },
+            bar2: { attribute: "wp" },
+            light: { negative: false, priority: 0, alpha: 0.5, angle: 360, bright: 0, color: null, coloration: 1, dim: 0, attenuation: 0.5, luminosity: 0.5, saturation: 0, contrast: 0, shadows: 0, animation: { type: null, speed: 5, intensity: 5, reverse: false }, darkness: { min: 0, max: 1 } },
+            sight: { enabled: false, range: 0, angle: 360, visionMode: "basic", color: null, attenuation: 0.1, brightness: 0, saturation: 0, contrast: 0 },
+            detectionModes: [],
+            occludable: { radius: 0 },
+            ring: { enabled: false, colors: { ring: null, background: null }, effects: 1, subject: { scale: 1, texture: null } },
+            flags: {},
+            randomImg: false
+        },
+        img: img,
+        system: {
+            health: { value: hp, min: 0, max: hp },
+            wp: { value: wp, min: 0, max: wp },
+            statistics: statsObj,
+            skills: defaultSkills,
+            typedSkills: {},
+            specialTraining: [],
+            settings: { sorting: {}, rolling: { defaultPercentileModifier: 20 } },
+            schemaVersion: 1,
+            sanity: { value: 50, currentBreakingPoint: 40, adaptations: { violence: { incident1: false, incident2: false, incident3: false }, helplessness: { incident1: false, incident2: false, incident3: false } } },
+            physical: { description: "(Physical description)", wounds: "", firstAidAttempted: false, exhausted: false, exhaustedPenalty: -20 },
+            biography: { profession: "", employer: "", nationality: "", sex: "", age: "", education: "" },
+            corruption: { value: 0, haveSeenTheYellowSign: false, gift: "", insight: "" }
+        },
+        items: [ { name: "Unarmed Attack", type: "weapon", flags: { deltagreen: { AutoAdded: true, SystemName: "unarmed-attack" } }, img: "systems/deltagreen/assets/icons/punch.svg", system: { name: "", description: "", skill: "unarmed_combat", skillModifier: 0, customSkillTarget: 50, range: "0M", damage: "1D4-1", armorPiercing: 0, lethality: 0, isLethal: false, killRadius: "N/A", ammo: "", expense: "Standard", equipped: true } } ],
+        effects: [],
+        flags: { exportSource: { world: "generated", system: "deltagreen" } }
+    };
+
+    return foundry;
+}
+
+function populateCharacterJSON() {
+    populateCharacterSheetForm();
+    const obj = buildFoundryJSON();
+    const pretty = JSON.stringify(obj, null, 2);
+    document.getElementById('cs-json').innerText = pretty;
+}
+
+function exportCharacterJSON() {
+    populateCharacterSheetForm();
+    const obj = buildFoundryJSON();
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj, null, 2));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute('href', dataStr);
+    dlAnchor.setAttribute('download', (obj.name || 'Agent') + '.json');
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+}
+
+// Keep the character sheet form in sync when stats change
+const observer = new MutationObserver(() => { try { populateCharacterSheetForm(); } catch(e){} });
+window.addEventListener('load', () => { populateCharacterSheetForm(); observer.observe(document.getElementById('stats'), { childList: true, subtree: true, characterData: true }); });
+
 function generateRandomBond() {
     const bondButton = document.getElementById('bonds-button');
     bondButton.disabled = true;
