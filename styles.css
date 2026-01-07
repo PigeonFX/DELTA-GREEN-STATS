@@ -1,25 +1,128 @@
-/* General body styling for the entire page */
+/* ============================================================================
+   DELTA GREEN STATS - PRODUCTION STYLESHEET
+   ============================================================================
+   Organized for easy customization with clear sections for:
+   1. Color configuration (CSS variables)
+   2. Global styling
+   3. Component styling
+   4. Layout patterns
+   5. Modern theme (Catppuccin-inspired)
+   ============================================================================ */
+
+/* ============================================================================
+   CONFIGURATION: Colors, Spacing, Typography
+   ============================================================================ */
+
+:root {
+    /* === Default (X-Files) Theme Colors === */
+    --primary-color: #00b521;
+    --bg-color: #000000;
+    --text-color: #ffffff;
+    --border-color: #00b521;
+    --input-bg: #000000;
+    --input-border: #00b521;
+
+    /* === Spacing === */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 20px;
+    --spacing-xl: 30px;
+    --spacing-2xl: 50px;
+
+    /* === Border Radius === */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 12px;
+
+    /* === Font Sizes === */
+    --font-xs: 12px;
+    --font-sm: 14px;
+    --font-base: 16px;
+    --font-lg: 18px;
+    --font-xl: 32px;
+
+    /* === Z-index Scale === */
+    --z-base: 1;
+    --z-dropdown: 100;
+    --z-modal: 1000;
+}
+
+/* ============================================================================
+   GLOBAL STYLING
+   ============================================================================ */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
 body {
-    font-family: Courier New;
-    background-color: #000000;
-    color: #FFFFFF;
-    padding: 20px;
+    font-family: 'Courier New', monospace;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: var(--spacing-lg);
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-weight: normal;
+    min-height: 100vh;
+    margin: 0;
 }
 
-/* Styling for the main content area */
+h2 {
+    font-size: var(--font-lg);
+    color: var(--primary-color);
+    margin: 0 0 var(--spacing-lg) 0;
+    padding-left: var(--spacing-lg);
+    width: 100%;
+    font-weight: bold;
+}
+
+label {
+    color: inherit;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+    font-family: inherit;
+    font-size: var(--font-base);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border: 1px solid #bbb;
+    border-radius: var(--radius-md);
+}
+
+/* ============================================================================
+   PAGE LAYOUT
+   ============================================================================ */
+
+.page-title {
+    font-size: var(--font-xl);
+    font-weight: 700;
+    color: var(--primary-color);
+    text-align: center;
+    width: 100%;
+    margin-bottom: var(--spacing-xl);
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
 .content {
     display: flex;
     justify-content: center;
     align-items: flex-start;
     max-width: 1400px;
     width: 100%;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
 }
 
-/* Styling for sections that contain statistics */
 .stats-section {
     display: flex;
     flex-direction: column;
@@ -27,155 +130,146 @@ body {
     width: 100%;
 }
 
-/* Style for the page title */
-.page-title {
-    font-size: 32px;
-    font-weight: bold;
-    color: #00b521;
-    text-align: center;
-    width: 100%;
-    margin-bottom: 30px;
-}
+/* ============================================================================
+   STAT CONTAINERS (Statistics Display)
+   ============================================================================ */
 
-/* Style for secondary headings */
-h2 {
-    font-size: 18px;
-    color: #00b521;
-    margin: 0 0 20px 0;
-    padding-left: 20px;
-    width: 100%;
-    font-weight: bold;
-}
-
-/* Container for individual stats */
 .stat-container {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
-    margin-right: 10px;
+    margin-bottom: var(--spacing-md);
+    gap: var(--spacing-md);
 }
 
-/* Labels for stats, aligning text to the left */
 .stat-label {
     text-align: left;
-    color: #00b521;
+    color: var(--primary-color);
     min-width: 50px;
-    margin-right: 10px;
+    font-weight: bold;
+}
+
+.stat-value {
+    text-align: center;
+    color: var(--text-color);
+    min-width: 50px;
     font-weight: bold;
 }
 
 .x5-label {
     text-align: left;
-    color: #00b521;
+    color: var(--primary-color);
     min-width: 30px;
-    margin-right: 10px;
-    margin-left: 10px;
     font-weight: bold;
-}
-
-/* Values for stats, centered */
-.stat-value {
-    text-align: center;
-    color: #ffffff;
-    min-width: 50px;
-    margin-right: 0px;
-    font-weight: bold;
+    margin-left: var(--spacing-md);
 }
 
 .x5-value {
     text-align: center;
-    color: #ffffff;
+    color: var(--text-color);
     min-width: 30px;
-    margin-right: 10px;
-    margin-left: 0px;
+    margin-right: var(--spacing-md);
     font-weight: bold;
 }
 
-/* Descriptor for additional information */
 .descriptor {
     text-align: center;
-    color: #00b521;
+    color: var(--primary-color);
     width: 140px;
     min-width: 80px;
-    margin-right: 0px;
     font-weight: bold;
 }
 
 .attributes {
     text-align: right;
-    color: #00b521;
+    color: var(--primary-color);
     min-width: 220px;
     font-weight: bold;
-    margin-right: 0px;
-    margin-left: 0px;
 }
 
 .attribute-values {
     text-align: right;
-    color: #ffffff;
+    color: var(--text-color);
     min-width: 50px;
-    margin-right: 20px;
-    margin-left: 0px;
+    margin-right: var(--spacing-lg);
     font-weight: bold;
 }
 
-/* Button styling for interactivity */
-.adjust-button,
-button {
-    background-color: #000000;
-    color: #00b521;
-    border: 2px solid #00b521;
-    padding: 8px 12px;
-    font-size: 14px;
-    border-radius: 4px;
+/* ============================================================================
+   BUTTONS
+   ============================================================================ */
+
+button,
+.adjust-button {
+    background-color: var(--input-bg);
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-sm);
+    border-radius: var(--radius-sm);
     cursor: pointer;
+    font-family: inherit;
+    font-weight: bold;
     transition: all 0.3s ease;
+    letter-spacing: 0.5px;
 }
 
-/* Hover effect for buttons */
-.adjust-button:hover,
-button:hover {
-    background-color: #00b521;
-    color: #000000;
+button:hover,
+.adjust-button:hover {
+    background-color: var(--primary-color);
+    color: var(--input-bg);
 }
 
-/* Container for buttons to align them properly */
+button:disabled,
+.adjust-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .button-container {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin-top: 50px;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-2xl);
+    flex-wrap: wrap;
+    width: 100%;
 }
 
-/* Styling for informational text below buttons or inputs */
+/* ============================================================================
+   INFORMATION & FEEDBACK
+   ============================================================================ */
+
 .info-text {
     text-align: center;
     width: 100%;
+    color: var(--primary-color);
+    min-height: var(--font-lg);
 }
 
-/* Style for displaying total points */
 .total-points {
-    color: #00b521;
-    margin-top: 30px;
-    padding-left: 20px;
+    color: var(--primary-color);
+    margin-top: var(--spacing-xl);
+    padding-left: var(--spacing-lg);
     width: 100%;
     font-weight: bold;
 }
+
+/* ============================================================================
+   TEXT BOX & BONDS DISPLAY
+   ============================================================================ */
 
 .text-box {
     width: 800px;
     height: 250px;
-    background-color: #000000;
-    color: #00b521;
-    border: 2px solid #00b521;
-    margin-top: 30px;
-    padding: 10px;
+    background-color: var(--input-bg);
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-md);
+    overflow-y: auto;
     overflow-x: hidden;
-    overflow-y: visible;
     position: relative;
-    color: #00b521;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 1);
     font-weight: bold;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 1);
 }
 
 .text-box::before {
@@ -191,29 +285,315 @@ button:hover {
     background-size: 200px 200px;
     opacity: 0.1;
     pointer-events: none;
+}
+
+.text-box-left {
+    margin-right: var(--spacing-lg);
+}
+
+#bondText {
+    min-height: 150px;
+}
+
+/* ============================================================================
+   BOND MANAGEMENT
+   ============================================================================ */
+
+.bond-categories {
+    margin-top: var(--spacing-xl);
+    margin-left: var(--spacing-md);
+    min-width: 200px;
+    color: var(--primary-color);
     font-weight: bold;
 }
 
+.bond-categories label {
+    display: block;
+    margin-bottom: var(--spacing-md);
+}
+
+.bond-categories input[type="checkbox"] {
+    margin-right: var(--spacing-sm);
+}
+
+.bond-entry {
+    border: 1px solid var(--primary-color);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--radius-sm);
+    background: rgba(0, 181, 33, 0.05);
+}
+
+.bond-entry input[type="text"],
+.bond-entry input[type="number"],
+.bond-entry textarea {
+    background: rgba(0, 181, 33, 0.05);
+    color: var(--primary-color);
+    border: 1px solid rgba(0, 181, 33, 0.3);
+    width: 100%;
+    margin-bottom: var(--spacing-sm);
+}
+
+.bond-entry input[type="text"]:focus,
+.bond-entry input[type="number"]:focus,
+.bond-entry textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(0, 181, 33, 0.3);
+}
+
+.bond-entry button {
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: var(--font-xs);
+}
+
+.bond-entry pre {
+    background: rgba(0, 181, 33, 0.1);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    margin-top: var(--spacing-sm);
+    border: 1px solid rgba(0, 181, 33, 0.2);
+    font-size: var(--font-xs);
+    line-height: 1.4;
+}
+
+.bond-entry code {
+    color: var(--primary-color);
+    font-family: 'Courier New', monospace;
+}
+
+#add-bond-button {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: var(--font-sm);
+}
+
+/* ============================================================================
+   CHARACTER SHEET STYLING
+   ============================================================================ */
+
+#character-sheet {
+    max-width: 980px;
+    width: 100%;
+}
+
+#cs-name,
+#cs-img,
+#cs-type {
+    width: 300px;
+}
+
+#cs-physical-desc {
+    width: 100%;
+    height: 80px;
+}
+
+/* Statistics & Derived Attributes Grid */
+.stats-derived-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 32px;
+    align-items: start;
+}
+
+.stats-derived-grid .stat-container {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.stats-derived-grid .stat-label {
+    min-width: 50px;
+}
+
+.stats-derived-grid .stat-input {
+    width: 80px;
+}
+
+#cs-stats label {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+#cs-stats input[type="number"] {
+    width: 80px;
+}
+
+#cs-derived-fieldset .stat-container {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+}
+
+#cs-derived-fieldset .stat-label {
+    min-width: 40px;
+    color: var(--primary-color);
+}
+
+#cs-derived-fieldset input[type="number"] {
+    width: 120px;
+}
+
+/* Skills Grid */
+#cs-skills {
+    display: grid;
+    grid-template-columns: 1fr 6ch 1fr 6ch 1fr 6ch;
+    gap: var(--spacing-xs) var(--spacing-md);
+    align-items: center;
+    align-content: start;
+}
+
+#cs-skills .cs-skill-name {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs);
+    color: var(--primary-color);
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#cs-skills .cs-skill-input {
+    width: 6ch;
+    text-align: center;
+}
+
+.cs-skill-specialty {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: inherit;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-family: inherit;
+    font-size: 0.95em;
+    width: 10ch;
+}
+
+/* Biography Fields */
+#cs-biography-fieldset label {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+}
+
+#cs-biography-fieldset input[type="text"],
+#cs-biography-fieldset textarea {
+    width: 100%;
+}
+
+/* Bonds Section */
+#cs-bonds {
+    padding: var(--spacing-md) 0;
+}
+
+/* ============================================================================
+   FIELDSETS & PANELS
+   ============================================================================ */
+
+fieldset {
+    border: 1px solid var(--primary-color);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    border-radius: var(--radius-sm);
+}
+
+legend {
+    color: var(--primary-color);
+    padding: 0 var(--spacing-sm);
+    font-weight: bold;
+}
+
+.panel {
+    position: relative;
+}
+
+/* ============================================================================
+   CHECKBOXES
+   ============================================================================ */
+
+input[type="checkbox"] {
+    display: none;
+}
+
+input[type="checkbox"]+label {
+    background-color: #eee;
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    display: inline-block;
+}
+
+input[type="checkbox"]:checked+label {
+    background-color: var(--primary-color);
+    color: #000;
+}
+
+/* ============================================================================
+   MISC COMPONENTS
+   ============================================================================ */
+
 .github-link-container {
-    margin-top: 50px;
+    margin-top: var(--spacing-2xl);
     text-align: center;
     width: 100%;
-    padding: 10px;
 }
 
 .github-link-container a {
-    color: #00b521;
+    color: var(--primary-color);
     font-weight: bold;
     text-decoration: none;
-    font-family: Courier New;
 }
 
 .github-link-container a:hover {
-    color: #00b521;
     text-decoration: underline;
 }
 
-/* Blinking cursor effect */
+#theme-selector {
+    width: 980px;
+    max-width: 100%;
+    margin: var(--spacing-xl) auto var(--spacing-lg);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+#theme-selector select {
+    background: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+}
+
+#cs-json {
+    font-family: 'Courier New', monospace;
+    font-size: var(--font-xs);
+    background: var(--input-bg);
+    color: var(--primary-color);
+    padding: var(--spacing-md);
+    border: 1px solid var(--primary-color);
+    border-radius: var(--radius-sm);
+    max-height: 400px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin-top: var(--spacing-md);
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
 @keyframes blink {
 
     0%,
@@ -253,43 +633,286 @@ body * {
     animation: textFlicker 20s infinite;
 }
 
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
 
-/* Bond categories styling */
-.bond-categories {
-    margin-top: 30px;
-    margin-right: 0px;
-    margin-left: 10px;
-    min-width: 200px;
-    color: #00b521;
-    font-weight: bold;
+@media (max-width: 900px) {
+    .stats-derived-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #cs-skills {
+        grid-template-columns: 1fr 6ch;
+    }
+
+    .text-box {
+        width: 100%;
+    }
 }
 
-.bond-categories label {
-    display: block;
-    /* This ensures each label is on its own line */
-    margin-bottom: 10px;
-    /* Adjust the bottom margin as needed for spacing */
+@media (max-width: 600px) {
+    body {
+        padding: var(--spacing-md);
+    }
+
+    .page-title {
+        font-size: var(--font-lg);
+    }
+
+    .button-container {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    #theme-selector {
+        flex-direction: column;
+        width: 100%;
+    }
 }
 
-.bond-categories input[type="checkbox"] {
-    display: inline-block;
-    /* Ensure each checkbox is displayed as an inline-block */
-    margin-right: 5px;
-    /* Add some spacing between checkbox and label */
+/* ============================================================================
+   MODERN THEME - CATPPUCCIN PALETTE
+   ============================================================================
+   Fully customizable color scheme. Edit these variables to change the theme.
+   Catppuccin Color Palette Reference:
+   - Background: #1e1e2e (darker for depth)
+   - Surface: #11111b to #313244 (layered depth)
+   - Text: #e6e9ef (light and readable)
+   - Accents: Sapphire (#89b4fa), Mauve (#b4befe), Rose (#f28fad), etc.
+   ============================================================================ */
+
+.theme-modern,
+.theme-modern * {
+    --cp-bg: #1e1e2e;
+    --cp-surface0: #11111b;
+    --cp-surface1: #1f1d2e;
+    --cp-surface2: #313244;
+    --cp-text: #e6e9ef;
+    --cp-subtle: #94a1b2;
+    --cp-rose: #f28fad;
+    --cp-peach: #f5c2b9;
+    --cp-mauve: #b4befe;
+    --cp-sapphire: #89b4fa;
+    --cp-foam: #9ccfd8;
+    --cp-green: #a6e3a1;
+    --cp-accent: #c6a0f6;
 }
 
-input[type="checkbox"] {
-    display: none;
-    /* Hide checkbox */
+.theme-modern,
+.theme-modern * {
+    font-family: 'JetBrains Mono', 'Fira Mono', 'Menlo', 'Consolas', 'Liberation Mono', monospace !important;
+}
+
+.theme-modern body {
+    background: linear-gradient(180deg, var(--cp-bg), #15151f) fixed;
+    color: var(--cp-text);
+    animation: none !important;
+}
+
+.theme-modern * {
+    animation: none !important;
+    text-shadow: none !important;
+}
+
+.theme-modern .page-title {
+    color: var(--cp-mauve);
+    background: linear-gradient(90deg, rgba(182, 170, 246, 0.06), rgba(125, 196, 228, 0.04));
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    box-shadow: 0 10px 36px rgba(9, 10, 16, 0.6);
+}
+
+.theme-modern h2 {
+    color: var(--cp-text);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    padding-bottom: var(--spacing-md);
+}
+
+.theme-modern label {
+    color: var(--cp-subtle);
+}
+
+.theme-modern button,
+.theme-modern .adjust-button {
+    background: linear-gradient(180deg, var(--cp-mauve), var(--cp-accent));
+    color: #071126;
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-weight: 600;
+    box-shadow: 0 8px 20px rgba(12, 12, 20, 0.5);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.theme-modern button:hover,
+.theme-modern .adjust-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 34px rgba(12, 12, 20, 0.6);
+}
+
+.theme-modern #random-point-buy {
+    background-color: var(--cp-sapphire);
+}
+
+.theme-modern #random-dice-roll {
+    background-color: var(--cp-mauve);
+}
+
+.theme-modern #reset-button {
+    background-color: var(--cp-rose);
+}
+
+.theme-modern #bonds-button {
+    background-color: var(--cp-green);
+}
+
+.theme-modern #preview-json {
+    background-color: var(--cp-foam);
+}
+
+.theme-modern #export-json {
+    background-color: var(--cp-peach);
+}
+
+.theme-modern #refresh-stats {
+    background-color: var(--cp-mauve);
+}
+
+.theme-modern #add-bond-button {
+    background-color: var(--cp-sapphire);
+    border: 2px solid var(--cp-sapphire);
+}
+
+.theme-modern input,
+.theme-modern textarea,
+.theme-modern select {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    color: var(--cp-text);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: var(--radius-lg);
+    transition: box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.theme-modern input:focus,
+.theme-modern textarea:focus,
+.theme-modern select:focus {
+    box-shadow: 0 8px 24px rgba(137, 180, 250, 0.08);
+    border-color: rgba(137, 180, 250, 0.25);
+    outline: none;
+}
+
+.theme-modern fieldset {
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.00));
+}
+
+.theme-modern legend {
+    color: var(--cp-accent);
+}
+
+.theme-modern .stat-label,
+.theme-modern .x5-label,
+.theme-modern .descriptor,
+.theme-modern .attributes,
+.theme-modern .total-points,
+.theme-modern .bond-categories,
+.theme-modern .info-text {
+    color: var(--cp-subtle) !important;
+}
+
+.theme-modern #cs-stats input[type="number"],
+.theme-modern .stats-derived-grid .stat-input {
+    background: var(--cp-surface1) !important;
+    color: var(--cp-text) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.theme-modern .cs-skill-specialty {
+    background: var(--cp-surface1) !important;
+    color: var(--cp-mauve) !important;
+}
+
+.theme-modern .text-box {
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    color: var(--cp-text) !important;
+}
+
+.theme-modern #bondText {
+    color: var(--cp-text) !important;
+}
+
+.theme-modern .text-box::before {
+    opacity: 0.04;
+    filter: hue-rotate(200deg) saturate(0.2) brightness(0.9);
+}
+
+.theme-modern .bond-entry {
+    border: 1px solid var(--cp-foam);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.theme-modern #cs-json {
+    background: linear-gradient(180deg, #0f1015, #0b0b10);
+    color: #cbd5e1;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.theme-modern #theme-selector select {
+    background: var(--cp-surface1);
+    color: var(--cp-text);
+    border: none;
+}
+
+.theme-modern .github-link-container a {
+    color: var(--cp-sapphire);
+}
+
+.theme-modern .panel.panel-stats {
+    border-left: 4px solid var(--cp-sapphire);
+}
+
+.theme-modern .panel.panel-derived {
+    border-left: 4px solid var(--cp-mauve);
+}
+
+.theme-modern .panel.panel-skills {
+    border-left: 4px solid var(--cp-rose);
+}
+
+.theme-modern .panel.panel-bio {
+    border-left: 4px solid var(--cp-foam);
+}
+
+.theme-modern .panel.panel-proto {
+    border-left: 4px solid var(--cp-peach);
+}
+
+.theme-modern .panel.panel-bonds {
+    border-left: 4px solid var(--cp-green);
 }
 
 input[type="checkbox"]+label {
     background-color: #eee;
-    padding: 5px;
-    border-radius: 5px;
 }
 
 input[type="checkbox"]:checked+label {
-    background-color: #00b521;
-    color: white;
+    background-color: var(--primary-color);
+    color: #000;
+}
+
+.theme-modern input[type="checkbox"]+label {
+    background-color: var(--cp-surface2) !important;
+    color: var(--cp-text) !important;
+}
+
+.theme-modern input[type="checkbox"]:checked+label {
+    background-color: var(--cp-accent) !important;
 }

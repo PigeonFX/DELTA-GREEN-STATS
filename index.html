@@ -1,3 +1,20 @@
+<!-- ============================================================================
+     DELTA GREEN STATS - Character Creator & Exporter for Foundry VTT
+     ============================================================================
+     This HTML file defines the structure for a complete Delta Green RPG character
+     creation and management tool with Foundry VTT export support.
+     
+     Key Sections:
+     - Stat management (point buy, random roll, dice roll)
+     - Character sheet with skills and specialties
+     - Biography and character details
+     - Bond generation and management system
+     - JSON preview and export to Foundry format
+     
+     Styling: styles.css (organized by component)
+     Logic: scripts.js (character generation, export)
+     Bonds: bonds.js (bond category data)
+     ============================================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,8 +22,10 @@
     <meta charset="UTF-8">
     <!-- Title of the webpage -->
     <title>Delta Green Point Buy</title>
-    <meta name="description" content="Delta Green Point Buy allows you to strategically allocate stats for your Delta Green characters. Explore options for PISCES (UK), DELTA GREEN (US), and more.">
+    <meta name="description"
+        content="Delta Green Point Buy allows you to strategically allocate stats for your Delta Green characters. Explore options for PISCES (UK), DELTA GREEN (US), and more.">
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script type="application/ld+json">
         {
           "@context": "http://schema.org",
@@ -51,11 +70,17 @@
                 LGBTQ
     </div>
     <div class="button-container">
-        <button type="button" id="random-point-buy" onmouseover="showInfo('pointBuy')" onmouseout="clearInfo()" onclick="randomStats()">RANDOM POINT BUY</button>
-        <button type="button" id="random-dice-roll" onmouseover="showInfo('dice')" onmouseout="clearInfo()" onclick="randomDiceRoll()">RANDOM DICE ROLL</button>
-        <button type="button" id="reset-button" onmouseover="showInfo('reset')" onmouseout="clearInfo()" onclick="resetStats()">RESET</button>
-        <button type="button" id="bonds-button" onmouseover="showInfo('bonds')" onmouseout="clearInfo()" onclick="generateRandomBond()">BONDS</button>
-     
+        <button type="button" id="random-point-buy" onmouseover="showInfo('pointBuy')" onmouseout="clearInfo()"
+            onclick="randomStats()">RANDOM POINT BUY</button>
+        <button type="button" id="random-dice-roll" onmouseover="showInfo('dice')" onmouseout="clearInfo()"
+            onclick="randomDiceRoll()">RANDOM DICE ROLL</button>
+        <button type="button" id="reset-button" onmouseover="showInfo('reset')" onmouseout="clearInfo()"
+            onclick="resetStats()">RESET</button>
+        <button type="button" id="bonds-button" onmouseover="showInfo('bonds')" onmouseout="clearInfo()"
+            onclick="generateRandomBond()">GENERATE BOND</button>
+        <button type="button" id="add-bond-button" onmouseover="showInfo('addBond')" onmouseout="clearInfo()"
+            onclick="addBondToSheet()">ADD TO SHEET</button>
+
     </div>
     <div class="github-link-container">
         <a href="https://github.com/PigeonFX/DELTA-GREEN-STATS" target="_blank">GitHub</a>
@@ -67,18 +92,93 @@
             <h2>CHARACTER SHEET (Foundry VTT export)</h2>
             <div id="character-sheet">
                 <label>Name: <input type="text" id="cs-name" value="Agent"></label><br>
-                <label>Image URL: <input type="text" id="cs-img" value="assets/art/logo.png"></label><br>
-                <label>Type: <input type="text" id="cs-type" value="agent"></label><br>
-                <div id="cs-stats">
-                    <!-- stat fields populated by JS -->
+                <input type="hidden" id="cs-img" value="assets/art/logo.png">
+                <input type="hidden" id="cs-type" value="agent">
+                <fieldset class="panel panel-stats" style="margin-top:8px;border:1px solid #00b521;padding:8px;">
+                    <legend>Statistics & Derived Attributes (editable)</legend>
+                    <div class="stats-derived-grid">
+                        <div>
+                            <div id="cs-stats"><!-- populated by JS --></div>
+                        </div>
+                        <div>
+                            <div class="stat-container"><span class="stat-label">HP</span><input type="number"
+                                    id="cs-hp" value="0" min="0" class="stat-input"></div>
+                            <div class="stat-container"><span class="stat-label">WP</span><input type="number"
+                                    id="cs-wp" value="0" min="0" class="stat-input"></div>
+                            <div class="stat-container"><span class="stat-label">SAN</span><input type="number"
+                                    id="cs-sanity-value" value="50" min="0" class="stat-input"></div>
+                            <div class="stat-container"><span class="stat-label">BP</span><input type="number"
+                                    id="cs-breaking-point" value="40" min="0" class="stat-input"></div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="panel panel-skills" style="margin-top:8px;border:1px solid #00b521;padding:8px;">
+                    <legend>Skills</legend>
+                    <div id="cs-skills"> <!-- skill inputs created by JS --> </div>
+                </fieldset>
+
+                <fieldset id="cs-biography-fieldset" class="panel panel-bio"
+                    style="margin-top:8px;border:1px solid #00b521;padding:8px;">
+                    <legend>Biography</legend>
+                    <label>Profession: <input type="text" id="cs-bio-profession" value=""></label>
+                    <label>Employer: <input type="text" id="cs-bio-employer" value=""></label>
+                    <label>Nationality: <input type="text" id="cs-bio-nationality" value=""></label>
+                    <label>Sex: <input type="text" id="cs-bio-sex" value=""></label>
+                    <label>Age: <input type="number" id="cs-bio-age" value="" min="0"></label>
+                    <label>Education: <input type="text" id="cs-bio-education" value=""></label>
+                    <label style="display:block;margin-top:8px">Physical Description:</label>
+                    <textarea id="cs-physical-desc" style="width:100%;height:120px"
+                        placeholder="Physical description of agent"></textarea>
+                </fieldset>
+
+                <fieldset style="margin-top:8px;border:1px solid #00b521;padding:8px;" id="cs-bonds-fieldset">
+                    <legend>Bonds</legend>
+                    <div id="cs-bonds">
+                        <p style="opacity:0.8;margin:0;">(No bonds yet — bonds UI will be added here.)</p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="panel panel-proto" style="margin-top:8px;border:1px solid #00b521;padding:8px;">
+                    <legend>Prototype Token / Misc JSON</legend>
+                    <label>Prototype Token (JSON):</label>
+                    <textarea id="cs-prototype-json" style="width:100%;height:140px">{
+  "actorLink": true,
+  "name": "Agent",
+  "width": 1,
+  "height": 1,
+  "texture": { "src": "icons/svg/mystery-man.svg" }
+}</textarea>
+                    <label>Items (JSON array):</label>
+                    <textarea id="cs-items-json" style="width:100%;height:140px">[{
+  "name": "Unarmed Attack",
+  "type": "weapon",
+  "flags": { "deltagreen": { "AutoAdded": true, "SystemName": "unarmed-attack" } },
+  "img": "systems/deltagreen/assets/icons/punch.svg",
+  "system": { "skill": "unarmed_combat", "damage": "1D4-1", "equipped": true }
+}]</textarea>
+                </fieldset>
+
+                <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+                    <button type="button" id="preview-json" onclick="populateCharacterJSON()">Preview Foundry
+                        JSON</button>
+                    <button type="button" id="export-json" onclick="exportCharacterJSON()">Export Foundry JSON</button>
+                    <button type="button" id="refresh-stats" onclick="populateCharacterSheetForm()">Refresh fields from
+                        Stats</button>
                 </div>
-                <div style="margin-top:10px;">
-                    <button type="button" onclick="populateCharacterJSON()">Preview Foundry JSON</button>
-                    <button type="button" onclick="exportCharacterJSON()">Export Foundry JSON</button>
-                </div>
-                <pre id="cs-json" style="white-space:pre-wrap;background:#000;border:1px solid #00b521;padding:10px;margin-top:10px;max-height:300px;overflow:auto;color:#00b521"></pre>
+                <pre id="cs-json"
+                    style="white-space:pre-wrap;background:#000;border:1px solid #00b521;padding:10px;margin-top:10px;max-height:400px;overflow:auto;color:#00b521"></pre>
             </div>
         </div>
+    </div>
+    <!-- Theme selector -->
+    <div id="theme-selector"
+        style="width:980px;max-width:100%;margin:18px auto 40px;display:flex;justify-content:flex-end;gap:12px;align-items:center;">
+        <label style="color:#00b521;font-weight:bold;">Theme:</label>
+        <select id="cs-theme-select" aria-label="Theme selector">
+            <option value="xfiles">X-Files</option>
+            <option value="modern">Modern</option>
+        </select>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="bonds.js"></script>
