@@ -359,6 +359,77 @@ function populateCharacterSheetForm() {
 }
 
 /**
+ * Add a new custom skill row
+ */
+function addCustomSkill() {
+    const customSkillsDiv = document.getElementById('cs-custom-skills');
+    const skillId = 'cs-custom-skill-' + Date.now();
+    
+    const skillRow = document.createElement('div');
+    skillRow.className = 'custom-skill-row';
+    skillRow.style.display = 'flex';
+    skillRow.style.gap = '8px';
+    skillRow.style.marginTop = '8px';
+    skillRow.style.alignItems = 'center';
+    
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.placeholder = 'Skill Name';
+    nameInput.className = 'custom-skill-name';
+    nameInput.style.flex = '1';
+    nameInput.style.padding = '4px 8px';
+    nameInput.style.borderRadius = '4px';
+    nameInput.style.border = '1px solid rgba(255,255,255,0.2)';
+    
+    const valueInput = document.createElement('input');
+    valueInput.type = 'number';
+    valueInput.placeholder = '0';
+    valueInput.className = 'custom-skill-value';
+    valueInput.min = '0';
+    valueInput.value = '0';
+    valueInput.style.width = '7ch';
+    valueInput.style.padding = '4px 8px';
+    valueInput.style.borderRadius = '4px';
+    valueInput.style.border = '1px solid rgba(255,255,255,0.2)';
+    valueInput.style.textAlign = 'center';
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.textContent = 'Remove';
+    removeBtn.style.padding = '4px 8px';
+    removeBtn.style.width = 'auto';
+    removeBtn.onclick = () => skillRow.remove();
+    
+    skillRow.appendChild(nameInput);
+    skillRow.appendChild(valueInput);
+    skillRow.appendChild(removeBtn);
+    customSkillsDiv.appendChild(skillRow);
+}
+
+/**
+ * Get all custom skills from the form
+ * @returns {array} Array of custom skill objects with name and value
+ */
+function getCustomSkills() {
+    const customSkillsDiv = document.getElementById('cs-custom-skills');
+    const customSkills = [];
+    const rows = customSkillsDiv.querySelectorAll('.custom-skill-row');
+    
+    rows.forEach(row => {
+        const nameInput = row.querySelector('.custom-skill-name');
+        const valueInput = row.querySelector('.custom-skill-value');
+        if (nameInput && nameInput.value.trim().length > 0) {
+            customSkills.push({
+                name: nameInput.value.trim(),
+                value: parseInt(valueInput.value) || 0
+            });
+        }
+    });
+    
+    return customSkills;
+}
+
+/**
  * Builds a complete Foundry VTT Delta Green character JSON
  * Gathers all character data from the form and converts it to the proper Foundry actor format
  * @returns {object} Complete actor object ready for Foundry VTT import
@@ -418,6 +489,16 @@ function buildFoundryJSON() {
         }
         skillsObj[key] = { label: label, proficiency: prof, failure: false };
     });
+
+    // Add custom skills
+    const customSkills = getCustomSkills();
+    customSkills.forEach(customSkill => {
+        const customSkillId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+        skillsObj[customSkillId] = { label: customSkill.name, proficiency: customSkill.value, failure: false };
+        // Also add to typedSkills for consistency
+        typedSkillsObj[customSkillId] = { label: customSkill.name, group: 'Custom', proficiency: customSkill.value, failure: false };
+    });
+    
     // Prototype token and items JSON (allow raw editing)
     let items = [];
     try { items = JSON.parse(document.getElementById('cs-items-json').value); } catch (e) { items = []; }

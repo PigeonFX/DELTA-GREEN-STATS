@@ -484,6 +484,22 @@ button:disabled,
     width: 10ch;
 }
 
+.custom-skill-name {
+    background: transparent;
+    color: inherit;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 0.95em;
+}
+
+.custom-skill-value {
+    background: transparent;
+    color: inherit;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 0.95em;
+}
+
 /* Biography Fields */
 #cs-biography-fieldset label {
     display: grid;
