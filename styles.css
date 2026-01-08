@@ -580,11 +580,12 @@ input[type="checkbox"]+label {
     padding: var(--spacing-xs);
     border-radius: var(--radius-sm);
     display: inline-block;
+    color: #000000;
 }
 
 input[type="checkbox"]:checked+label {
     background-color: var(--primary-color);
-    color: #000;
+    color: #ffffff;
 }
 
 /* ============================================================================
@@ -634,10 +635,10 @@ input[type="checkbox"]:checked+label {
 #cs-json {
     font-family: 'Courier New', monospace;
     font-size: var(--font-xs);
-    background: var(--input-bg);
-    color: var(--primary-color);
+    background: #000 !important;
+    color: #00b521 !important;
     padding: var(--spacing-md);
-    border: 1px solid var(--primary-color);
+    border: 1px solid #00b521 !important;
     border-radius: var(--radius-sm);
     max-height: 400px;
     overflow: auto;
@@ -918,10 +919,10 @@ body * {
     background: rgba(255, 255, 255, 0.02);
 }
 
-.theme-modern #cs-json {
-    background: linear-gradient(180deg, #0f1015, #0b0b10);
-    color: #cbd5e1;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+body.theme-modern #cs-json {
+    background: #1e1e2e !important;
+    color: #00ffff !important;
+    border: 1px solid #00ffff !important;
 }
 
 .theme-modern #theme-selector select {

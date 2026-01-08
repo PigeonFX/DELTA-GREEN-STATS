@@ -519,6 +519,18 @@ function applyProfessionSkills() {
     // Track which base skills have been applied (for handling multiple "choose" skills)
     const appliedBaseSkills = {};
 
+    // Helper function to highlight select elements that need a specialty picked
+    function highlightSelectForProfessionSkill(selectElement) {
+        if (selectElement) {
+            // Add orange border and background to draw attention
+            selectElement.style.borderColor = '#fe640b';
+            selectElement.style.borderWidth = '2px';
+            selectElement.style.backgroundColor = '#fff3e0';
+            selectElement.style.color = '#fe640b';
+            selectElement.style.fontWeight = 'bold';
+        }
+    }
+
     // Function to apply a skill
     function applySkill(skillName, skillValue) {
         const parsed = parseSkillName(skillName);
@@ -533,31 +545,38 @@ function applyProfessionSkills() {
                 appliedBaseSkills[parsed.base] = 1;
                 input.value = skillValue;
 
-                // Set the specialty if available
-                if (parsed.specialty) {
+                // Check if this skill has a specialty dropdown (skills with specialties: art, craft, science, pilot, military_science)
+                const skillsWithSpecialties = ['art', 'craft', 'science', 'pilot', 'military_science'];
+                if (skillsWithSpecialties.includes(parsed.base)) {
                     const specId = `cs-skill-${parsed.base}-spec`;
                     const specSelect = document.getElementById(specId);
                     if (specSelect) {
-                        let found = false;
-                        // For military_science, options include "Military Science (X)" format
-                        // For other skills, options are just the specialty name like "Electrician"
-                        let specialtyToMatch = parsed.specialty;
-                        if (parsed.base === 'military_science') {
-                            specialtyToMatch = `Military Science (${parsed.specialty})`;
-                        }
+                        // Highlight the select element to remind user to select a specialty
+                        highlightSelectForProfessionSkill(specSelect);
 
-                        for (let option of specSelect.options) {
-                            if (option.text === specialtyToMatch) {
-                                specSelect.value = option.value;
-                                found = true;
-                                break;
+                        // If a specific specialty was provided, select it
+                        if (parsed.specialty) {
+                            let found = false;
+                            // For military_science, options include "Military Science (X)" format
+                            // For other skills, options are just the specialty name like "Electrician"
+                            let specialtyToMatch = parsed.specialty;
+                            if (parsed.base === 'military_science') {
+                                specialtyToMatch = `Military Science (${parsed.specialty})`;
                             }
-                        }
-                        if (!found) {
+
                             for (let option of specSelect.options) {
-                                if (option.text.toLowerCase() === specialtyToMatch.toLowerCase()) {
+                                if (option.text === specialtyToMatch) {
                                     specSelect.value = option.value;
+                                    found = true;
                                     break;
+                                }
+                            }
+                            if (!found) {
+                                for (let option of specSelect.options) {
+                                    if (option.text.toLowerCase() === specialtyToMatch.toLowerCase()) {
+                                        specSelect.value = option.value;
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -674,7 +693,10 @@ function addCustomSkillFromProfession(skillName, skillValue) {
         specSelect.className = 'cs-skill-specialty';
         specSelect.style.padding = '4px 6px';
         specSelect.style.borderRadius = '4px';
-        specSelect.style.border = '1px solid rgba(255,255,255,0.2)';
+        specSelect.style.border = '2px solid #fe640b';
+        specSelect.style.backgroundColor = '#fff3e0';
+        specSelect.style.color = '#fe640b';
+        specSelect.style.fontWeight = 'bold';
         specSelect.style.flex = '1';
         specSelect.style.maxWidth = '200px';
 
@@ -958,7 +980,9 @@ function populateCharacterJSON() {
     populateCharacterSheetForm();
     const obj = buildFoundryJSON();
     const pretty = JSON.stringify(obj, null, 2);
-    document.getElementById('cs-json').innerText = pretty;
+    const jsonPreviewEl = document.getElementById('cs-json');
+    jsonPreviewEl.innerText = pretty;
+    jsonPreviewEl.style.display = 'block';
 }
 
 /**
@@ -1026,6 +1050,18 @@ function generateRandomBond() {
 
     const bondTextElement = document.getElementById('bondText');
     bondTextElement.innerHTML = ''; // Clear previous text
+    
+    // Apply theme-appropriate styling
+    if (document.body.classList.contains('theme-modern')) {
+        bondTextElement.style.fontFamily = 'inherit';
+        bondTextElement.style.color = '#cdd6f4';
+        bondTextElement.style.borderColor = 'rgba(255, 255, 255, 0.02)';
+    } else {
+        // X-Files theme (default)
+        bondTextElement.style.fontFamily = "'Courier New', monospace";
+        bondTextElement.style.color = '#00b521';
+        bondTextElement.style.borderColor = '#00b521';
+    }
 
     if (availableBonds.length > 0) {
         let randomBond = availableBonds[Math.floor(Math.random() * availableBonds.length)];
