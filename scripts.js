@@ -1050,7 +1050,7 @@ function generateRandomBond() {
 
     const bondTextElement = document.getElementById('bondText');
     bondTextElement.innerHTML = ''; // Clear previous text
-    
+
     // Apply theme-appropriate styling
     if (document.body.classList.contains('theme-modern')) {
         bondTextElement.style.fontFamily = 'inherit';
