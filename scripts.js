@@ -453,26 +453,25 @@ function selectProfession(professionKey) {
     const infoDiv = document.getElementById('cs-profession-info');
     const optionalDiv = document.getElementById('cs-profession-optional-skills');
     const applyBtn = document.getElementById('apply-profession-button');
-    
+
     if (!professionKey || !professions[professionKey]) {
         infoDiv.textContent = '';
         optionalDiv.innerHTML = '';
         applyBtn.style.display = 'none';
         return;
     }
-    
+
     const profession = professions[professionKey];
     infoDiv.textContent = profession.description;
-    
+
     // Display optional skills with checkboxes
     if (profession.optionalSkills && profession.optionalSkills.length > 0) {
         let html = '<div style="margin-top:12px; padding:8px; background:rgba(0,0,0,0.2); border-radius:4px;"><strong>Optional Skills (Choose up to listed limit):</strong><div style="margin-top:8px;">';
         profession.optionalSkills.forEach((skill, idx) => {
+            const checkboxId = `profession-optional-skill-${idx}`;
             html += `<div style="margin:6px 0;">
-                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                    <input type="checkbox" class="profession-optional-skill" data-skill-name="${skill.name}" data-skill-value="${skill.value}" data-limit="${skill.limit}">
-                    <span>${skill.name} ${skill.value}%${skill.notes ? ' (' + skill.notes + ')' : ''}</span>
-                </label>
+                <input type="checkbox" id="${checkboxId}" class="profession-optional-skill" data-skill-name="${skill.name}" data-skill-value="${skill.value}" data-limit="${skill.limit}">
+                <label for="${checkboxId}" style="cursor:pointer;">${skill.name} ${skill.value}%${skill.notes ? ' (' + skill.notes + ')' : ''}</label>
             </div>`;
         });
         html += '</div></div>';
@@ -480,7 +479,7 @@ function selectProfession(professionKey) {
     } else {
         optionalDiv.innerHTML = '';
     }
-    
+
     applyBtn.style.display = profession.requiredSkills.length > 0 ? 'inline-block' : 'none';
 }
 
@@ -490,65 +489,115 @@ function selectProfession(professionKey) {
 function applyProfessionSkills() {
     const professionSelect = document.getElementById('cs-profession-select');
     const professionKey = professionSelect.value;
-    
+
     if (!professionKey || !professions[professionKey]) return;
-    
+
     const profession = professions[professionKey];
-    
+    let appliedCount = 0;
+
     // Predefined skills - these are the base skill keys
     const predefinedSkills = ["accounting", "alertness", "anthropology", "archeology", "art", "artillery", "athletics", "bureaucracy", "computer_science", "craft", "criminology", "demolitions", "disguise", "dodge", "drive", "firearms", "first_aid", "forensics", "heavy_machinery", "heavy_weapons", "history", "humint", "law", "medicine", "melee_weapons", "military_science", "navigate", "occult", "persuade", "pharmacy", "pilot", "psychotherapy", "ride", "science", "search", "sigint", "stealth", "surgery", "survival", "swim", "unarmed_combat", "unnatural"];
-    
+
     // Function to extract base skill and specialty from a skill name
     // E.g., "Craft (Electrician)" -> { base: "craft", specialty: "Electrician" }
-    // E.g., "Alertness" -> { base: "alertness", specialty: null }
+    // E.g., "Science (choose one)" -> { base: "science", specialty: null, isChoice: true }
     function parseSkillName(skillName) {
         const match = skillName.match(/^([^(]+)(?:\s*\(([^)]+)\))?$/);
-        if (!match) return { base: skillName.toLowerCase().replace(/\s+/g, '_'), specialty: null };
-        
+        if (!match) return { base: skillName.toLowerCase().replace(/\s+/g, '_'), specialty: null, isChoice: false };
+
         const basePart = match[1].trim().toLowerCase().replace(/\s+/g, '_');
         const specialty = match[2] ? match[2].trim() : null;
-        return { base: basePart, specialty: specialty };
+        const isChoice = specialty && (specialty.includes("choose") || specialty === "choose one" || specialty === "choose another");
+
+        return {
+            base: basePart,
+            specialty: isChoice ? null : specialty,
+            isChoice: isChoice
+        };
     }
-    
+
+    // Track which base skills have been applied (for handling multiple "choose" skills)
+    const appliedBaseSkills = {};
+
     // Function to apply a skill
     function applySkill(skillName, skillValue) {
         const parsed = parseSkillName(skillName);
         const inputId = `cs-skill-${parsed.base}`;
         const input = document.getElementById(inputId);
-        
+
         if (input) {
-            // Set the value (take the higher of existing or new)
-            const currentValue = parseInt(input.value) || 0;
-            input.value = Math.max(currentValue, skillValue);
-            
-            // If there's a specialty, set it
-            if (parsed.specialty) {
-                const specId = `cs-skill-${parsed.base}-spec`;
-                const specSelect = document.getElementById(specId);
-                if (specSelect) {
-                    // Find the option that matches the specialty
-                    for (let option of specSelect.options) {
-                        if (option.text === parsed.specialty) {
-                            specSelect.value = option.value;
-                            // Trigger change event to update title
-                            const event = new Event('change', { bubbles: true });
-                            specSelect.dispatchEvent(event);
-                            break;
+            // For both choice and non-choice skills, track occurrences to handle multiples
+
+            if (!appliedBaseSkills[parsed.base]) {
+                // First occurrence: set the predefined skill
+                appliedBaseSkills[parsed.base] = 1;
+                input.value = skillValue;
+
+                // Set the specialty if available
+                if (parsed.specialty) {
+                    const specId = `cs-skill-${parsed.base}-spec`;
+                    const specSelect = document.getElementById(specId);
+                    if (specSelect) {
+                        let found = false;
+                        // For military_science, options include "Military Science (X)" format
+                        // For other skills, options are just the specialty name like "Electrician"
+                        let specialtyToMatch = parsed.specialty;
+                        if (parsed.base === 'military_science') {
+                            specialtyToMatch = `Military Science (${parsed.specialty})`;
                         }
+
+                        for (let option of specSelect.options) {
+                            if (option.text === specialtyToMatch) {
+                                specSelect.value = option.value;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            for (let option of specSelect.options) {
+                                if (option.text.toLowerCase() === specialtyToMatch.toLowerCase()) {
+                                    specSelect.value = option.value;
+                                    break;
+                                }
+                            }
+                        }
+                        const event = new Event('change', { bubbles: true });
+                        specSelect.dispatchEvent(event);
                     }
+                }
+                appliedCount++;
+            } else {
+                // Skill already has a value or this is a subsequent occurrence: create custom skill entry
+                appliedBaseSkills[parsed.base] = (appliedBaseSkills[parsed.base] || 1) + 1;
+
+                // Format the skill name for custom entry
+                let customName;
+                if (parsed.isChoice) {
+                    // Remove "(choose one)" or "(choose another)" text for choice skills
+                    customName = skillName.replace(/\s*\([^)]*choose[^)]*\)/i, '').trim();
+                    customName = `${customName} (Choice ${appliedBaseSkills[parsed.base]})`;
+                } else {
+                    // For non-choice skills with specialty, use the full skill name
+                    customName = skillName;
+                }
+
+                if (addCustomSkillFromProfession(customName, skillValue)) {
+                    appliedCount++;
                 }
             }
         } else if (!predefinedSkills.includes(parsed.base)) {
             // Add as custom skill if not predefined
-            addCustomSkillFromProfession(skillName, skillValue);
+            if (addCustomSkillFromProfession(skillName, skillValue)) {
+                appliedCount++;
+            }
         }
     }
-    
+
     // Apply required skills
     profession.requiredSkills.forEach(skill => {
         applySkill(skill.name, skill.value);
     });
-    
+
     // Apply selected optional skills
     const optionalCheckboxes = document.querySelectorAll('.profession-optional-skill:checked');
     optionalCheckboxes.forEach(checkbox => {
@@ -556,8 +605,12 @@ function applyProfessionSkills() {
         const skillValue = parseInt(checkbox.getAttribute('data-skill-value'));
         applySkill(skillName, skillValue);
     });
-    
-    alert('Professional skills applied! Check the Skills section to see the changes.');
+
+    if (appliedCount > 0) {
+        alert(`Applied ${appliedCount} professional skill(s)! Check the Skills section to see the changes.`);
+    } else {
+        alert('No skills were applied. Make sure the skills exist in the character sheet.');
+    }
 }
 
 /**
@@ -573,17 +626,112 @@ function addCustomSkillFromProfession(skillName, skillValue) {
     skillRow.style.gap = '8px';
     skillRow.style.marginTop = '8px';
     skillRow.style.alignItems = 'center';
-    
-    const nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.value = skillName;
-    nameInput.className = 'custom-skill-name';
-    nameInput.style.flex = '1';
-    nameInput.style.padding = '4px 8px';
-    nameInput.style.borderRadius = '4px';
-    nameInput.style.border = '1px solid rgba(255,255,255,0.2)';
-    nameInput.readOnly = true;
-    
+
+    // Parse skill name to extract base skill and specialty
+    const skillMatch = skillName.match(/^([^(]+)(?:\s*\(([^)]+)\))?/);
+    const skillBase = skillMatch ? skillMatch[1].trim().toLowerCase().replace(/\s+/g, '_') : '';
+    const specialty = skillMatch && skillMatch[2] ? skillMatch[2].trim() : null;
+
+    // Define specialty options for skills that have them (excluding Foreign Language which is user-editable)
+    const specialtyOptions = {
+        art: ["Creative Writing", "Journalism", "Painting", "Photography", "Sculpture", "Music", "Acting", "Film / Scriptwriting", "Illustration"],
+        craft: ["Electrician", "Mechanic", "Locksmithing", "Carpentry", "Plumbing", "Welding", "Microelectronics", "Machinist", "Blacksmith", "Explosives (non-military fabrication)"],
+        science: ["Biology", "Chemistry", "Physics", "Mathematics", "Geology", "Astronomy", "Meteorology", "Genetics", "Engineering", "Environmental Science"],
+        pilot: ["Fixed-Wing Aircraft", "Helicopter", "Jet Aircraft", "Drone / UAV", "Spacecraft (Handler approval)"],
+        military_science: ["Military Science (Land)", "Military Science (Air)", "Military Science (Naval)", "Military Science (Special Operations)"]
+    };
+
+    // Create name input or label based on specialty
+    if (skillBase === 'foreign_language') {
+        // Foreign Language is user-editable
+        const nameLabel = document.createElement('label');
+        nameLabel.textContent = 'Foreign Language:';
+        nameLabel.style.flex = '0 0 auto';
+        nameLabel.style.minWidth = '120px';
+        skillRow.appendChild(nameLabel);
+
+        // Create editable text input for language name
+        const langInput = document.createElement('input');
+        langInput.type = 'text';
+        langInput.placeholder = 'e.g., French, Spanish, Mandarin';
+        langInput.className = 'custom-skill-name';
+        langInput.style.flex = '1';
+        langInput.style.maxWidth = '200px';
+        langInput.style.padding = '4px 8px';
+        langInput.style.borderRadius = '4px';
+        langInput.style.border = '1px solid rgba(255,255,255,0.2)';
+        skillRow.appendChild(langInput);
+    } else if (specialtyOptions[skillBase]) {
+        // Skill has specialty dropdown
+        const nameLabel = document.createElement('label');
+        nameLabel.textContent = skillBase.charAt(0).toUpperCase() + skillBase.slice(1) + ':';
+        nameLabel.style.flex = '0 0 auto';
+        nameLabel.style.minWidth = '100px';
+        skillRow.appendChild(nameLabel);
+
+        // Create specialty dropdown
+        const specSelect = document.createElement('select');
+        specSelect.className = 'cs-skill-specialty';
+        specSelect.style.padding = '4px 6px';
+        specSelect.style.borderRadius = '4px';
+        specSelect.style.border = '1px solid rgba(255,255,255,0.2)';
+        specSelect.style.flex = '1';
+        specSelect.style.maxWidth = '200px';
+
+        const pickOption = document.createElement('option');
+        pickOption.value = '';
+        pickOption.textContent = 'Pick';
+        specSelect.appendChild(pickOption);
+
+        specialtyOptions[skillBase].forEach(option => {
+            const opt = document.createElement('option');
+            opt.value = option;
+            opt.textContent = option;
+            specSelect.appendChild(opt);
+        });
+
+        // Pre-select the specialty if provided
+        if (specialty) {
+            let found = false;
+            // For military_science, options include "Military Science (X)" format
+            // For other skills, options are just the specialty name like "Electrician"
+            let specialtyToMatch = specialty;
+            if (skillBase === 'military_science') {
+                specialtyToMatch = `Military Science (${specialty})`;
+            }
+
+            for (let option of specSelect.options) {
+                if (option.text === specialtyToMatch) {
+                    specSelect.value = option.value;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                for (let option of specSelect.options) {
+                    if (option.text.toLowerCase() === specialtyToMatch.toLowerCase()) {
+                        specSelect.value = option.value;
+                        break;
+                    }
+                }
+            }
+        }
+
+        skillRow.appendChild(specSelect);
+    } else {
+        // Regular skill without specialty
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.value = skillName;
+        nameInput.className = 'custom-skill-name';
+        nameInput.style.flex = '1';
+        nameInput.style.padding = '4px 8px';
+        nameInput.style.borderRadius = '4px';
+        nameInput.style.border = '1px solid rgba(255,255,255,0.2)';
+        nameInput.readOnly = true;
+        skillRow.appendChild(nameInput);
+    }
+
     const valueInput = document.createElement('input');
     valueInput.type = 'number';
     valueInput.value = skillValue;
@@ -594,18 +742,18 @@ function addCustomSkillFromProfession(skillName, skillValue) {
     valueInput.style.borderRadius = '4px';
     valueInput.style.border = '1px solid rgba(255,255,255,0.2)';
     valueInput.style.textAlign = 'center';
-    
+
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.textContent = 'Remove';
     removeBtn.style.padding = '4px 8px';
     removeBtn.style.width = 'auto';
     removeBtn.onclick = () => skillRow.remove();
-    
-    skillRow.appendChild(nameInput);
+
     skillRow.appendChild(valueInput);
     skillRow.appendChild(removeBtn);
     customSkillsDiv.appendChild(skillRow);
+    return true;
 }
 
 /**
@@ -1058,7 +1206,7 @@ function renderBondsOnSheet() {
     bondsContainer.innerHTML = html;
 }
 
-window.onload = function() {
+window.onload = function () {
     generateStatContainers();
     populateProfessionDropdown();
 };
