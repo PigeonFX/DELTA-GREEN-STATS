@@ -113,6 +113,15 @@
                     </div>
                 </fieldset>
 
+                <fieldset class="panel panel-profession" style="margin-top:8px;border:1px solid #00b521;padding:8px;">
+                    <legend>Profession</legend>
+                    <label for="cs-profession-select">Select Profession:</label>
+                    <select id="cs-profession-select" onchange="displayProfessionInfo(this.value)">
+                        <option value="">-- Choose a Profession --</option>
+                    </select>
+                    <div id="cs-profession-info" style="margin-top:12px;font-size:0.9em;line-height:1.6;white-space:pre-wrap;"></div>
+                </fieldset>
+
                 <fieldset class="panel panel-skills" style="margin-top:8px;border:1px solid #00b521;padding:8px;">
                     <legend>Skills</legend>
                     <div id="cs-skills"> <!-- skill inputs created by JS --> </div>

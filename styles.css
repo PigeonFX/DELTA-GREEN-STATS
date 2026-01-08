@@ -473,6 +473,29 @@ button:disabled,
     text-align: center;
 }
 
+#cs-profession-select {
+    background: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: inherit;
+}
+
+#cs-profession-select option {
+    background: #1a1a1a;
+    color: var(--primary-color);
+}
+
+#cs-profession-info {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-family: 'Courier New', monospace;
+}
+
 .cs-skill-specialty {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.06);
@@ -928,8 +951,29 @@ body * {
     border-left: 4px solid var(--cp-mauve);
 }
 
+.theme-modern .panel.panel-profession {
+    border-left: 4px solid var(--cp-sapphire);
+}
+
 .theme-modern .panel.panel-skills {
     border-left: 4px solid var(--cp-rose);
+}
+
+.theme-modern #cs-profession-select {
+    color: var(--cp-text);
+    border-color: var(--cp-text);
+    background: var(--cp-surface1);
+}
+
+.theme-modern #cs-profession-select option {
+    background: var(--cp-surface1);
+    color: var(--cp-text);
+}
+
+.theme-modern #cs-profession-info {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--cp-text);
 }
 
 .theme-modern .panel.panel-bio {
