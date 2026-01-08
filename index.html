@@ -112,14 +112,15 @@
                         </div>
                     </div>
                 </fieldset>
-
                 <fieldset class="panel panel-profession" style="margin-top:8px;border:1px solid #00b521;padding:8px;">
                     <legend>Profession</legend>
                     <label for="cs-profession-select">Select Profession:</label>
-                    <select id="cs-profession-select" onchange="displayProfessionInfo(this.value)">
+                    <select id="cs-profession-select" onchange="selectProfession(this.value)">
                         <option value="">-- Choose a Profession --</option>
                     </select>
                     <div id="cs-profession-info" style="margin-top:12px;font-size:0.9em;line-height:1.6;white-space:pre-wrap;"></div>
+                    <div id="cs-profession-optional-skills" style="margin-top:12px;"></div>
+                    <button type="button" id="apply-profession-button" onclick="applyProfessionSkills()" style="margin-top:12px;padding:6px 12px;width:auto;display:none;">Apply Professional Skills</button>
                 </fieldset>
 
                 <fieldset class="panel panel-skills" style="margin-top:8px;border:1px solid #00b521;padding:8px;">
@@ -195,6 +196,7 @@
         <a href="https://github.com/PigeonFX/DELTA-GREEN-STATS" target="_blank">GitHub</a>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="professions.js"></script>
     <script src="bonds.js"></script>
     <script src="scripts.js"></script>
 </body>

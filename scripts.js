@@ -13,463 +13,7 @@ const stats = ['STR', 'CON', 'DEX', 'INT', 'POW', 'CHA'];
 const attributesText = ['Hit Points (HP)', 'Willpower Points (WP)', 'Sanity Points (SAN)', 'Breaking Point (BP)'];
 
 // Profession data
-const professions = {
-    "anthropologist": {
-        title: "Anthropologist or Historian",
-        description: `You study humanity. You're concerned with the patterns that emerge over time, across land masses, cultures, and language groups. You might be a number-cruncher, a field worker trudging through the jungle, a consultant in a war zone, or a think-tank analyst sifting myth from history in studies of the Tcho-Tcho peoples.
-
-RECOMMENDED STATS: INT
-
-PROFESSIONAL SKILLS:
-» Anthropology 50% or Archeology 50%
-» Bureaucracy 40%
-» Foreign Language (choose one) 50%
-» Foreign Language (choose another) 40%
-» History 60%
-» Occult 40%
-» Persuade 40%
-
-Choose any two of these that you don't already have:
-» Anthropology 40%
-» Archeology 40%
-» HUMINT 50%
-» Navigate 50%
-» Ride 50%
-» Search 60%
-» Survival 50%
-
-BONDS: 4`
-    },
-    "computer_scientist": {
-        title: "Computer Scientist or Engineer",
-        description: `Computers and machinery are the backbone of modern industry. You are a craftsman with data or machinery, possibly for the government and most definitely for profit. However you use your skills, the overlap between information technology and awareness of the unnatural could make this the most dangerous job on the planet.
-
-RECOMMENDED STATS: INT
-
-PROFESSIONAL SKILLS:
-» Computer Science 60%
-» Craft (Electrician) 30%
-» Craft (Mechanic) 30%
-» Craft (Microelectronics) 40%
-» Science (Mathematics) 40%
-» SIGINT 40%
-
-Choose any four of these that you don't already have:
-» Accounting 50%
-» Bureaucracy 50%
-» Craft (choose one) 40%
-» Foreign Language (choose one) 40%
-» Heavy Machinery 50%
-» Law 40%
-» Science (choose one) 40%
-
-BONDS: 3`
-    },
-    "federal_agent": {
-        title: "Federal Agent",
-        description: `Many Delta Green Agents are federal law enforcement officers, mostly from the FBI. Delta Green decided long ago that federal agents have the optimum balance of skills and mental stability needed to confront the unnatural. For other versions of this profession see FEDERAL AGENCIES on page 104.
-
-RECOMMENDED STATS: CON, POW, CHA
-
-PROFESSIONAL SKILLS:
-» Alertness 50%
-» Bureaucracy 40%
-» Criminology 50%
-» Drive 50%
-» Firearms 50%
-» Forensics 30%
-» HUMINT 60%
-» Law 30%
-» Persuade 50%
-» Search 50%
-» Unarmed Combat 60%
-
-Choose one of these:
-» Accounting 60%
-» Computer Science 50%
-» Foreign Language (choose one) 50%
-» Heavy Weapons 50%
-» Pharmacy 50%
-
-BONDS: 3`
-    },
-    "physician": {
-        title: "Physician",
-        description: `Doctors are often the first to uncover signs of an unnatural incursion, and the most valuable investigators of its disastrous effects on humanity.
-
-RECOMMENDED STATS: INT, POW, DEX
-
-PROFESSIONAL SKILLS:
-» Bureaucracy 50%
-» First Aid 60%
-» Medicine 60%
-» Persuade 40%
-» Pharmacy 50%
-» Science (Biology) 60%
-» Search 40%
-
-Choose any two of these that you don't already have:
-» Forensics 50%
-» Psychotherapy 60%
-» Science (choose one) 50%
-» Surgery 50%
-
-BONDS: 3`
-    },
-    "scientist": {
-        title: "Scientist",
-        description: `You expand human knowledge in a field such as biology, physics, or chemistry. When certain forms of knowledge cause insanity and death, it's easy to conclude that some hypotheses should not be tested.
-
-RECOMMENDED STATS: INT
-
-PROFESSIONAL SKILLS:
-» Bureaucracy 40%
-» Computer Science 40%
-» Science (choose one) 60%
-» Science (choose another) 50%
-» Science (choose another) 50%
-
-Choose any three of these:
-» Accounting 50%
-» Craft (choose one) 40%
-» Foreign Language (choose one) 40%
-» Forensics 40%
-» Law 40%
-» Pharmacy 40%
-
-BONDS: 4`
-    },
-    "special_operator": {
-        title: "Special Operator",
-        description: `As part of a force like the U.S. Army Rangers, you volunteered for a more difficult path than other soldiers. You've spent years in the most grueling training on the planet, and now serve on the most dangerous missions around. For other versions of this profession (U.S. Army Special Forces, SEALs, USMC Raiders, FBI Hostage Rescue Team, CIA Special Operations Group, and so on), see FEDERAL AGENCIES on page 104.
-
-RECOMMENDED STATS: STR, CON, POW
-
-PROFESSIONAL SKILLS:
-» Alertness 60%
-» Athletics 60%
-» Demolitions 40%
-» Firearms 60%
-» Heavy Weapons 50%
-» Melee Weapons 50%
-» Military Science (Land) 60%
-» Navigate 50%
-» Stealth 50%
-» Survival 50%
-» Swim 50%
-» Unarmed Combat 60%
-
-BONDS: 2`
-    },
-    "criminal": {
-        title: "Criminal",
-        description: `So much is illegal that there are broad economies of crime. This profile fits a hardened militant or a traditional "black collar" criminal: pimp, burglar, extortionist, or thug. If you want a white-collar criminal, choose Computer Scientist or Business Executive and make very risky decisions.
-
-RECOMMENDED STATS: STR, DEX
-
-PROFESSIONAL SKILLS:
-» Alertness 50%
-» Athletics 50%
-» Criminology 60%
-» Dodge 40%
-» Drive 50%
-» Firearms 40%
-» Law 20%
-» Melee Weapons 40%
-» Persuade 50%
-» Stealth 50%
-» Unarmed Combat 50%
-
-Choose two from:
-» Craft (Locksmithing) 40%
-» Demolitions 40%
-» Disguise 50%
-» Foreign Language (choose one) 40%
-» Forensics 40%
-» HUMINT 50%
-» Navigate 50%
-» Occult 50%
-» Pharmacy 40%
-
-BONDS: 4`
-    },
-    "firefighter": {
-        title: "Firefighter",
-        description: `Your job oscillates between the tedium of maintaining your gear, exhilaration when the alarm finally comes, and the work of investigating a scene after the smoke has cleared. If you're involved with Delta Green, you clearly stumbled into something worse than a house fire.
-
-RECOMMENDED STATS: STR, DEX, CON
-
-PROFESSIONAL SKILLS:
-» Alertness 50%
-» Athletics 60%
-» Craft (Electrician) 40%
-» Craft (Mechanic) 40%
-» Demolitions 50%
-» Drive 50%
-» First Aid 50%
-» Forensics 40%
-» Heavy Machinery 50%
-» Navigate 50%
-» Search 40%
-
-BONDS: 3`
-    },
-    "foreign_service": {
-        title: "Foreign Service Officer",
-        description: `You travel to strange lands, meet interesting people, and try to get along with them. Odds are you work for the State Department, though USAID, the Commercial Service and the Foreign Agriculture Service also have FSOs. Either way, you've had every opportunity to learn exotic and deadly things; the kinds of things that qualify you for Delta Green clearance.
-
-RECOMMENDED STATS: INT, CHA
-
-PROFESSIONAL SKILLS:
-» Accounting 40%
-» Anthropology 40%
-» Bureaucracy 60%
-» Foreign Language (choose one) 50%
-» Foreign Language (choose one) 50%
-» Foreign Language (choose one) 40%
-» History 40%
-» HUMINT 50%
-» Law 40%
-» Persuade 50%
-
-BONDS: 3`
-    },
-    "intelligence_analyst": {
-        title: "Intelligence Analyst",
-        description: `In the FBI, NSA and CIA, there are those who gather information and those who decide what it means. You take information from disparate sources—newspapers, websites, informants, ELINT, and the assets developed by Case Officers—and figure out what it means. In short, your job is the piecing together of unrelated knowledge, a dangerous endeavor in the world of Delta Green.
-
-RECOMMENDED STATS: INT
-
-PROFESSIONAL SKILLS:
-» Anthropology 40%
-» Bureaucracy 50%
-» Computer Science 40%
-» Criminology 40%
-» Foreign Language (choose one) 50%
-» Foreign Language (choose one) 50%
-» Foreign Language (choose one) 40%
-» History 40%
-» HUMINT 50%
-» SIGINT 40%
-
-BONDS: 3`
-    },
-    "intelligence_case_officer": {
-        title: "Intelligence Case Officer",
-        description: `You recruit people to spy on their own countries for your agency, probably the CIA. Your job is to develop foreign intelligence sources ("assets"), communicate with them, and keep them under control, productive, and alive. It's a hard business because you must view everyone as a potential threat, liar, or tool to further your agenda. If your name came to the attention of Delta Green, congratulations; you are now someone else's asset.
-
-RECOMMENDED STATS: INT, POW, CHA
-
-PROFESSIONAL SKILLS:
-» Alertness 50%
-» Bureaucracy 40%
-» Criminology 50%
-» Disguise 50%
-» Drive 40%
-» Firearms 40%
-» Foreign Language (choose one) 50%
-» Foreign Language (choose another) 40%
-» HUMINT 60%
-» Persuade 60%
-» SIGINT 40%
-» Stealth 50%
-» Unarmed Combat 50%
-
-BONDS: 2`
-    },
-    "lawyer_executive": {
-        title: "Lawyer or Business Executive",
-        description: `Your tools are a computer and smartphone. You might be moving millions of dollars, or bits of data, or both. Or you might be a prosecutor, a defense attorney, or judge.
-
-RECOMMENDED STATS: INT, CHA
-
-PROFESSIONAL SKILLS:
-» Accounting 50%
-» Bureaucracy 50%
-» HUMINT 40%
-» Persuade 60%
-
-Choose four from:
-» Computer Science 50%
-» Criminology 60%
-» Foreign Language (choose one) 50%
-» Law 50%
-» Pharmacy 50%
-
-BONDS: 4`
-    },
-    "media_specialist": {
-        title: "Media Specialist",
-        description: `You might be an author, an editor, a researcher for a company or any branch of the government, a blogger, a TV reporter, or a scholar of rare texts. With the unnatural, you've uncovered the story of a lifetime.
-
-RECOMMENDED STATS: INT, CHA
-
-PROFESSIONAL SKILLS:
-» Art (choose one: Creative Writing, Journalism, Poetry, Scriptwriting, etc.) 60%
-» History 40%
-» HUMINT 40%
-» Persuade 50%
-
-Choose five from:
-» Anthropology 40%
-» Archeology 40%
-» Art (choose one) 40%
-» Bureaucracy 50%
-» Computer Science 40%
-» Criminology 50%
-» Foreign Language (choose one) 40%
-» Law 40%
-» Military Science (choose one) 40%
-» Occult 50%
-» Science (choose one) 40%
-
-BONDS: 4`
-    },
-    "nurse_paramedic": {
-        title: "Nurse or Paramedic",
-        description: `Medical professionals are on the front line when awful things happen. Is that what brought you to the group's attention?
-
-RECOMMENDED STATS: INT, POW, CHA
-
-PROFESSIONAL SKILLS:
-» Alertness 40%
-» Bureaucracy 40%
-» First Aid 60%
-» HUMINT 40%
-» Medicine 40%
-» Persuade 40%
-» Pharmacy 40%
-» Science (Biology) 40%
-
-Choose two from:
-» Drive 60%
-» Forensics 40%
-» Navigate 50%
-» Psychotherapy 50%
-» Search 60%
-
-BONDS: 4`
-    },
-    "pilot_sailor": {
-        title: "Pilot or Sailor",
-        description: `Air or sea, commercial or military, your duty is to keep your passengers alive and craft intact. This can lead to hard choices when your passengers put the vehicle in danger. Or are you a drone operator, flying a Predator from a thousand miles away? Either way, what op brought you to the attention of Delta Green?
-
-RECOMMENDED STATS: DEX, INT
-
-PROFESSIONAL SKILLS:
-» Alertness 60%
-» Bureaucracy 30%
-» Craft (Electrician) 40%
-» Craft (Mechanic) 40%
-» Navigate 50%
-» Pilot (choose one) 60%
-» Science (Meteorology) 40%
-» Swim 40%
-
-Choose two from:
-» Foreign Language (choose one) 50%
-» Pilot (choose one) 50%
-» Heavy Weapons 50%
-» Military Science (choose one) 50%
-
-BONDS: 3`
-    },
-    "police_officer": {
-        title: "Police Officer",
-        description: `You serve and protect. Police officers walk the beat in uniform. Deputy sheriffs answer to an elected law enforcer and have jurisdiction over an entire county. Detectives come in after the fact and put the pieces together.
-
-RECOMMENDED STATS: STR, CON, POW
-
-PROFESSIONAL SKILLS:
-» Alertness 60%
-» Bureaucracy 40%
-» Criminology 40%
-» Drive 50%
-» Firearms 40%
-» First Aid 30%
-» HUMINT 50%
-» Law 30%
-» Melee Weapons 50%
-» Navigate 40%
-» Persuade 40%
-» Search 40%
-» Unarmed Combat 60%
-
-Choose one from:
-» Forensics 50%
-» Heavy Machinery 60%
-» Heavy Weapons 50%
-» Ride 60%
-
-BONDS: 3`
-    },
-    "program_manager": {
-        title: "Program Manager",
-        description: `You run an organization. Someone has to secure funding, move resources, and make connections, and that's you. You control a budget and are responsible for how your program is maintained and where the money goes. Organizations discover the most startling things in their pursuit of profit or the public good.
-
-RECOMMENDED STATS: INT, CHA
-
-PROFESSIONAL SKILLS:
-» Accounting 60%
-» Bureaucracy 60%
-» Computer Science 50%
-» Criminology 30%
-» Foreign Language (choose one) 50%
-» History 40%
-» Law 40%
-» Persuade 50%
-
-Choose one from:
-» Anthropology 30%
-» Art (choose one) 30%
-» Craft (choose one) 30%
-» Science (choose one) 30%
-
-BONDS: 4`
-    },
-    "soldier_marine": {
-        title: "Soldier or Marine",
-        description: `Governments will always need boots on the ground and steady hands holding rifles. When war begins, civilization gets out of the way. With the social contract void, unnatural things creep in at the edges. There's a reason Delta Green began in the military.
-
-RECOMMENDED STATS: STR, CON
-
-PROFESSIONAL SKILLS:
-» Alertness 50%
-» Athletics 50%
-» Bureaucracy 30%
-» Drive 40%
-» Firearms 40%
-» First Aid 40%
-» Military Science (Land) 40%
-» Navigate 40%
-» Persuade 30%
-» Unarmed Combat 50%
-
-Choose three from:
-» Artillery 40%
-» Computer Science 40%
-» Craft (choose one) 40%
-» Demolitions 40%
-» Foreign Language (choose one) 40%
-» Heavy Machinery 50%
-» Heavy Weapons 40%
-» Search 60%
-» SIGINT 40%
-» Swim 60%
-
-BONDS: 4`
-    },
-    "new_profession": {
-        title: "New Profession",
-        description: `If none of the professions suit your Agent, use these guidelines to build a new one.
-
-PROFESSIONAL SKILLS: Pick ten professional skills for the new profession. Divide 400 skill points between them. Add those points to each skill's starting level. As a rule of thumb, professional skills should be 30% to 50%. No professional skill may be higher than 60%.
-
-BONDS: 3
-
-CUSTOMIZE: For each additional bond (to a maximum of 4), reduce professional skill points by 50. For each bond removed (to a minimum of 1), add 50 professional skill points.`
-    }
-};
+// Professions data is now in professions.js
 
 /**
  * Populates the profession dropdown menu
@@ -482,19 +26,6 @@ function populateProfessionDropdown() {
         option.textContent = professions[key].title;
         select.appendChild(option);
     });
-}
-
-/**
- * Displays the information for the selected profession
- * @param {string} professionKey - The key of the selected profession
- */
-function displayProfessionInfo(professionKey) {
-    const infoDiv = document.getElementById('cs-profession-info');
-    if (!professionKey || !professions[professionKey]) {
-        infoDiv.textContent = '';
-        return;
-    }
-    infoDiv.textContent = professions[professionKey].description;
 }
 
 /**
@@ -912,6 +443,169 @@ function getCustomSkills() {
     });
 
     return customSkills;
+}
+
+/**
+ * Select a profession and display its information and optional skills
+ * @param {string} professionKey - The key of the selected profession
+ */
+function selectProfession(professionKey) {
+    const infoDiv = document.getElementById('cs-profession-info');
+    const optionalDiv = document.getElementById('cs-profession-optional-skills');
+    const applyBtn = document.getElementById('apply-profession-button');
+    
+    if (!professionKey || !professions[professionKey]) {
+        infoDiv.textContent = '';
+        optionalDiv.innerHTML = '';
+        applyBtn.style.display = 'none';
+        return;
+    }
+    
+    const profession = professions[professionKey];
+    infoDiv.textContent = profession.description;
+    
+    // Display optional skills with checkboxes
+    if (profession.optionalSkills && profession.optionalSkills.length > 0) {
+        let html = '<div style="margin-top:12px; padding:8px; background:rgba(0,0,0,0.2); border-radius:4px;"><strong>Optional Skills (Choose up to listed limit):</strong><div style="margin-top:8px;">';
+        profession.optionalSkills.forEach((skill, idx) => {
+            html += `<div style="margin:6px 0;">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" class="profession-optional-skill" data-skill-name="${skill.name}" data-skill-value="${skill.value}" data-limit="${skill.limit}">
+                    <span>${skill.name} ${skill.value}%${skill.notes ? ' (' + skill.notes + ')' : ''}</span>
+                </label>
+            </div>`;
+        });
+        html += '</div></div>';
+        optionalDiv.innerHTML = html;
+    } else {
+        optionalDiv.innerHTML = '';
+    }
+    
+    applyBtn.style.display = profession.requiredSkills.length > 0 ? 'inline-block' : 'none';
+}
+
+/**
+ * Apply the selected profession's required and optional skills to the character sheet
+ */
+function applyProfessionSkills() {
+    const professionSelect = document.getElementById('cs-profession-select');
+    const professionKey = professionSelect.value;
+    
+    if (!professionKey || !professions[professionKey]) return;
+    
+    const profession = professions[professionKey];
+    
+    // Predefined skills - these are the base skill keys
+    const predefinedSkills = ["accounting", "alertness", "anthropology", "archeology", "art", "artillery", "athletics", "bureaucracy", "computer_science", "craft", "criminology", "demolitions", "disguise", "dodge", "drive", "firearms", "first_aid", "forensics", "heavy_machinery", "heavy_weapons", "history", "humint", "law", "medicine", "melee_weapons", "military_science", "navigate", "occult", "persuade", "pharmacy", "pilot", "psychotherapy", "ride", "science", "search", "sigint", "stealth", "surgery", "survival", "swim", "unarmed_combat", "unnatural"];
+    
+    // Function to extract base skill and specialty from a skill name
+    // E.g., "Craft (Electrician)" -> { base: "craft", specialty: "Electrician" }
+    // E.g., "Alertness" -> { base: "alertness", specialty: null }
+    function parseSkillName(skillName) {
+        const match = skillName.match(/^([^(]+)(?:\s*\(([^)]+)\))?$/);
+        if (!match) return { base: skillName.toLowerCase().replace(/\s+/g, '_'), specialty: null };
+        
+        const basePart = match[1].trim().toLowerCase().replace(/\s+/g, '_');
+        const specialty = match[2] ? match[2].trim() : null;
+        return { base: basePart, specialty: specialty };
+    }
+    
+    // Function to apply a skill
+    function applySkill(skillName, skillValue) {
+        const parsed = parseSkillName(skillName);
+        const inputId = `cs-skill-${parsed.base}`;
+        const input = document.getElementById(inputId);
+        
+        if (input) {
+            // Set the value (take the higher of existing or new)
+            const currentValue = parseInt(input.value) || 0;
+            input.value = Math.max(currentValue, skillValue);
+            
+            // If there's a specialty, set it
+            if (parsed.specialty) {
+                const specId = `cs-skill-${parsed.base}-spec`;
+                const specSelect = document.getElementById(specId);
+                if (specSelect) {
+                    // Find the option that matches the specialty
+                    for (let option of specSelect.options) {
+                        if (option.text === parsed.specialty) {
+                            specSelect.value = option.value;
+                            // Trigger change event to update title
+                            const event = new Event('change', { bubbles: true });
+                            specSelect.dispatchEvent(event);
+                            break;
+                        }
+                    }
+                }
+            }
+        } else if (!predefinedSkills.includes(parsed.base)) {
+            // Add as custom skill if not predefined
+            addCustomSkillFromProfession(skillName, skillValue);
+        }
+    }
+    
+    // Apply required skills
+    profession.requiredSkills.forEach(skill => {
+        applySkill(skill.name, skill.value);
+    });
+    
+    // Apply selected optional skills
+    const optionalCheckboxes = document.querySelectorAll('.profession-optional-skill:checked');
+    optionalCheckboxes.forEach(checkbox => {
+        const skillName = checkbox.getAttribute('data-skill-name');
+        const skillValue = parseInt(checkbox.getAttribute('data-skill-value'));
+        applySkill(skillName, skillValue);
+    });
+    
+    alert('Professional skills applied! Check the Skills section to see the changes.');
+}
+
+/**
+ * Add a custom skill from profession selection
+ * @param {string} skillName - The name of the skill
+ * @param {number} skillValue - The proficiency value
+ */
+function addCustomSkillFromProfession(skillName, skillValue) {
+    const customSkillsDiv = document.getElementById('cs-custom-skills');
+    const skillRow = document.createElement('div');
+    skillRow.className = 'custom-skill-row';
+    skillRow.style.display = 'flex';
+    skillRow.style.gap = '8px';
+    skillRow.style.marginTop = '8px';
+    skillRow.style.alignItems = 'center';
+    
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.value = skillName;
+    nameInput.className = 'custom-skill-name';
+    nameInput.style.flex = '1';
+    nameInput.style.padding = '4px 8px';
+    nameInput.style.borderRadius = '4px';
+    nameInput.style.border = '1px solid rgba(255,255,255,0.2)';
+    nameInput.readOnly = true;
+    
+    const valueInput = document.createElement('input');
+    valueInput.type = 'number';
+    valueInput.value = skillValue;
+    valueInput.className = 'custom-skill-value';
+    valueInput.min = '0';
+    valueInput.style.width = '7ch';
+    valueInput.style.padding = '4px 8px';
+    valueInput.style.borderRadius = '4px';
+    valueInput.style.border = '1px solid rgba(255,255,255,0.2)';
+    valueInput.style.textAlign = 'center';
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.textContent = 'Remove';
+    removeBtn.style.padding = '4px 8px';
+    removeBtn.style.width = 'auto';
+    removeBtn.onclick = () => skillRow.remove();
+    
+    skillRow.appendChild(nameInput);
+    skillRow.appendChild(valueInput);
+    skillRow.appendChild(removeBtn);
+    customSkillsDiv.appendChild(skillRow);
 }
 
 /**
