@@ -5,7 +5,17 @@ https://pigeon-labs-stack.github.io/DELTA-GREEN-STATS/
 ## Overview
 DELTA-GREEN-STATS is a comprehensive character creation and management tool for the Delta Green Role-Playing System. Built with vanilla HTML/CSS/JavaScript, it provides multiple character creation methods, profession selection, bonus skill points, bond management, and seamless integration with Foundry VTT through JSON export functionality.
 
-<img src="assets/art/Screenshit.png" alt="Screenshot" style="max-width: 100%; height: auto;"> 
+#### Theme Options
+<div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+  <div style="flex: 1; min-width: 300px;">
+    <h5>X-Files Theme (Default)</h5>
+    <img src="assets/art/Screenshot.png" alt="X-Files Theme Screenshot" style="max-width: 100%; height: auto; border: 1px solid #00b521;">
+  </div>
+  <div style="flex: 1; min-width: 300px;">
+    <h5>Modern Theme</h5>
+    <img src="assets/art/screenshot2.png" alt="Modern Theme Screenshot" style="max-width: 100%; height: auto; border: 1px solid #b4befe;">
+  </div>
+</div>
 
 ### Features
 
