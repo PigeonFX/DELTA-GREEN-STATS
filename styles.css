@@ -76,9 +76,10 @@ h2 {
     font-size: var(--font-lg);
     color: var(--primary-color);
     margin: 0 0 var(--spacing-lg) 0;
-    padding-left: var(--spacing-lg);
+    padding-left: 0;
     width: 100%;
     font-weight: bold;
+    text-align: center;
 }
 
 label {
@@ -126,9 +127,9 @@ select {
 .stats-section {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     width: 100%;
-    margin-left: 150px;
+    margin-left: 0;
 }
 
 .stats-section h2 {
@@ -252,9 +253,10 @@ button:disabled,
 .total-points {
     color: var(--primary-color);
     margin-top: var(--spacing-xl);
-    padding-left: var(--spacing-lg);
+    padding-left: 0;
     width: 100%;
     font-weight: bold;
+    text-align: center;
 }
 
 /* ============================================================================
@@ -262,7 +264,8 @@ button:disabled,
    ============================================================================ */
 
 .text-box {
-    width: 800px;
+    width: 100%;
+    max-width: 600px;
     height: 250px;
     background-color: var(--input-bg);
     color: var(--primary-color);
@@ -340,6 +343,40 @@ button:disabled,
     border: 1px solid rgba(0, 181, 33, 0.3);
     width: 100%;
     margin-bottom: var(--spacing-sm);
+}
+
+.bond-entry-field {
+    background: rgba(0, 181, 33, 0.05) !important;
+    color: var(--primary-color) !important;
+    border: 1px solid rgba(0, 181, 33, 0.3) !important;
+    width: 100%;
+    margin-bottom: var(--spacing-sm);
+    padding: 4px !important;
+    font-family: inherit !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+}
+
+.bond-entry-field[readonly] {
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    resize: vertical;
+}
+
+.bond-remove-button {
+    padding: 6px 12px;
+    cursor: pointer;
+    background: var(--primary-color);
+    color: var(--bg-color);
+    border: 1px solid var(--primary-color);
+    border-radius: var(--radius-sm);
+    font-weight: bold;
+    transition: opacity 0.2s ease;
+}
+
+.bond-remove-button:hover {
+    opacity: 0.8;
 }
 
 .bond-entry input[type="text"]:focus,
@@ -553,6 +590,12 @@ fieldset {
     border-radius: var(--radius-sm);
 }
 
+fieldset.fieldset-default {
+    margin-top: 8px;
+    border: 1px solid #00b521;
+    padding: 8px;
+}
+
 legend {
     color: var(--primary-color);
     padding: 0 var(--spacing-sm);
@@ -564,6 +607,102 @@ legend {
 }
 
 .panel.panel-proto {
+    display: none;
+}
+
+/* Utility classes for common inline styles */
+.section-flex {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.section-flex-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.section-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.bonds-list {
+    margin-top: 12px;
+}
+
+.hidden-section {
+    display: none;
+}
+
+.description-text {
+    font-size: 0.9em;
+    margin-bottom: 12px;
+    opacity: 0.8;
+}
+
+/* Textarea sizing */
+textarea {
+    width: 100%;
+}
+
+#cs-physical-desc {
+    height: 120px;
+}
+
+#cs-prototype-json,
+#cs-items-json {
+    height: 140px;
+}
+
+#cs-json {
+    white-space: pre-wrap;
+    padding: 10px;
+    margin-top: 10px;
+    max-height: 400px;
+    overflow: auto;
+}
+
+/* Section labels */
+#cs-biography-fieldset label[style*="display:block"] {
+    display: block;
+    margin-top: 8px;
+}
+
+/* Info divs */
+#cs-profession-info {
+    margin-top: 12px;
+    font-size: 0.9em;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+#cs-profession-optional-skills {
+    margin-top: 12px;
+}
+
+#bonus-dropdowns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+/* Button styling */
+button[style*="margin-top:12px"],
+button[style*="margin-bottom:12px"] {
+    margin-top: 12px;
+    padding: 6px 12px;
+    width: auto;
+}
+
+#apply-profession-button {
+    display: none;
+}
+
+#bonus-skills-section {
     display: none;
 }
 
@@ -602,10 +741,60 @@ input[type="checkbox"]:checked+label {
     color: var(--primary-color);
     font-weight: bold;
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.3s ease;
 }
 
 .github-link-container a:hover {
+    opacity: 0.8;
     text-decoration: underline;
+}
+
+.github-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    stroke: var(--primary-color);
+}
+
+/* Bonus Skill Select Styling */
+.cs-bonus-skill-select {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: inherit;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-family: inherit;
+    font-size: 0.95em;
+}
+
+.cs-bonus-skill-select:focus {
+    outline: none;
+}
+
+.theme-modern .cs-bonus-skill-select {
+    background: var(--cp-surface1) !important;
+    color: #8aadf4 !important;
+}
+
+.disclaimer {
+    margin-top: var(--spacing-2xl);
+    text-align: center;
+    width: 100%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: var(--spacing-lg);
+}
+
+.disclaimer p {
+    font-size: 0.85em;
+    color: var(--text-color);
+    opacity: 0.7;
+    line-height: 1.6;
+    margin: 0;
 }
 
 #theme-selector {
@@ -846,8 +1035,9 @@ body * {
 }
 
 .theme-modern #add-bond-button {
-    background-color: var(--cp-sapphire);
-    border: 2px solid var(--cp-sapphire);
+    background: linear-gradient(180deg, var(--cp-mauve), var(--cp-accent));
+    border: none;
+    color: #071126;
 }
 
 .theme-modern input,
@@ -919,8 +1109,37 @@ body * {
 }
 
 .theme-modern .bond-entry {
-    border: 1px solid var(--cp-foam);
+    border: 1px solid var(--cp-mauve);
     background: rgba(255, 255, 255, 0.02);
+}
+
+.theme-modern .bond-entry-field {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--cp-text) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.theme-modern .bond-entry-field:focus {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid var(--cp-sapphire) !important;
+    box-shadow: 0 0 8px rgba(137, 180, 250, 0.2) !important;
+}
+
+.theme-modern .bond-remove-button {
+    background: linear-gradient(180deg, var(--cp-mauve), var(--cp-accent));
+    color: #071126;
+    border: none;
+    font-weight: 600;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    box-shadow: 0 4px 12px rgba(12, 12, 20, 0.4);
+}
+
+.theme-modern .bond-remove-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(12, 12, 20, 0.5);
+    opacity: 1;
 }
 
 body.theme-modern #cs-json {

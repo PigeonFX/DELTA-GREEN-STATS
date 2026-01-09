@@ -426,24 +426,6 @@ function addCustomSkill() {
  * Get all custom skills from the form
  * @returns {array} Array of custom skill objects with name and value
  */
-function getCustomSkills() {
-    const customSkillsDiv = document.getElementById('cs-custom-skills');
-    const customSkills = [];
-    const rows = customSkillsDiv.querySelectorAll('.custom-skill-row');
-
-    rows.forEach(row => {
-        const nameInput = row.querySelector('.custom-skill-name');
-        const valueInput = row.querySelector('.custom-skill-value');
-        if (nameInput && nameInput.value.trim().length > 0) {
-            customSkills.push({
-                name: nameInput.value.trim(),
-                value: parseInt(valueInput.value) || 0
-            });
-        }
-    });
-
-    return customSkills;
-}
 
 /**
  * Select a profession and display its information and optional skills
@@ -629,6 +611,296 @@ function applyProfessionSkills() {
         alert(`Applied ${appliedCount} professional skill(s)! Check the Skills section to see the changes.`);
     } else {
         alert('No skills were applied. Make sure the skills exist in the character sheet.');
+    }
+}
+
+/**
+ * Prepare bonus skills feature - shows the bonus section and populates dropdowns
+ */
+function getCustomSkills() {
+    const customSkillsDiv = document.getElementById('cs-custom-skills');
+    const customSkills = [];
+    const rows = customSkillsDiv.querySelectorAll('.custom-skill-row');
+
+    rows.forEach((row) => {
+        const nameInput = row.querySelector('.custom-skill-name');
+        const valueInput = row.querySelector('.custom-skill-value');
+        const specSelect = row.querySelector('.cs-skill-specialty');
+
+        // Handle specialty skills (Science, Craft, etc.)
+        if (specSelect && specSelect.value) {
+            // Extract base skill from the label
+            const label = row.querySelector('label');
+            if (label && label.textContent) {
+                const baseSkillText = label.textContent.replace(':', '').trim();
+                const specialty = specSelect.value;
+                const skillName = `${baseSkillText} (${specialty})`;
+                customSkills.push({
+                    name: skillName,
+                    value: parseInt(valueInput.value) || 0
+                });
+            }
+        }
+        // Handle regular custom skills
+        else if (nameInput && nameInput.value.trim().length > 0) {
+            customSkills.push({
+                name: nameInput.value.trim(),
+                value: parseInt(valueInput.value) || 0
+            });
+        }
+    });
+
+    return customSkills;
+}
+
+function prepareBonusSkills() {
+    // Get all specialty select elements from the skills section
+    const specialtySelects = document.querySelectorAll('.cs-skill-specialty');
+    const selectedSpecialties = [];
+
+    specialtySelects.forEach(select => {
+        if (select.value && select.value !== 'Pick') {
+            const skillName = select.getAttribute('id');
+
+            // Try to extract base skill from ID
+            if (!skillName) {
+                return; // Skip this one
+            }
+
+            const baseSkillMatch = skillName.match(/cs-skill-(\w+)-spec/);
+            if (baseSkillMatch) {
+                const baseSkill = baseSkillMatch[1];
+                const specialty = select.value;
+                // Format as "Science (Chemistry)"
+                const skillLabel = baseSkill.charAt(0).toUpperCase() +
+                    baseSkill.slice(1).replace(/_/g, ' ') +
+                    ' (' + specialty + ')';
+                selectedSpecialties.push(skillLabel);
+            }
+        }
+    });
+
+    // Show the bonus fieldset
+    const bonusSection = document.getElementById('bonus-skills-section');
+    if (bonusSection) {
+        bonusSection.style.display = 'block';
+    }
+
+    // Populate the bonus skills dropdowns
+    populateBonusSkillDropdowns();
+
+    if (selectedSpecialties.length > 0) {
+        alert(`Found ${selectedSpecialties.length} specialty skill(s). Bonus skills ready!`);
+    } else {
+        alert('Bonus skills updated! You can boost base skills or custom skills you added.');
+    }
+}
+
+/**
+ * Populate the 8 bonus skill dropdown selectors with all available skills
+ */
+function populateBonusSkillDropdowns() {
+    const bonusSkillsDiv = document.getElementById('bonus-dropdowns');
+    bonusSkillsDiv.innerHTML = '';
+
+    // Get all available skills: base skills + custom/typed skills
+    const baseSkillsList = [
+        ["accounting", "Accounting"],
+        ["alertness", "Alertness"],
+        ["anthropology", "Anthropology"],
+        ["archeology", "Archeology"],
+        ["art", "Art"],
+        ["artillery", "Artillery"],
+        ["athletics", "Athletics"],
+        ["bureaucracy", "Bureaucracy"],
+        ["computer_science", "Computer Science"],
+        ["craft", "Craft"],
+        ["criminology", "Criminology"],
+        ["demolitions", "Demolitions"],
+        ["disguise", "Disguise"],
+        ["dodge", "Dodge"],
+        ["drive", "Drive"],
+        ["firearms", "Firearms"],
+        ["first_aid", "First Aid"],
+        ["forensics", "Forensics"],
+        ["heavy_machinery", "Heavy Machinery"],
+        ["heavy_weapons", "Heavy Weapons"],
+        ["history", "History"],
+        ["humint", "HUMINT"],
+        ["law", "Law"],
+        ["medicine", "Medicine"],
+        ["melee_weapons", "Melee Weapons"],
+        ["military_science", "Military Science"],
+        ["navigate", "Navigate"],
+        ["occult", "Occult"],
+        ["persuade", "Persuade"],
+        ["pharmacy", "Pharmacy"],
+        ["pilot", "Pilot"],
+        ["psychotherapy", "Psychotherapy"],
+        ["ride", "Ride"],
+        ["science", "Science"],
+        ["search", "Search"],
+        ["sigint", "SIGINT"],
+        ["stealth", "Stealth"],
+        ["surgery", "Surgery"],
+        ["survival", "Survival"],
+        ["swim", "Swim"],
+        ["unarmed_combat", "Unarmed Combat"],
+        ["unnatural", "Unnatural"]
+    ];
+
+    // Get custom/typed skills
+    const customSkills = getCustomSkills();
+
+    // Get selected specialties from Skills section
+    const specialtySelects = document.querySelectorAll('.cs-skill-specialty');
+    const selectedSpecialties = [];
+    specialtySelects.forEach(select => {
+        if (select.value && select.value !== 'Pick') {
+            const skillName = select.getAttribute('id');
+            // Skip if no ID
+            if (!skillName) return;
+
+            const baseSkillMatch = skillName.match(/cs-skill-(\w+)-spec/);
+            if (baseSkillMatch) {
+                const baseSkill = baseSkillMatch[1];
+                const specialty = select.value;
+                const skillLabel = baseSkill.charAt(0).toUpperCase() +
+                    baseSkill.slice(1).replace(/_/g, ' ') +
+                    ' (' + specialty + ')';
+                selectedSpecialties.push([skillLabel, skillLabel]);
+            }
+        }
+    });
+
+    // Check which base skills have specialty variants in custom skills or selected specialties
+    const skillsWithSpecialties = new Set();
+    customSkills.forEach(skill => {
+        const match = skill.name.match(/^(.+?)\s*\((.+?)\)$/);
+        if (match) {
+            const baseSkill = match[1].trim().toLowerCase().replace(/\s+/g, '_');
+            skillsWithSpecialties.add(baseSkill);
+        }
+    });
+    selectedSpecialties.forEach(([, label]) => {
+        const match = label.match(/^(.+?)\s*\((.+?)\)$/);
+        if (match) {
+            const baseSkill = match[1].trim().toLowerCase().replace(/\s+/g, '_');
+            skillsWithSpecialties.add(baseSkill);
+        }
+    });
+
+    // Build options: base skills (excluding those with specialties), plus selected specialties, plus all other custom skills
+    const allSkillOptions = [];
+
+    baseSkillsList.forEach(([key, label]) => {
+        if (!skillsWithSpecialties.has(key)) {
+            allSkillOptions.push([key, label]);
+        }
+    });
+
+    // Add selected specialties first
+    selectedSpecialties.forEach(option => allSkillOptions.push(option));
+
+    // Add remaining custom skills
+    customSkills.forEach(skill => {
+        allSkillOptions.push([skill.name, skill.name]);
+    });
+
+    // Create 8 dropdown selectors
+    for (let i = 0; i < 8; i++) {
+        const label = document.createElement('label');
+        label.style.display = 'flex';
+        label.style.flexDirection = 'column';
+        label.style.gap = '4px';
+        label.style.color = 'inherit';
+        label.textContent = `Boost ${i + 1}:`;
+
+        const select = document.createElement('select');
+        select.id = `cs-bonus-skill-${i}`;
+        select.className = 'cs-bonus-skill-select';
+
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = '-- Select Skill --';
+        select.appendChild(emptyOption);
+
+        allSkillOptions.forEach(([key, label]) => {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = label;
+            select.appendChild(option);
+        });
+
+        label.appendChild(select);
+        bonusSkillsDiv.appendChild(label);
+    }
+}
+
+/**
+ * Apply bonus skill points: +20 to each selected skill (max 8)
+ */
+function applyBonusSkills() {
+    const selectedSkills = [];
+    for (let i = 0; i < 8; i++) {
+        const select = document.getElementById(`cs-bonus-skill-${i}`);
+        if (select && select.value) {
+            selectedSkills.push(select.value);
+        }
+    }
+
+    if (selectedSkills.length === 0) {
+        alert('Please select at least one skill to boost.');
+        return;
+    }
+
+    let appliedCount = 0;
+
+    selectedSkills.forEach(skillKey => {
+        // Check if it's a specialty skill like "Science (Biology)"
+        const specialtyMatch = skillKey.match(/^(.+?)\s*\((.+?)\)$/);
+        if (specialtyMatch) {
+            // It's a specialty - extract base skill and find the input
+            const baseSkillLabel = specialtyMatch[1].trim();
+            const baseSkillKey = baseSkillLabel.toLowerCase().replace(/\s+/g, '_');
+            const skillInput = document.getElementById(`cs-skill-${baseSkillKey}`);
+            if (skillInput) {
+                const currentValue = parseInt(skillInput.value) || 0;
+                const newValue = Math.min(currentValue + 20, 80);
+                skillInput.value = newValue;
+                appliedCount++;
+            }
+        } else {
+            // Check if it's a base skill
+            const skillInput = document.getElementById(`cs-skill-${skillKey}`);
+            if (skillInput) {
+                const currentValue = parseInt(skillInput.value) || 0;
+                const newValue = Math.min(currentValue + 20, 80); // Cap at 80%
+                skillInput.value = newValue;
+                appliedCount++;
+            } else {
+                // Check if it's a custom skill - we need to find it by name
+                const customSkillRows = document.querySelectorAll('.custom-skill-row');
+                let found = false;
+                customSkillRows.forEach(row => {
+                    const nameInput = row.querySelector('.custom-skill-name');
+                    const valueInput = row.querySelector('.custom-skill-value');
+                    if (nameInput && nameInput.value === skillKey) {
+                        const currentValue = parseInt(valueInput.value) || 0;
+                        const newValue = Math.min(currentValue + 20, 80); // Cap at 80%
+                        valueInput.value = newValue;
+                        found = true;
+                    }
+                });
+                if (found) appliedCount++;
+            }
+        }
+    });
+
+    if (appliedCount > 0) {
+        alert(`Applied +20 bonus to ${appliedCount} skill(s)!`);
+    } else {
+        alert('Could not find selected skills to boost.');
     }
 }
 
@@ -1065,10 +1337,14 @@ function generateRandomBond() {
 
     if (availableBonds.length > 0) {
         let randomBond = availableBonds[Math.floor(Math.random() * availableBonds.length)];
-        // Store the current bond without <br> replacements for later use
-        window.currentBond = randomBond.replace(/\^/g, ' ');
+        // Store the original bond BEFORE any modifications for later parsing
+        window.currentBondOriginal = randomBond;
 
-        // Correctly replace ^ with <br> before typing effect starts
+        // Replace ^ with space for display
+        let displayBond = randomBond.replace(/\^/g, ' ');
+        window.currentBond = displayBond;
+
+        // Replace ^ with <br> for typing effect
         randomBond = randomBond.replace(/\^/g, '<br>');
 
         let i = 0;
@@ -1105,13 +1381,13 @@ if (!window.bondsOnSheet) {
  * Generates unique ID and renders the bond on the sheet
  */
 function addBondToSheet() {
-    if (!window.currentBond) {
+    if (!window.currentBondOriginal) {
         alert('Generate a bond first!');
         return;
     }
 
-    // Parse bond text: format is "Name ^ ^ Relationship ^ ^ Description"
-    const parts = window.currentBond.split(' ^ ^ ');
+    // Parse bond text using original format: "Name ^ ^ Relationship ^ ^ Description"
+    const parts = window.currentBondOriginal.split(' ^ ^ ');
     let bondName = '';
     let bondRelationship = '';
     let bondDescription = '';
@@ -1122,8 +1398,8 @@ function addBondToSheet() {
         bondDescription = parts[2].trim();
     } else {
         // Fallback if format doesn't match
-        bondName = window.currentBond.substring(0, 30) + (window.currentBond.length > 30 ? '...' : '');
-        bondDescription = window.currentBond;
+        bondName = window.currentBondOriginal.substring(0, 30) + (window.currentBondOriginal.length > 30 ? '...' : '');
+        bondDescription = window.currentBondOriginal;
     }
 
     // Create a unique ID for this bond entry
@@ -1203,27 +1479,27 @@ function renderBondsOnSheet() {
     let html = '';
     window.bondsOnSheet.forEach(bond => {
         html += `
-            <div class="bond-entry" style="border:1px solid #00b521;padding:8px;margin-bottom:8px;border-radius:4px;">
+            <div class="bond-entry">
                 <div style="display:flex;gap:8px;margin-bottom:6px;">
-                    <input type="text" placeholder="Bond Name" value="${bond.name}" onchange="updateBondName('${bond.id}', this.value)" style="flex:1;padding:4px;">
-                    <button type="button" onclick="removeBondFromSheet('${bond.id}')" style="padding:4px 8px;cursor:pointer;">Remove</button>
+                    <input type="text" class="bond-entry-field" placeholder="Bond Name" value="${bond.name}" onchange="updateBondName('${bond.id}', this.value)" style="flex:1;min-width:0;">
+                    <button type="button" class="bond-remove-button" onclick="removeBondFromSheet('${bond.id}')">Remove</button>
                 </div>
                 <div style="margin-bottom:6px;">
-                    <textarea placeholder="Bond Description/Text" readonly style="width:100%;padding:4px;border-radius:4px;font-size:0.9em;height:50px;">${bond.description}</textarea>
+                    <textarea class="bond-entry-field" placeholder="Bond Description/Text" readonly style="height:80px;resize:vertical;">${bond.description}</textarea>
                 </div>
                 <div style="display:flex;gap:8px;">
                     <div style="flex:1;">
                         <label style="font-size:0.85em;opacity:0.8;">Relationship:</label>
-                        <input type="text" placeholder="Edit relationship..." value="${bond.relationship}" onchange="updateBondRelationship('${bond.id}', this.value)" style="width:100%;padding:4px;">
+                        <input type="text" class="bond-entry-field" placeholder="Edit relationship..." value="${bond.relationship}" onchange="updateBondRelationship('${bond.id}', this.value)">
                     </div>
                     <div style="flex:0 0 100px;">
                         <label style="font-size:0.85em;opacity:0.8;">Score:</label>
-                        <input type="number" value="${bond.score}" min="0" max="20" onchange="updateBondScore('${bond.id}', this.value)" style="width:100%;padding:4px;">
+                        <input type="number" class="bond-entry-field" value="${bond.score}" min="0" max="20" onchange="updateBondScore('${bond.id}', this.value)">
                     </div>
                 </div>
                 <details style="margin-top:6px;font-size:0.85em;">
                     <summary style="cursor:pointer;opacity:0.8;">JSON Code</summary>
-                    <pre style="background:#f5f5f5;padding:8px;border-radius:4px;overflow-x:auto;margin-top:4px;"><code>${JSON.stringify({
+                    <pre><code>${JSON.stringify({
             name: bond.name || 'New Bond',
             type: bond.relationship || 'bond',
             system: {
