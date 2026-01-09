@@ -1244,6 +1244,7 @@ function renderBondsOnSheet() {
 
 /**
  * Generates a printable HTML version of the character sheet
+ * Includes filled sections plus blank spaces for user to fill in
  * Can be saved, printed to PDF, or viewed in browser
  */
 function exportPrintable() {
@@ -1251,13 +1252,13 @@ function exportPrintable() {
     const name = document.getElementById('cs-name').value || 'Agent';
     const profession = document.getElementById('cs-profession-select').value || '';
     const professionTitle = profession ? professions[profession].title : 'No Profession Selected';
-    
+
     // Get stats
     const statsData = {};
     stats.forEach(stat => {
         statsData[stat] = document.getElementById(`${stat}-value`).innerText;
     });
-    
+
     // Get derived attributes
     const attrs = calculateAttributes();
     const attributeLabels = ['HP', 'WP', 'SAN', 'BP'];
@@ -1265,7 +1266,7 @@ function exportPrintable() {
     attributeLabels.forEach((label, idx) => {
         attributeData[label] = attrs[idx];
     });
-    
+
     // Get biography data
     const bioData = {
         nationality: document.getElementById('cs-nationality')?.value || '',
@@ -1273,7 +1274,7 @@ function exportPrintable() {
         age: document.getElementById('cs-age')?.value || '',
         description: document.getElementById('cs-description')?.value || ''
     };
-    
+
     // Get skills
     const skillElements = document.querySelectorAll('#cs-skills [id$="-skill"]');
     const skills = [];
@@ -1289,10 +1290,10 @@ function exportPrintable() {
             });
         }
     });
-    
+
     // Get bonds
     const bondsData = window.bondsOnSheet || [];
-    
+
     // Create printable HTML
     const printableHTML = `<!DOCTYPE html>
 <html lang="en">
@@ -1597,20 +1598,83 @@ function exportPrintable() {
         ` : ''}
         
         <!-- Bonds Section -->
-        ${bondsData.length > 0 ? `
         <div class="section">
             <div class="section-title">Bonds</div>
             <div class="bonds-list">
-                ${bondsData.map(bond => `
+                ${bondsData.length > 0 ? bondsData.map(bond => `
                     <div class="bond-item">
                         <div class="bond-name">${bond.name || 'Unknown Bond'}</div>
                         <div class="bond-description">${bond.description}</div>
                         <div class="bond-relationship">Relationship: ${bond.relationship || 'N/A'} | Score: ${bond.score || 0}</div>
                     </div>
-                `).join('')}
+                `).join('') : '<p style="font-size: 10px; opacity: 0.6;">(Add bonds here)</p>'}
+            </div>
+            ${bondsData.length < 4 ? `
+            <div style="margin-top: 8px; padding: 8px; border: 1px dashed #ccc; min-height: 40px; font-size: 9px;">
+                <span style="opacity: 0.5;">Additional Bond Space:</span>
+            </div>
+            ` : ''}
+        </div>
+        
+        <!-- Equipment & Gear Section -->
+        <div class="section">
+            <div class="section-title">Equipment & Gear</div>
+            <div style="min-height: 60px; border: 1px solid #000; padding: 8px; font-size: 10px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; height: 100%;">
+                    <div style="border-right: 1px dashed #999;">
+                        <div style="font-weight: bold; margin-bottom: 4px; font-size: 9px;">Weapons:</div>
+                        <div style="min-height: 48px;"></div>
+                    </div>
+                    <div>
+                        <div style="font-weight: bold; margin-bottom: 4px; font-size: 9px;">Gear:</div>
+                        <div style="min-height: 48px;"></div>
+                    </div>
+                </div>
             </div>
         </div>
-        ` : ''}
+        
+        <!-- Sanity Checks & Trauma Section -->
+        <div class="section">
+            <div class="section-title">Sanity & Trauma</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                <div style="border: 1px solid #000; padding: 8px; text-align: center;">
+                    <div style="font-size: 9px; font-weight: bold; margin-bottom: 4px;">Current SAN</div>
+                    <div style="font-size: 18px; min-height: 20px;">${attributeData['SAN']}</div>
+                </div>
+                <div style="border: 1px solid #000; padding: 8px; text-align: center;">
+                    <div style="font-size: 9px; font-weight: bold; margin-bottom: 4px;">Breaking Point</div>
+                    <div style="font-size: 18px; min-height: 20px;">${attributeData['BP']}</div>
+                </div>
+            </div>
+            <div style="min-height: 40px; border: 1px solid #000; padding: 6px; font-size: 9px;">
+                <div style="font-weight: bold; margin-bottom: 3px; font-size: 8px;">Phobias & Manias:</div>
+                <div style="opacity: 0.5;">_________________________________________</div>
+            </div>
+        </div>
+        
+        <!-- Contact & Safe House Section -->
+        <div class="section">
+            <div class="section-title">Contacts & Safe Houses</div>
+            <div style="min-height: 50px; border: 1px solid #000; padding: 8px; font-size: 9px;">
+                <div style="margin-bottom: 8px;">
+                    <span style="font-weight: bold;">Handler:</span>
+                    <div style="border-bottom: 1px solid #000; margin-top: 2px; height: 12px;"></div>
+                </div>
+                <div>
+                    <span style="font-weight: bold;">Safe Houses/Locations:</span>
+                    <div style="border-bottom: 1px solid #000; margin-top: 2px; height: 12px;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notes Section -->
+        <div class="section">
+            <div class="section-title">Notes & Campaign Notes</div>
+            <div style="min-height: 80px; border: 1px solid #000; padding: 8px; font-size: 9px; line-height: 1.4;">
+                <!-- Grid for line writing -->
+                ${Array(6).fill(0).map(() => '<div style="border-bottom: 1px dashed #ccc; height: 12px; margin-bottom: 2px;"></div>').join('')}
+            </div>
+        </div>
         
         <div class="footer">
             Delta Green Character Sheet | Generated on ${new Date().toLocaleString()}
@@ -1623,7 +1687,7 @@ function exportPrintable() {
     </script>
 </body>
 </html>`;
-    
+
     // Create blob and download
     const blob = new Blob([printableHTML], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
