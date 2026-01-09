@@ -837,6 +837,10 @@ body * {
     background-color: var(--cp-peach);
 }
 
+.theme-modern #export-printable {
+    background-color: var(--cp-lavender);
+}
+
 .theme-modern #refresh-stats {
     background-color: var(--cp-mauve);
 }

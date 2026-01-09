@@ -1242,6 +1242,401 @@ function renderBondsOnSheet() {
     bondsContainer.innerHTML = html;
 }
 
+/**
+ * Generates a printable HTML version of the character sheet
+ * Can be saved, printed to PDF, or viewed in browser
+ */
+function exportPrintable() {
+    // Gather all character data
+    const name = document.getElementById('cs-name').value || 'Agent';
+    const profession = document.getElementById('cs-profession-select').value || '';
+    const professionTitle = profession ? professions[profession].title : 'No Profession Selected';
+    
+    // Get stats
+    const statsData = {};
+    stats.forEach(stat => {
+        statsData[stat] = document.getElementById(`${stat}-value`).innerText;
+    });
+    
+    // Get derived attributes
+    const attrs = calculateAttributes();
+    const attributeLabels = ['HP', 'WP', 'SAN', 'BP'];
+    const attributeData = {};
+    attributeLabels.forEach((label, idx) => {
+        attributeData[label] = attrs[idx];
+    });
+    
+    // Get biography data
+    const bioData = {
+        nationality: document.getElementById('cs-nationality')?.value || '',
+        sex: document.getElementById('cs-sex')?.value || '',
+        age: document.getElementById('cs-age')?.value || '',
+        description: document.getElementById('cs-description')?.value || ''
+    };
+    
+    // Get skills
+    const skillElements = document.querySelectorAll('#cs-skills [id$="-skill"]');
+    const skills = [];
+    skillElements.forEach(elem => {
+        const skillName = elem.id.replace('-skill', '');
+        const value = elem.value;
+        const specialty = document.getElementById(`${skillName}-specialty`)?.value || '';
+        if (value && value > 0) {
+            skills.push({
+                name: skillName.replace(/_/g, ' '),
+                value: value,
+                specialty: specialty
+            });
+        }
+    });
+    
+    // Get bonds
+    const bondsData = window.bondsOnSheet || [];
+    
+    // Create printable HTML
+    const printableHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delta Green Character Sheet - ${name}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #fff;
+            color: #000;
+            padding: 20px;
+            line-height: 1.4;
+        }
+        
+        .character-sheet {
+            max-width: 8.5in;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border: 2px solid #000;
+        }
+        
+        .header {
+            border-bottom: 2px solid #000;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .header-title {
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+        
+        .header-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 12px;
+        }
+        
+        .header-info-item {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .header-info-label {
+            font-weight: bold;
+            min-width: 80px;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-box {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+            font-size: 11px;
+        }
+        
+        .stat-box-label {
+            font-weight: bold;
+            font-size: 10px;
+            margin-bottom: 3px;
+        }
+        
+        .stat-box-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .attributes-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .attribute-box {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+            font-size: 10px;
+        }
+        
+        .attribute-box-label {
+            font-weight: bold;
+            font-size: 9px;
+            margin-bottom: 2px;
+        }
+        
+        .attribute-box-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .skills-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .skill-list {
+            font-size: 10px;
+        }
+        
+        .skill-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+            border-bottom: 0.5px dotted #ccc;
+        }
+        
+        .skill-name {
+            flex: 1;
+        }
+        
+        .skill-value {
+            min-width: 30px;
+            text-align: right;
+            font-weight: bold;
+        }
+        
+        .skill-specialty {
+            font-size: 8px;
+            font-style: italic;
+            opacity: 0.8;
+        }
+        
+        .bonds-list {
+            font-size: 10px;
+        }
+        
+        .bond-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-left: 2px solid #000;
+            page-break-inside: avoid;
+        }
+        
+        .bond-name {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        
+        .bond-description {
+            font-size: 9px;
+            margin-bottom: 2px;
+        }
+        
+        .bond-relationship {
+            font-size: 9px;
+            opacity: 0.8;
+        }
+        
+        .bio-text {
+            font-size: 10px;
+            line-height: 1.5;
+            max-height: 60px;
+            overflow: hidden;
+        }
+        
+        .footer {
+            border-top: 1px solid #000;
+            padding-top: 10px;
+            margin-top: 20px;
+            font-size: 8px;
+            text-align: right;
+            opacity: 0.7;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+            }
+            .character-sheet {
+                border: none;
+                padding: 0;
+                max-width: 100%;
+            }
+            .section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="character-sheet">
+        <div class="header">
+            <div class="header-title">DELTA GREEN AGENT DOSSIER</div>
+            <div class="header-info">
+                <div class="header-info-item">
+                    <span class="header-info-label">Agent Name:</span>
+                    <span>${name}</span>
+                </div>
+                <div class="header-info-item">
+                    <span class="header-info-label">Profession:</span>
+                    <span>${professionTitle}</span>
+                </div>
+                <div class="header-info-item">
+                    <span class="header-info-label">Nationality:</span>
+                    <span>${bioData.nationality}</span>
+                </div>
+                <div class="header-info-item">
+                    <span class="header-info-label">Age:</span>
+                    <span>${bioData.age}</span>
+                </div>
+                <div class="header-info-item">
+                    <span class="header-info-label">Sex:</span>
+                    <span>${bioData.sex}</span>
+                </div>
+                <div class="header-info-item">
+                    <span class="header-info-label">Created:</span>
+                    <span>${new Date().toLocaleDateString()}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Statistics Section -->
+        <div class="section">
+            <div class="section-title">Statistics</div>
+            <div class="stats-grid">
+                ${stats.map(stat => `
+                    <div class="stat-box">
+                        <div class="stat-box-label">${stat}</div>
+                        <div class="stat-box-value">${statsData[stat]}</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        
+        <!-- Attributes Section -->
+        <div class="section">
+            <div class="section-title">Attributes</div>
+            <div class="attributes-grid">
+                ${attributeLabels.map(label => `
+                    <div class="attribute-box">
+                        <div class="attribute-box-label">${label}</div>
+                        <div class="attribute-box-value">${attributeData[label]}</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        
+        <!-- Skills Section -->
+        <div class="section">
+            <div class="section-title">Skills</div>
+            <div class="skills-section">
+                <div class="skill-list">
+                    ${skills.slice(0, Math.ceil(skills.length / 2)).map(skill => `
+                        <div class="skill-item">
+                            <span class="skill-name">${skill.name}${skill.specialty ? ' (' + skill.specialty + ')' : ''}</span>
+                            <span class="skill-value">${skill.value}%</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="skill-list">
+                    ${skills.slice(Math.ceil(skills.length / 2)).map(skill => `
+                        <div class="skill-item">
+                            <span class="skill-name">${skill.name}${skill.specialty ? ' (' + skill.specialty + ')' : ''}</span>
+                            <span class="skill-value">${skill.value}%</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Biography Section -->
+        ${bioData.description ? `
+        <div class="section">
+            <div class="section-title">Background</div>
+            <div class="bio-text">${bioData.description.replace(/\n/g, '<br>')}</div>
+        </div>
+        ` : ''}
+        
+        <!-- Bonds Section -->
+        ${bondsData.length > 0 ? `
+        <div class="section">
+            <div class="section-title">Bonds</div>
+            <div class="bonds-list">
+                ${bondsData.map(bond => `
+                    <div class="bond-item">
+                        <div class="bond-name">${bond.name || 'Unknown Bond'}</div>
+                        <div class="bond-description">${bond.description}</div>
+                        <div class="bond-relationship">Relationship: ${bond.relationship || 'N/A'} | Score: ${bond.score || 0}</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        ` : ''}
+        
+        <div class="footer">
+            Delta Green Character Sheet | Generated on ${new Date().toLocaleString()}
+        </div>
+    </div>
+    <script>
+        window.addEventListener('load', function() {
+            window.print();
+        });
+    </script>
+</body>
+</html>`;
+    
+    // Create blob and download
+    const blob = new Blob([printableHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const filename = 'DeltaGreen_' + name.replace(/\s+/g, '_') + '_' + new Date().toISOString().split('T')[0] + '.html';
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
 window.onload = function () {
     generateStatContainers();
     populateProfessionDropdown();
