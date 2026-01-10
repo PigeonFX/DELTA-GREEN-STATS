@@ -49,6 +49,12 @@ A character creation and management tool for the Delta Green RPG system. Build c
 - Ready to import into Delta Green system
 - View raw HTML preview before export
 
+### Printable Character Sheet
+- **HTML Export**: Generate printable character sheet for pen & paper play
+- **Print-Optimized Layout**: Clean formatting with fillable sections
+- **All Character Data**: Stats, skills, bonds, biography on one page
+- **Pen & Paper Ready**: Perfect for table use without digital tools
+
 ---
 
 ## Themes
