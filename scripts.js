@@ -25,7 +25,7 @@ const CONFIG = {
     DICE_SIDES: 6,
     DICE_KEEP: 3,
     BOND_DELIMITER: ' ^ ^ ',
-    
+
     // Default skills with base values [key, label, defaultValue, hasSpecialty?]
     SKILLS: [
         ["accounting", "Accounting", 10],
@@ -71,9 +71,9 @@ const CONFIG = {
         ["unarmed_combat", "Unarmed Combat", 40],
         ["unnatural", "Unnatural", 0]
     ],
-    
+
     // Get all skill keys in order
-    SKILL_KEYS: function() {
+    SKILL_KEYS: function () {
         return this.SKILLS.map(s => s[0]);
     }
 };
@@ -125,12 +125,10 @@ function calculateAttributes() {
  * Updates the display of derived attribute values on the character sheet
  */
 function updateAttributesValues() {
-    const attributes = calculateAttributes();
-    stats.forEach((stat, index) => {
-        if (index < 4) {
-            document.getElementById(`${stat}-attribute-value`).innerText = attributes[index];
-        }
-    });
+    // Derived attributes are now only displayed in the character sheet form
+    // Main stats section no longer shows them, so this function is kept for compatibility
+    // but does nothing. The character sheet form (populateCharacterSheetForm) handles
+    // calculating and displaying HP, WP, SAN, BP.
 }
 
 /**
@@ -163,17 +161,16 @@ function generateStatContainers() {
     const container = document.getElementById('stats');
     container.innerHTML = '';
     stats.forEach((stat, index) => {
-        const attributeInfo = index < 4 ? `<span class="attributes">${attributesText[index]}</span><span class="attribute-values" id="${stat}-attribute-value"></span>` : '';
+        const plusSymbol = document.body.classList.contains('theme-son-of-sam') ? '⛤' : '+';
         container.innerHTML += `
                     <div class="stat-container">
                         <span class="stat-label">${stat}</span>
                         <button onclick="adjustStat('${stat}', -1)" class="adjust-button">-</button>
                         <span class="stat-value" id="${stat}-value">3</span>
-                        <button onclick="adjustStat('${stat}', 1)" class="adjust-button">+</button>
+                        <button onclick="adjustStat('${stat}', 1)" class="adjust-button">${plusSymbol}</button>
                         <span class="x5-label">x5=</span>
                         <span class="x5-value" id="${stat}-x5-value">15</span>
                         <span class="descriptor" id="${stat}-descriptor">${getDescriptor(stat, 3)}</span>
-                        ${attributeInfo}
                     </div>
                 `;
     });
@@ -296,6 +293,23 @@ function populateCharacterSheetForm() {
         csStatsDiv.innerHTML += `<div class="stat-container"><span class="stat-label">${stat}</span><input type="number" id="cs-${stat}" value="${value}" min="3" max="18" class="stat-input"></div>`;
     });
 
+    // Generate derived attributes (HP, WP, SAN, BP) dynamically for consistent formatting
+    const csDerivedDiv = document.getElementById('cs-derived-attributes');
+    if (csDerivedDiv) {
+        csDerivedDiv.innerHTML = '';
+        const derivedList = [
+            ['HP', 'cs-hp', 0],
+            ['WP', 'cs-wp', 0],
+            ['SAN', 'cs-sanity-value', 50],
+            ['BP', 'cs-breaking-point', 40]
+        ];
+        derivedList.forEach(([label, id, defaultVal]) => {
+            const existingEl = document.getElementById(id);
+            const currentVal = existingEl ? existingEl.value : defaultVal;
+            csDerivedDiv.innerHTML += `<div class="stat-container"><span class="stat-label">${label}</span><input type="number" id="${id}" value="${currentVal}" min="0" class="stat-input"></div>`;
+        });
+    }
+
     // populate skills
     const skillsContainer = document.getElementById('cs-skills');
     const skillsList = CONFIG.SKILLS;
@@ -354,9 +368,10 @@ function populateCharacterSheetForm() {
     // compute derived attributes from stats (HP, WP, SAN, BP)
     const s = (id) => {
         const el = document.getElementById(`cs-${id}`);
-        if (el) return parseInt(el.value) || 3;
+        if (el && el.value) return parseInt(el.value) || 3;
         const disp = document.getElementById(`${id}-value`);
-        return disp ? parseInt(disp.innerText) : 3;
+        if (disp && disp.innerText) return parseInt(disp.innerText) || 3;
+        return 3;
     };
     const STRv = s('STR');
     const CONv = s('CON');
@@ -365,6 +380,7 @@ function populateCharacterSheetForm() {
     const wp = POWv;
     const san = POWv * 5;
     const bp = san - POWv;
+    console.log(`[populateCharacterSheetForm] Calculated: STR=${STRv}, CON=${CONv}, POW=${POWv} → HP=${hp}, WP=${wp}, SAN=${san}, BP=${bp}`);
     const csSanEl = document.getElementById('cs-sanity-value');
     const csBpEl = document.getElementById('cs-breaking-point');
     const csHpEl = document.getElementById('cs-hp');
@@ -545,15 +561,19 @@ function selectProfession(professionKey) {
  * Removes all custom skill rows and resets predefined skill values to 0
  */
 function clearProfessionSkills() {
-    // Reset all predefined skills to 0
-    const predefinedSkills = CONFIG.SKILL_KEYS();
-    
-    predefinedSkills.forEach(skillKey => {
+    // Reset all predefined skills to their default values from CONFIG.SKILLS
+    const skillsMap = {};
+    CONFIG.SKILLS.forEach(([key, label, defaultValue]) => {
+        skillsMap[key] = defaultValue;
+    });
+
+    CONFIG.SKILL_KEYS().forEach(skillKey => {
         const input = document.getElementById(`cs-skill-${skillKey}`);
         if (input) {
-            input.value = '0';
+            // Reset to default value from CONFIG.SKILLS
+            input.value = skillsMap[skillKey] || '0';
         }
-        
+
         // Reset specialty selections
         const specSelect = document.getElementById(`cs-skill-${skillKey}-spec`);
         if (specSelect) {
@@ -565,7 +585,7 @@ function clearProfessionSkills() {
             specSelect.style.fontWeight = '';
         }
     });
-    
+
     // Remove all custom skill rows
     const customSkillsDiv = document.getElementById('cs-custom-skills');
     if (customSkillsDiv) {
@@ -1471,33 +1491,34 @@ function exportCharacterJSON() {
     }
 }
 
-// Keep the character sheet form in sync when stats change
-const observer = new MutationObserver(() => { try { populateCharacterSheetForm(); } catch (e) { } });
-window.addEventListener('load', () => { populateCharacterSheetForm(); observer.observe(document.getElementById('stats'), { childList: true, subtree: true, characterData: true }); });
-
 /**
- * Theme Management: Switch between X-Files (default green retro) and Modern (Catppuccin palette)
- * Persists theme selection to localStorage for consistency across sessions
- * @param {string} theme - Either 'xfiles' or 'modern'
+ * Detect if the user is on a mobile or tablet device
+ * @returns {boolean} true if on mobile/tablet, false otherwise
  */
-function setTheme(theme) {
-    try {
-        const body = document.body;
-        if (theme === 'modern') {
-            body.classList.add('theme-modern');
-        } else {
-            body.classList.remove('theme-modern');
-        }
-        localStorage.setItem('dg_theme', theme);
-        const sel = document.getElementById('cs-theme-select');
-        if (sel) sel.value = theme;
-    } catch (e) { }
+function isMobileDevice() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    // Check for mobile/tablet user agents and screen size
+    const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet|windows phone/i;
+    const isMobileUA = mobileRegex.test(userAgent.toLowerCase());
+    const isMobileScreen = window.innerWidth <= 768;
+    return isMobileUA || isMobileScreen;
 }
 
-// initialize theme from storage and wire selector
-window.addEventListener('load', () => {
+// Keep the character sheet form in sync when stats change
+const observer = new MutationObserver(() => { try { populateCharacterSheetForm(); } catch (e) { } });
+
+window.onload = function () {
+    generateStatContainers();
+    randomDiceRoll();
+    populateProfessionDropdown();
+    populateCharacterSheetForm();
+    observer.observe(document.getElementById('stats'), { childList: true, subtree: true, characterData: true });
+
+    // initialize theme from storage and wire selector
     try {
-        const stored = localStorage.getItem('dg_theme') || 'xfiles';
+        // Determine default theme: use mobile theme for mobile devices, xfiles for desktop
+        const defaultTheme = isMobileDevice() ? 'mobile' : 'xfiles';
+        const stored = localStorage.getItem('dg_theme') || defaultTheme;
         setTheme(stored);
         const sel = document.getElementById('cs-theme-select');
         if (sel) {
@@ -1505,7 +1526,33 @@ window.addEventListener('load', () => {
             sel.addEventListener('change', (e) => setTheme(e.target.value));
         }
     } catch (e) { }
-});
+};
+
+/**
+ * Theme Management: Switch between X-Files, Modern, Morris, and Son of Sam themes
+ * Persists theme selection to localStorage for consistency across sessions
+ * @param {string} theme - 'xfiles', 'modern', 'morris', or 'son-of-sam'
+ */
+function setTheme(theme) {
+    try {
+        const body = document.body;
+        body.classList.remove('theme-modern', 'theme-morris', 'theme-son-of-sam', 'theme-mobile');
+
+        if (theme === 'modern') {
+            body.classList.add('theme-modern');
+        } else if (theme === 'morris') {
+            body.classList.add('theme-morris');
+        } else if (theme === 'son-of-sam') {
+            body.classList.add('theme-son-of-sam');
+        } else if (theme === 'mobile') {
+            body.classList.add('theme-mobile');
+        }
+
+        localStorage.setItem('dg_theme', theme);
+        const sel = document.getElementById('cs-theme-select');
+        if (sel) sel.value = theme;
+    } catch (e) { }
+}
 
 /**
  * Generates a random bond from selected categories with typing effect
@@ -1527,6 +1574,18 @@ function generateRandomBond() {
         bondTextElement.style.fontFamily = 'inherit';
         bondTextElement.style.color = '#cdd6f4';
         bondTextElement.style.borderColor = 'rgba(255, 255, 255, 0.02)';
+    } else if (document.body.classList.contains('theme-morris')) {
+        bondTextElement.style.fontFamily = 'inherit';
+        bondTextElement.style.color = '#8be9fd';
+        bondTextElement.style.borderColor = 'rgba(139, 233, 253, 0.15)';
+    } else if (document.body.classList.contains('theme-son-of-sam')) {
+        bondTextElement.style.fontFamily = "'Courier New', monospace";
+        bondTextElement.style.color = '#f5e6d3';
+        bondTextElement.style.borderColor = 'rgba(255, 0, 0, 0.2)';
+    } else if (document.body.classList.contains('theme-mobile')) {
+        bondTextElement.style.fontFamily = 'inherit';
+        bondTextElement.style.color = '#1a1a1a';
+        bondTextElement.style.borderColor = 'rgba(0, 0, 0, 0.1)';
     } else {
         // X-Files theme (default)
         bondTextElement.style.fontFamily = "'Courier New', monospace";
@@ -1728,7 +1787,3 @@ function renderBondsOnSheet() {
  * Includes filled sections plus blank spaces for user to fill in
  * Can be saved, printed to PDF, or viewed in browser
  */
-window.onload = function () {
-    generateStatContainers();
-    populateProfessionDropdown();
-};

@@ -59,7 +59,7 @@
         <!-- Character sheet section -->
         <div class="content">
             <div class="stats-section">
-                <h2>CHARACTER SHEET (Foundry VTT export)</h2>
+                <h2>CHARACTER SHEET (Foundry VTT export And printable HTML)</h2>
                 <div id="character-sheet">
                     <input type="hidden" id="cs-img" value="assets/art/logo.png">
                     <input type="hidden" id="cs-type" value="agent">
@@ -82,14 +82,7 @@
                                 <div id="cs-stats"><!-- populated by JS --></div>
                             </div>
                             <div>
-                                <div class="stat-container"><span class="stat-label">HP</span><input type="number"
-                                        id="cs-hp" value="0" min="0" class="stat-input"></div>
-                                <div class="stat-container"><span class="stat-label">WP</span><input type="number"
-                                        id="cs-wp" value="0" min="0" class="stat-input"></div>
-                                <div class="stat-container"><span class="stat-label">SAN</span><input type="number"
-                                        id="cs-sanity-value" value="50" min="0" class="stat-input"></div>
-                                <div class="stat-container"><span class="stat-label">BP</span><input type="number"
-                                        id="cs-breaking-point" value="40" min="0" class="stat-input"></div>
+                                <div id="cs-derived-attributes"><!-- populated by JS --></div>
                             </div>
                         </div>
                     </fieldset>
@@ -211,6 +204,9 @@
             <select id="cs-theme-select" aria-label="Theme selector">
                 <option value="xfiles">X-Files</option>
                 <option value="modern">Modern</option>
+                <option value="morris">Morris</option>
+                <option value="son-of-sam">Son of Sam</option>
+                <option value="mobile">Mobile</option>
             </select>
         </div>
         <div class="github-link-container">
@@ -222,6 +218,20 @@
                     </path>
                 </svg>
                 GitHub
+            </a>
+        </div>
+        <div style="display: flex; justify-content: center; margin-top: 20px; width: 100%;">
+            <a href="https://www.buymeacoffee.com/pigeon_labs" target="_blank" class="bmc-badge-link">
+                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-black.png" alt="Buy Me A Coffee"
+                    class="bmc-img" data-theme="xfiles">
+                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee"
+                    class="bmc-img" data-theme="modern">
+                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-red.png" alt="Buy Me A Coffee" class="bmc-img"
+                    data-theme="son-of-sam">
+                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-white.png" alt="Buy Me A Coffee"
+                    class="bmc-img" data-theme="mobile">
+                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee"
+                    class="bmc-img" data-theme="morris">
             </a>
         </div>
         <div class="disclaimer">

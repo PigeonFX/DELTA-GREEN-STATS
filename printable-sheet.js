@@ -111,7 +111,7 @@ function exportPrintable() {
                         <div style="font-size: 18px; font-weight: bold; line-height: 1;">${attributeData[label]}</div>
                     </div>
                     <div style="border-top: 1px solid #000; padding-top: 4px;">
-                        <div style="font-size: 9px; margin-bottom: 2px;">CUR</div>
+                        <div style="font-size: 9px; margin-bottom: 2px;">CURRENT</div>
                         <div style="height: 20px; border: 1px solid #ccc;"></div>
                     </div>
                 </div>
@@ -194,7 +194,7 @@ function exportPrintable() {
         if (bioData.description) {
             backgroundHtml = `
                 <div class="section">
-                    <div class="section-title">Background</div>
+                    <div class="section-title">PHYSICAL DESCRIPTION</div>
                     <div class="bio-text">${bioData.description.replace(/\n/g, '<br>')}</div>
                 </div>
             `;

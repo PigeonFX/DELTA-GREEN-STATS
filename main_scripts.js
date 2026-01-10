@@ -773,7 +773,7 @@ function selectProfession(professionKey) {
             break;
         }
     }
-    
+
     // Build display text: everything up to (but not including) the "Choose any" line, without BONDS
     let displayText;
     if (chooseLineIdx >= 0) {
@@ -787,7 +787,7 @@ function selectProfession(professionKey) {
             .replace(/BONDS:\s*\d+/g, '')
             .trim();
     }
-    
+
     // Add BONDS at the top
     displayText = `BONDS: ${bondCount}\n\n${displayText}`;
 

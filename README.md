@@ -2,152 +2,75 @@
 
 https://pigeon-labs-stack.github.io/DELTA-GREEN-STATS/
 
-## Overview
-DELTA-GREEN-STATS is a comprehensive character creation and management tool for the Delta Green Role-Playing System. Built with vanilla HTML/CSS/JavaScript, it provides multiple character creation methods, profession selection, bonus skill points, bond management, and seamless integration with Foundry VTT through JSON export functionality.
+A character creation and management tool for the Delta Green RPG system. Build characters, manage skills, generate bonds, and export to Foundry VTT.
 
-#### Theme Options
-<div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-  <div style="flex: 1; min-width: 300px;">
-    <h5>X-Files Theme (Default)</h5>
-    <img src="assets/art/Screenshot.png" alt="X-Files Theme Screenshot" style="max-width: 100%; height: auto; border: 1px solid #00b521;">
-  </div>
-  <div style="flex: 1; min-width: 300px;">
-    <h5>Modern Theme</h5>
-    <img src="assets/art/screenshot2.png" alt="Modern Theme Screenshot" style="max-width: 100%; height: auto; border: 1px solid #b4befe;">
-  </div>
-</div>
+---
 
-### Features
+## Quick Start
 
-#### Character Creation Methods
-- **Point Buy System**: Manually distribute 72 points across six statistics (STR, CON, DEX, INT, POW, CHA)
-- **Random Point Buy**: Automatically allocates points randomly for quick character generation
-- **Random Dice Roll**: Simulates rolling 4d6 (keeping highest 3) for each stat
-- **Real-time Attributes**: Automatic calculation of derived attributes:
-  - Hit Points (HP) = ceil((STR + CON) / 2)
-  - Willpower Points (WP) = POW
-  - Sanity Points (SAN) = POW × 5
-  - Breaking Point (BP) = SAN - POW
+1. **Build Stats** → Choose Point Buy, Random, or Dice Roll
+2. **Pick Profession** → Select from 20 professions, apply skills
+3. **Add Skills** → Base skills + specialties + custom skills + bonus points
+4. **Fill Biography** → Character details (name, description, etc.)
+5. **Generate Bonds** → Random bond creation (optional)
+6. **Export** → Download JSON and import to Foundry VTT (or view raw HTML)
 
-#### Profession System
-- **20 Delta Green Professions**: Choose from official professions like Agent, Academic, Soldier, Hacker, and more
-- **Profession Skills**: Each profession provides predefined base skills
-- **Optional Skills**: Select from profession-specific optional skills
-- **Auto-Apply**: Click to automatically apply profession skills to your sheet
+---
 
-#### Skills & Specialties
-- **42+ Delta Green Skills**: Full skill list with realistic default proficiencies
-- **Specialty Support**: Select specialties for Art, Craft, Science, Pilot, and Military Science
-- **Custom Skills**: Add any additional skills (languages, special abilities, etc.)
-- **Bonus Skill Points**: Boost up to 8 skills with +20 points each (max 80%)
+## Features
 
-#### Bonus Skill Points System
-- **Strategic Enhancement**: After building your base skills, use bonus points to fine-tune your character
-- **D&D-Style Boost**: Pick any 8 skills and add +20 to each (capped at 80%)
-- **Full Support**: Works with base skills, specialties, and custom skills
-- **Easy Management**: Hidden until you're ready, triggered with one button click
+### Character Creation
+- **Point Buy** | **Random Allocation** | **Dice Roll (4d6)**
+- Auto-calculated derived attributes (HP, WP, SAN, BP)
+- Real-time stat updates
 
-#### Bond System
-- **Bond Generation**: Randomly generate bonds from 5 categories:
-  - PISCES (UK)
-  - DELTA GREEN (US)
-  - FRIENDS & FAMILY
-  - UNDERWORLD
-  - LGBTQ
-- **Bond Management**: Add multiple bonds to your character sheet with editable names and scores
-- **Structured Export**: Bonds export as individual items in Foundry VTT format
+### Professions
+- 20 official Delta Green professions
+- Auto-apply profession skills
+- Select optional skills per profession
 
-#### Foundry VTT Integration
-- **Complete JSON Export**: Export actor data compatible with Foundry VTT Delta Green system
-- **Typed Skills**: Specialty skills available in Foundry's typed skills system
-- **Bond Items**: Bonds export as bond-type items with proper structure
-- **Token Configuration**: Includes prototype token with proper icon and display settings
+### Skills System
+- 42+ Delta Green skills with base proficiencies
+- Specialty support (Art, Craft, Science, Pilot, Military)
+- Add custom skills (languages, special abilities)
+- **Bonus Skill Points**: Enhance up to 8 skills with +20 each (capped at 80%)
 
-#### Theming
-- **X-Files Theme**: Classic green-on-black terminal aesthetic (default)
-- **Modern Theme**: Catppuccin-inspired color palette with improved readability
-- **Theme Persistence**: Selected theme saves automatically
+### Bond Management
+- Random bond generation from 5 categories:
+  - PISCES (UK) | DELTA GREEN (US)
+  - Friends & Family | Underworld | LGBTQ
+- Add multiple bonds to your character
+- Automatic Foundry export
 
-## Quick Start Guide - Complete Walkthrough
+### Foundry VTT Export
+- Complete JSON export with all character data
+- Typed skills in Foundry format
+- Bonds as items
+- Ready to import into Delta Green system
+- View raw HTML preview before export
 
-### Step 1: Create Your Stats
-1. Choose one of three methods:
-   - **Point Buy**: Manually drag points to each stat (you have 72 to distribute)
-   - **Random Point Buy**: Click "RANDOM POINT BUY" for instant random allocation
-   - **Dice Roll**: Click "RANDOM DICE ROLL" to roll 4d6 three times per stat
-2. See your derived attributes (HP, WP, SAN, BP) update automatically
+---
 
-### Step 2: Choose a Profession
-1. Scroll to the "Profession" section
-2. Click the dropdown and select a profession (e.g., "Agent", "Scientist", "Soldier")
-3. Read the profession description
-4. Select optional skills from the checkboxes (respecting the limit shown)
-5. Click "Apply Professional Skills" to add them to your sheet
+## Themes
 
-### Step 3: Build Your Skills
-1. Scroll to the "Skills" section
-2. You'll see all 42+ Delta Green skills with their base values
-3. For skills with specialties (Art, Craft, Science, etc.):
-   - Select a specialty type from the dropdown (e.g., "Chemistry" for Science)
-   - The skill will be recorded as "Science (Chemistry)"
-4. **Add Custom Skills**: Click "Add Skill" to add any custom skill:
-   - Enter skill name (e.g., "French", "Piloting (Helicopter)")
-   - Enter proficiency (0-80)
-   - Click Remove to delete custom skills
-5. Don't worry about reaching exactly 80% - that's what bonus points are for!
+| Theme | Style | Best For |
+|-------|-------|----------|
+| **X-Files** (Default) | Green terminal aesthetic | Classic retro feel |
+| **Modern** | Catppuccin color palette | Enhanced readability |
+| **Morris** | Dracula colors | Dark mode preference |
+| **Son of Sam** | Red/black high contrast | Alternative dark |
+| **Mobile** | Blue responsive design | Mobile devices (auto-detects) |
 
-### Step 4: Apply Bonus Skill Points (NEW!)
-1. After setting up your skills, click "Prepare Skills for Bonus Points"
-2. The "Bonus Skill Points" section will appear with 8 dropdown menus
-3. For each dropdown:
-   - Select a skill you want to boost (base skills, specialties, or custom skills)
-   - You can select the same skill multiple times to boost it more
-   - Maximum boost per skill: +20 per selection, capped at 80%
-4. Click "Apply Bonus Skills" to add +20 to each selected skill
-5. Your skill values update instantly!
-6. **Tip**: Each selection can be any skill - no restriction on duplicates
+---
 
-### Step 5: Fill in Character Details
-1. Go to the "Biography" section
-2. Enter your character's details:
-   - Profession, Employer, Nationality
-   - Sex, Age, Education
-   - Physical Description (longer text field)
+## Technologies
 
-### Step 6: Generate and Add Bonds (Optional)
-1. In the "STATISTICS" section, select bond categories you want
-2. Click "GENERATE BOND" to create a random bond
-3. See the generated bond appear in the text box
-4. Click "ADD TO SHEET" to add it to your character
-5. Repeat to add multiple bonds
+- **HTML5** - Semantic markup
+- **CSS3** - Organized theming with CSS variables
+- **Vanilla JavaScript** - No dependencies, ES6+
+- **Foundry VTT** - Compatible with Delta Green system
 
-### Step 7: Export Your Character
-1. Scroll to the bottom of the Character Sheet
-2. Click "Preview Foundry JSON" to see what will be exported
-3. Click "Export Foundry JSON" to download a JSON file
-4. In Foundry VTT:
-   - Open your Delta Green world
-   - Click "Import Data"
-   - Select the downloaded JSON file
-   - Your character will be created!
-
-## Technologies Used
-- **HTML5**: Semantic markup with proper metadata
-- **CSS3**: Organized styling with CSS variables for easy customization
-- **JavaScript (Vanilla)**: No dependencies - uses plain ES6+ JavaScript
-- **Foundry VTT Integration**: Compatible with Delta Green system
-### Customization
-
-#### Changing Colors
-Edit the CSS variables at the top of `styles.css`:
-```css
-:root {
-    --primary-color: #00b521;
-    --bg-color: #000000;
-    --text-color: #ffffff;
-    /* etc... */
-}
-```
+---
 
 #### Adding Skills
 Edit the `skillsList` array in `scripts.js` within `populateCharacterSheetForm()`:
@@ -300,5 +223,13 @@ This project is open source and available under the MIT License. Feel free to us
 <p align="center">
   Built with ❤️ by <a href="https://github.com/pigeon-labs-stack">Pigeon Labs Stack</a> for Delta Green enthusiasts and role-playing game fans everywhere.
 </p>
+
+---
+
+<div align="center">
+  <a href="https://www.buymeacoffee.com/pigeon_labs" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee" style="height: 60px !important; width: 217px !important;">
+  </a>
+</div>
 
 
