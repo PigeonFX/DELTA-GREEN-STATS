@@ -444,16 +444,59 @@ function selectProfession(professionKey) {
     }
 
     const profession = professions[professionKey];
-    infoDiv.textContent = profession.description;
+
+    // Extract BONDS info
+    const bondsMatch = profession.description.match(/BONDS:\s*(\d+)/);
+    const bondCount = bondsMatch ? bondsMatch[1] : '?';
+
+    // Update bonds legend
+    const bondsLegend = document.querySelector('#cs-bonds-fieldset legend');
+    if (bondsLegend) {
+        bondsLegend.textContent = `Bonds (${bondCount} available)`;
+    }
+
+    // Find the "Choose" line (optional skills header) - can be "Choose any X" or "Choose one"
+    const lines = profession.description.split('\n');
+    let chooseLineIdx = -1;
+    let chooseText = '';
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i].trim().toLowerCase().startsWith('choose')) {
+            chooseLineIdx = i;
+            chooseText = lines[i];
+            break;
+        }
+    }
+    
+    // Build display text: everything up to (but not including) the "Choose any" line, without BONDS
+    let displayText;
+    if (chooseLineIdx >= 0) {
+        displayText = lines.slice(0, chooseLineIdx)
+            .filter(line => !line.includes('BONDS:'))
+            .join('\n')
+            .trim();
+    } else {
+        // No optional skills section, just remove BONDS
+        displayText = profession.description
+            .replace(/BONDS:\s*\d+/g, '')
+            .trim();
+    }
+    
+    // Add BONDS at the top
+    displayText = `BONDS: ${bondCount}\n\n${displayText}`;
+    
+    infoDiv.textContent = displayText;
 
     // Display optional skills with checkboxes
-    if (profession.optionalSkills && profession.optionalSkills.length > 0) {
-        let html = '<div style="margin-top:12px; padding:8px; background:rgba(0,0,0,0.2); border-radius:4px;"><strong>Optional Skills (Choose up to listed limit):</strong><div style="margin-top:8px;">';
+    if (profession.optionalSkills && profession.optionalSkills.length > 0 && chooseText) {
+        let html = `<div style="margin-top:12px; padding:8px; background:rgba(0,0,0,0.2); border-radius:4px;">
+            <div style="margin-bottom:8px; font-weight:normal; white-space:pre-wrap;">${chooseText}</div>
+            <div style="margin-top:8px;">`;
+        
         profession.optionalSkills.forEach((skill, idx) => {
             const checkboxId = `profession-optional-skill-${idx}`;
-            html += `<div style="margin:6px 0;">
-                <input type="checkbox" id="${checkboxId}" class="profession-optional-skill" data-skill-name="${skill.name}" data-skill-value="${skill.value}" data-limit="${skill.limit}">
-                <label for="${checkboxId}" style="cursor:pointer;">${skill.name} ${skill.value}%${skill.notes ? ' (' + skill.notes + ')' : ''}</label>
+            html += `<div style="margin:6px 0; display:flex; align-items:center; gap:6px;">
+                <input type="checkbox" id="${checkboxId}" class="profession-optional-skill" data-skill-name="${skill.name}" data-skill-value="${skill.value}" data-limit="${skill.limit}" style="flex-shrink:0; cursor:pointer;">
+                <label for="${checkboxId}" style="cursor:pointer; flex:1; margin:0;">» ${skill.name} ${skill.value}%</label>
             </div>`;
         });
         html += '</div></div>';
