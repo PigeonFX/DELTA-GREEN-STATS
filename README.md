@@ -6,6 +6,47 @@ A character creation and management tool for the Delta Green RPG system. Build c
 
 ---
 
+## Theme Gallery
+
+<details open>
+  <summary style="cursor: pointer; font-weight: bold; font-size: 1.2em;">📸 Click to expand/collapse screenshots</summary>
+  
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+    <div style="text-align: center;">
+      <a href="assets/art/Screenshot X-Files.png" target="_blank" style="text-decoration: none;">
+        <img src="assets/art/Screenshot X-Files.png" alt="X-Files Theme" style="width: 100%; height: 200px; object-fit: cover; border: 2px solid #00b521; border-radius: 4px; cursor: pointer;">
+        <p style="margin: 8px 0; font-weight: bold;">X-Files (Default)</p>
+      </a>
+    </div>
+    <div style="text-align: center;">
+      <a href="assets/art/Screenshot Modern.png" target="_blank" style="text-decoration: none;">
+        <img src="assets/art/Screenshot Modern.png" alt="Modern Theme" style="width: 100%; height: 200px; object-fit: cover; border: 2px solid #b4befe; border-radius: 4px; cursor: pointer;">
+        <p style="margin: 8px 0; font-weight: bold;">Modern (Catppuccin)</p>
+      </a>
+    </div>
+    <div style="text-align: center;">
+      <a href="assets/art/Screenshot Son of sam.png" target="_blank" style="text-decoration: none;">
+        <img src="assets/art/Screenshot Son of sam.png" alt="Son of Sam Theme" style="width: 100%; height: 200px; object-fit: cover; border: 2px solid #ff0000; border-radius: 4px; cursor: pointer;">
+        <p style="margin: 8px 0; font-weight: bold;">Son of Sam</p>
+      </a>
+    </div>
+    <div style="text-align: center;">
+      <a href="assets/art/Screenshot Mobile.png" target="_blank" style="text-decoration: none;">
+        <img src="assets/art/Screenshot Mobile.png" alt="Mobile Theme" style="width: 100%; height: 200px; object-fit: cover; border: 2px solid #4a90e2; border-radius: 4px; cursor: pointer;">
+        <p style="margin: 8px 0; font-weight: bold;">Mobile</p>
+      </a>
+    </div>
+    <div style="text-align: center;">
+      <a href="assets/art/HTML Sheet.png" target="_blank" style="text-decoration: none;">
+        <img src="assets/art/HTML Sheet.png" alt="Printable Sheet" style="width: 100%; height: 200px; object-fit: cover; border: 2px solid #888; border-radius: 4px; cursor: pointer;">
+        <p style="margin: 8px 0; font-weight: bold;">Printable Sheet</p>
+      </a>
+    </div>
+  </div>
+</details>
+
+---
+
 ## Quick Start
 
 1. **Build Stats** → Choose Point Buy, Random, or Dice Roll
