@@ -9,8 +9,32 @@
 // - Foundry VTT JSON export
 // ============================================================================
 
-const stats = ['STR', 'CON', 'DEX', 'INT', 'POW', 'CHA'];
-const attributesText = ['Hit Points (HP)', 'Willpower Points (WP)', 'Sanity Points (SAN)', 'Breaking Point (BP)'];
+// ============================================================================
+// CONFIGURATION & CONSTANTS
+// ============================================================================
+const CONFIG = {
+    STATS: ['STR', 'CON', 'DEX', 'INT', 'POW', 'CHA'],
+    ATTRIBUTES: ['Hit Points (HP)', 'Willpower Points (WP)', 'Sanity Points (SAN)', 'Breaking Point (BP)'],
+    POINT_BUY_TOTAL: 72,
+    STAT_MIN: 3,
+    STAT_MAX: 18,
+    BONUS_SKILL_COUNT: 8,
+    BONUS_SKILL_POINTS: 20,
+    MAX_SKILL_VALUE: 80,
+    DICE_COUNT: 4,
+    DICE_SIDES: 6,
+    DICE_KEEP: 3,
+    BOND_DELIMITER: ' ^ ^ ',
+};
+
+// Application state
+const appState = {
+    currentBond: null,
+    agentStats: {},
+};
+
+const stats = CONFIG.STATS;
+const attributesText = CONFIG.ATTRIBUTES;
 
 // Profession data
 // Professions data is now in professions.js
@@ -125,32 +149,32 @@ function adjustStat(stat, adjustment) {
 
 /**
  * Updates and displays remaining points available for stat allocation
- * Used with point buy system (72 total points)
+ * Used with point buy system (CONFIG.POINT_BUY_TOTAL total points)
  */
 function updateTotalPoints() {
     const totalPointsUsed = stats.reduce((total, stat) => total + parseInt(document.getElementById(`${stat}-value`).innerText), 0);
-    const remainingPoints = 72 - totalPointsUsed;
+    const remainingPoints = CONFIG.POINT_BUY_TOTAL - totalPointsUsed;
     document.getElementById('totalPoints').innerText = remainingPoints;
 }
 
 /**
- * Distributes 72 points randomly among all ability scores
- * Ensures no stat exceeds 18 or goes below 3
+ * Distributes CONFIG.POINT_BUY_TOTAL points randomly among all ability scores
+ * Ensures no stat exceeds CONFIG.STAT_MAX or goes below CONFIG.STAT_MIN
  */
 function randomStats() {
     stats.forEach(stat => {
-        document.getElementById(`${stat}-value`).innerText = '3';
+        document.getElementById(`${stat}-value`).innerText = CONFIG.STAT_MIN.toString();
     });
 
-    let remainingPoints = 72 - (stats.length * 3);
+    let remainingPoints = CONFIG.POINT_BUY_TOTAL - (stats.length * CONFIG.STAT_MIN);
 
     while (remainingPoints > 0) {
         for (let stat of stats) {
             if (remainingPoints <= 0) break;
 
             let currentValue = parseInt(document.getElementById(`${stat}-value`).innerText);
-            if (currentValue < 18) {
-                const pointsToAdd = Math.min(remainingPoints, 18 - currentValue);
+            if (currentValue < CONFIG.STAT_MAX) {
+                const pointsToAdd = Math.min(remainingPoints, CONFIG.STAT_MAX - currentValue);
                 const add = Math.floor(Math.random() * pointsToAdd) + 1;
                 currentValue += add;
                 remainingPoints -= add;
@@ -168,10 +192,10 @@ function randomStats() {
 
 function randomDiceRoll() {
     stats.forEach(stat => {
-        const rolls = Array.from({ length: 4 }, () => Math.floor(Math.random() * 6) + 1)
+        const rolls = Array.from({ length: CONFIG.DICE_COUNT }, () => Math.floor(Math.random() * CONFIG.DICE_SIDES) + 1)
             .sort((a, b) => b - a)
-            .slice(0, 3);
-        const finalValue = Math.max(3, Math.min(rolls.reduce((a, b) => a + b), 18));
+            .slice(0, CONFIG.DICE_KEEP);
+        const finalValue = Math.max(CONFIG.STAT_MIN, Math.min(rolls.reduce((a, b) => a + b), CONFIG.STAT_MAX));
         document.getElementById(`${stat}-value`).innerText = finalValue;
         document.getElementById(`${stat}-x5-value`).innerText = finalValue * 5;
         document.getElementById(`${stat}-descriptor`).innerText = getDescriptor(stat, finalValue);
@@ -466,7 +490,7 @@ function selectProfession(professionKey) {
             break;
         }
     }
-    
+
     // Build display text: everything up to (but not including) the "Choose any" line, without BONDS
     let displayText;
     if (chooseLineIdx >= 0) {
@@ -480,10 +504,10 @@ function selectProfession(professionKey) {
             .replace(/BONDS:\s*\d+/g, '')
             .trim();
     }
-    
+
     // Add BONDS at the top
     displayText = `BONDS: ${bondCount}\n\n${displayText}`;
-    
+
     infoDiv.textContent = displayText;
 
     // Display optional skills with checkboxes
@@ -491,7 +515,7 @@ function selectProfession(professionKey) {
         let html = `<div style="margin-top:12px; padding:8px; background:rgba(0,0,0,0.2); border-radius:4px;">
             <div style="margin-bottom:8px; font-weight:normal; white-space:pre-wrap;">${chooseText}</div>
             <div style="margin-top:8px;">`;
-        
+
         profession.optionalSkills.forEach((skill, idx) => {
             const checkboxId = `profession-optional-skill-${idx}`;
             html += `<div style="margin:6px 0; display:flex; align-items:center; gap:6px;">
@@ -509,13 +533,51 @@ function selectProfession(professionKey) {
 }
 
 /**
+ * Clears all profession-applied skills from the character sheet
+ * Removes all custom skill rows and resets predefined skill values to 0
+ */
+function clearProfessionSkills() {
+    // Reset all predefined skills to 0
+    const predefinedSkills = ["accounting", "alertness", "anthropology", "archeology", "art", "artillery", "athletics", "bureaucracy", "computer_science", "craft", "criminology", "demolitions", "disguise", "dodge", "drive", "firearms", "first_aid", "forensics", "heavy_machinery", "heavy_weapons", "history", "humint", "law", "medicine", "melee_weapons", "military_science", "navigate", "occult", "persuade", "pharmacy", "pilot", "psychotherapy", "ride", "science", "search", "sigint", "stealth", "surgery", "survival", "swim", "unarmed_combat", "unnatural"];
+    
+    predefinedSkills.forEach(skillKey => {
+        const input = document.getElementById(`cs-skill-${skillKey}`);
+        if (input) {
+            input.value = '0';
+        }
+        
+        // Reset specialty selections
+        const specSelect = document.getElementById(`cs-skill-${skillKey}-spec`);
+        if (specSelect) {
+            specSelect.value = '';
+            specSelect.style.borderColor = '';
+            specSelect.style.borderWidth = '';
+            specSelect.style.backgroundColor = '';
+            specSelect.style.color = '';
+            specSelect.style.fontWeight = '';
+        }
+    });
+    
+    // Remove all custom skill rows
+    const customSkillsDiv = document.getElementById('cs-custom-skills');
+    if (customSkillsDiv) {
+        const customSkillRows = customSkillsDiv.querySelectorAll('.custom-skill-row');
+        customSkillRows.forEach(row => row.remove());
+    }
+}
+
+/**
  * Apply the selected profession's required and optional skills to the character sheet
+ * Clears existing profession skills before applying new ones to prevent stacking
  */
 function applyProfessionSkills() {
     const professionSelect = document.getElementById('cs-profession-select');
     const professionKey = professionSelect.value;
 
     if (!professionKey || !professions[professionKey]) return;
+
+    // Clear all existing profession-applied skills before applying new ones
+    clearProfessionSkills();
 
     const profession = professions[professionKey];
     let appliedCount = 0;
@@ -898,11 +960,11 @@ function populateBonusSkillDropdowns() {
 }
 
 /**
- * Apply bonus skill points: +20 to each selected skill (max 8)
+ * Apply bonus skill points: +CONFIG.BONUS_SKILL_POINTS to each selected skill (max CONFIG.BONUS_SKILL_COUNT)
  */
 function applyBonusSkills() {
     const selectedSkills = [];
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < CONFIG.BONUS_SKILL_COUNT; i++) {
         const select = document.getElementById(`cs-bonus-skill-${i}`);
         if (select && select.value) {
             selectedSkills.push(select.value);
@@ -953,7 +1015,7 @@ function applyBonusSkills() {
                     if (rowSkillName.toLowerCase() === baseSkillLabel.toLowerCase() &&
                         rowSpecialty.toLowerCase() === specialty.toLowerCase()) {
                         const currentValue = parseInt(valueInput.value) || 0;
-                        const newValue = Math.min(currentValue + 20, 80);
+                        const newValue = Math.min(currentValue + CONFIG.BONUS_SKILL_POINTS, CONFIG.MAX_SKILL_VALUE);
                         valueInput.value = newValue;
                         found = true;
                     }
@@ -966,7 +1028,7 @@ function applyBonusSkills() {
 
                 if (skillInput) {
                     const currentValue = parseInt(skillInput.value) || 0;
-                    const newValue = Math.min(currentValue + 20, 80);
+                    const newValue = Math.min(currentValue + CONFIG.BONUS_SKILL_POINTS, CONFIG.MAX_SKILL_VALUE);
                     skillInput.value = newValue;
                     found = true;
                 }
@@ -979,7 +1041,7 @@ function applyBonusSkills() {
 
             if (skillInput) {
                 const currentValue = parseInt(skillInput.value) || 0;
-                const newValue = Math.min(currentValue + 20, 80);
+                const newValue = Math.min(currentValue + CONFIG.BONUS_SKILL_POINTS, CONFIG.MAX_SKILL_VALUE);
                 skillInput.value = newValue;
                 appliedCount++;
             } else {
@@ -992,7 +1054,7 @@ function applyBonusSkills() {
 
                     if (nameInput && nameInput.value === skillKey) {
                         const currentValue = parseInt(valueInput.value) || 0;
-                        const newValue = Math.min(currentValue + 20, 80);
+                        const newValue = Math.min(currentValue + CONFIG.BONUS_SKILL_POINTS, CONFIG.MAX_SKILL_VALUE);
                         valueInput.value = newValue;
                         found = true;
                     }
@@ -1002,7 +1064,7 @@ function applyBonusSkills() {
         }
     });
     if (appliedCount > 0) {
-        alert(`Applied +20 bonus to ${appliedCount} skill(s)!`);
+        alert(`Applied +${CONFIG.BONUS_SKILL_POINTS} bonus to ${appliedCount} skill(s)!`);
     } else {
         alert('Could not find selected skills to boost.');
     }
@@ -1158,207 +1220,227 @@ function addCustomSkillFromProfession(skillName, skillValue) {
  * Builds a complete Foundry VTT Delta Green character JSON
  * Gathers all character data from the form and converts it to the proper Foundry actor format
  * @returns {object} Complete actor object ready for Foundry VTT import
+ * @throws {Error} If critical character data is missing or invalid
  */
 function buildFoundryJSON() {
-    // Gather basic fields
-    const name = document.getElementById('cs-name').value || 'Agent';
-    const img = document.getElementById('cs-img').value || 'icons/svg/mystery-man.svg';
-    const type = document.getElementById('cs-type').value || 'agent';
+    try {
+        // Gather basic fields
+        const name = document.getElementById('cs-name')?.value || 'Agent';
+        const img = document.getElementById('cs-img')?.value || 'icons/svg/mystery-man.svg';
+        const type = document.getElementById('cs-type')?.value || 'agent';
 
-    // Statistics
-    const statsObj = {};
-    stats.forEach(stat => {
-        const valInput = document.getElementById(`cs-${stat}`);
-        const value = valInput ? parseInt(valInput.value) : parseInt(document.getElementById(`${stat}-value`).innerText);
-        const key = stat.toLowerCase();
-        statsObj[key] = { value: value, distinguishing_feature: '' };
-    });
+        // Statistics
+        const statsObj = {};
+        stats.forEach(stat => {
+            const valInput = document.getElementById(`cs-${stat}`);
+            const value = valInput ? parseInt(valInput.value) : parseInt(document.getElementById(`${stat}-value`).innerText);
+            const key = stat.toLowerCase();
+            statsObj[key] = { value: value, distinguishing_feature: '' };
+        });
 
-    // health/wp derived from STR/CON/POW but allow override via sheet fields
-    const hpDefault = Math.ceil((statsObj.str.value + statsObj.con.value) / 2);
-    const wpDefault = statsObj.pow.value;
-    const hpVal = (document.getElementById('cs-hp') && parseInt(document.getElementById('cs-hp').value)) ? parseInt(document.getElementById('cs-hp').value) : hpDefault;
-    const wpVal = (document.getElementById('cs-wp') && parseInt(document.getElementById('cs-wp').value)) ? parseInt(document.getElementById('cs-wp').value) : wpDefault;
+        // health/wp derived from STR/CON/POW but allow override via sheet fields
+        const hpDefault = Math.ceil((statsObj.str.value + statsObj.con.value) / 2);
+        const wpDefault = statsObj.pow.value;
+        const hpVal = (document.getElementById('cs-hp') && parseInt(document.getElementById('cs-hp').value)) ? parseInt(document.getElementById('cs-hp').value) : hpDefault;
+        const wpVal = (document.getElementById('cs-wp') && parseInt(document.getElementById('cs-wp').value)) ? parseInt(document.getElementById('cs-wp').value) : wpDefault;
 
-    // Sanity/physical/biography/corruption
-    const sanityValue = (document.getElementById('cs-sanity-value') && parseInt(document.getElementById('cs-sanity-value').value)) ? parseInt(document.getElementById('cs-sanity-value').value) : (statsObj.pow.value * 5);
-    const breakingPoint = (document.getElementById('cs-breaking-point') && parseInt(document.getElementById('cs-breaking-point').value)) ? parseInt(document.getElementById('cs-breaking-point').value) : (sanityValue - statsObj.pow.value);
-    const physicalDesc = (document.getElementById('cs-physical-desc') && document.getElementById('cs-physical-desc').value) ? document.getElementById('cs-physical-desc').value : '';
-    const bioProfession = document.getElementById('cs-bio-profession') ? document.getElementById('cs-bio-profession').value : '';
-    const bioEmployer = document.getElementById('cs-bio-employer') ? document.getElementById('cs-bio-employer').value : '';
-    const bioNationality = document.getElementById('cs-bio-nationality') ? document.getElementById('cs-bio-nationality').value : '';
-    const bioSex = document.getElementById('cs-bio-sex') ? document.getElementById('cs-bio-sex').value : '';
-    const bioAge = document.getElementById('cs-bio-age') ? document.getElementById('cs-bio-age').value : '';
-    const bioEducation = document.getElementById('cs-bio-education') ? document.getElementById('cs-bio-education').value : '';
-    const corruptionValue = 0;
+        // Sanity/physical/biography/corruption
+        const sanityValue = (document.getElementById('cs-sanity-value') && parseInt(document.getElementById('cs-sanity-value').value)) ? parseInt(document.getElementById('cs-sanity-value').value) : (statsObj.pow.value * 5);
+        const breakingPoint = (document.getElementById('cs-breaking-point') && parseInt(document.getElementById('cs-breaking-point').value)) ? parseInt(document.getElementById('cs-breaking-point').value) : (sanityValue - statsObj.pow.value);
+        const physicalDesc = (document.getElementById('cs-physical-desc') && document.getElementById('cs-physical-desc').value) ? document.getElementById('cs-physical-desc').value : '';
+        const bioProfession = document.getElementById('cs-bio-profession')?.value || '';
+        const bioEmployer = document.getElementById('cs-bio-employer')?.value || '';
+        const bioNationality = document.getElementById('cs-bio-nationality')?.value || '';
+        const bioSex = document.getElementById('cs-bio-sex')?.value || '';
+        const bioAge = document.getElementById('cs-bio-age')?.value || '';
+        const bioEducation = document.getElementById('cs-bio-education')?.value || '';
+        const corruptionValue = 0;
 
-    // Skills
-    const skillsKeys = ["accounting", "alertness", "anthropology", "archeology", "art", "artillery", "athletics", "bureaucracy", "computer_science", "craft", "criminology", "demolitions", "disguise", "dodge", "drive", "firearms", "first_aid", "forensics", "heavy_machinery", "heavy_weapons", "history", "humint", "law", "medicine", "melee_weapons", "military_science", "navigate", "occult", "persuade", "pharmacy", "pilot", "psychotherapy", "ride", "science", "search", "sigint", "stealth", "surgery", "survival", "swim", "unarmed_combat", "unnatural"];
-    const skillsObj = {};
-    const typedSkillsObj = {};
-    const specialtyGroupMap = { art: 'Art', craft: 'Craft', science: 'Science', pilot: 'Pilot', military_science: 'Military Science' };
+        // Skills
+        const skillsKeys = ["accounting", "alertness", "anthropology", "archeology", "art", "artillery", "athletics", "bureaucracy", "computer_science", "craft", "criminology", "demolitions", "disguise", "dodge", "drive", "firearms", "first_aid", "forensics", "heavy_machinery", "heavy_weapons", "history", "humint", "law", "medicine", "melee_weapons", "military_science", "navigate", "occult", "persuade", "pharmacy", "pilot", "psychotherapy", "ride", "science", "search", "sigint", "stealth", "surgery", "survival", "swim", "unarmed_combat", "unnatural"];
+        const skillsObj = {};
+        const typedSkillsObj = {};
+        const specialtyGroupMap = { art: 'Art', craft: 'Craft', science: 'Science', pilot: 'Pilot', military_science: 'Military Science' };
 
-    skillsKeys.forEach(key => {
-        const el = document.getElementById(`cs-skill-${key}`);
-        const prof = el ? parseInt(el.value) || 0 : 0;
-        // check for specialty input and include it in the label if present
-        const specEl = document.getElementById(`cs-skill-${key}-spec`);
-        let label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        if (specEl && specEl.value && specEl.value.trim().length > 0 && specEl.value !== 'Pick') {
-            const specialty = specEl.value.trim();
-            label = `${label} (${specialty})`;
-            // Add to typedSkills with a generated ID (timestamp-based)
-            const typedSkillId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-            const group = specialtyGroupMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            typedSkillsObj[typedSkillId] = { label: specialty, group: group, proficiency: prof, failure: false };
-        }
-        skillsObj[key] = { label: label, proficiency: prof, failure: false };
-    });
-
-    // Add custom skills
-    const customSkills = getCustomSkills();
-    customSkills.forEach(customSkill => {
-        const customSkillId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-        skillsObj[customSkillId] = { label: customSkill.name, proficiency: customSkill.value, failure: false };
-        // Also add to typedSkills for consistency
-        typedSkillsObj[customSkillId] = { label: customSkill.name, group: 'Custom', proficiency: customSkill.value, failure: false };
-    });
-
-    // Prototype token and items JSON (allow raw editing)
-    let items = [];
-    try { items = JSON.parse(document.getElementById('cs-items-json').value); } catch (e) { items = []; }
-
-    // Add bonds as items
-    const bondsToAdd = (window.bondsOnSheet || []).map((bond, idx) => {
-        return {
-            name: bond.name,
-            type: 'bond',
-            img: 'icons/svg/mystery-man.svg',
-            system: {
-                name: '',
-                description: '<p>' + bond.description.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</p>',
-                score: bond.score,
-                relationship: bond.relationship || '',
-                hasBeenDamagedSinceLastHomeScene: false
+        skillsKeys.forEach(key => {
+            const el = document.getElementById(`cs-skill-${key}`);
+            const prof = el ? parseInt(el.value) || 0 : 0;
+            // check for specialty input and include it in the label if present
+            const specEl = document.getElementById(`cs-skill-${key}-spec`);
+            let label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            if (specEl && specEl.value && specEl.value.trim().length > 0 && specEl.value !== 'Pick') {
+                const specialty = specEl.value.trim();
+                label = `${label} (${specialty})`;
+                // Add to typedSkills with a generated ID (timestamp-based)
+                const typedSkillId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+                const group = specialtyGroupMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                typedSkillsObj[typedSkillId] = { label: specialty, group: group, proficiency: prof, failure: false };
             }
-        };
-    });
+            skillsObj[key] = { label: label, proficiency: prof, failure: false };
+        });
 
-    // Combine items with bonds
-    items = bondsToAdd.concat(items);
+        // Add custom skills
+        const customSkills = getCustomSkills();
+        customSkills.forEach(customSkill => {
+            const customSkillId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+            skillsObj[customSkillId] = { label: customSkill.name, proficiency: customSkill.value, failure: false };
+            // Also add to typedSkills for consistency
+            typedSkillsObj[customSkillId] = { label: customSkill.name, group: 'Custom', proficiency: customSkill.value, failure: false };
+        });
 
-    // Build default prototypeToken matching Foundry structure
-    const defaultProtoToken = {
-        actorLink: true,
-        name: name,
-        displayName: 0,
-        appendNumber: false,
-        prependAdjective: false,
-        width: 1,
-        height: 1,
-        texture: {
-            src: img,
-            anchorX: 0.5,
-            anchorY: 0.5,
-            offsetX: 0,
-            offsetY: 0,
-            fit: 'contain',
-            scaleX: 1,
-            scaleY: 1,
+        // Prototype token and items JSON (allow raw editing)
+        let items = [];
+        try { items = JSON.parse(document.getElementById('cs-items-json')?.value || '[]'); } catch (e) {
+            console.warn('Failed to parse custom items JSON:', e);
+            items = [];
+        }
+
+        // Add bonds as items
+        const bondsToAdd = (window.bondsOnSheet || []).map((bond) => {
+            return {
+                name: bond.name,
+                type: 'bond',
+                img: 'icons/svg/mystery-man.svg',
+                system: {
+                    name: '',
+                    description: '<p>' + bond.description.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</p>',
+                    score: bond.score,
+                    relationship: bond.relationship || '',
+                    hasBeenDamagedSinceLastHomeScene: false
+                }
+            };
+        });
+
+        // Combine items with bonds
+        items = bondsToAdd.concat(items);
+
+        // Build default prototypeToken matching Foundry structure
+        const defaultProtoToken = {
+            actorLink: true,
+            name: name,
+            displayName: 0,
+            appendNumber: false,
+            prependAdjective: false,
+            width: 1,
+            height: 1,
+            texture: {
+                src: img,
+                anchorX: 0.5,
+                anchorY: 0.5,
+                offsetX: 0,
+                offsetY: 0,
+                fit: 'contain',
+                scaleX: 1,
+                scaleY: 1,
+                rotation: 0,
+                tint: '#ffffff',
+                alphaThreshold: 0.75
+            },
+            hexagonalShape: 0,
+            lockRotation: false,
             rotation: 0,
-            tint: '#ffffff',
-            alphaThreshold: 0.75
-        },
-        hexagonalShape: 0,
-        lockRotation: false,
-        rotation: 0,
-        alpha: 1,
-        disposition: -1,
-        displayBars: 0,
-        bar1: { attribute: 'health' },
-        bar2: { attribute: 'wp' },
-        light: {
-            negative: false,
-            priority: 0,
-            alpha: 0.5,
-            angle: 360,
-            bright: 0,
-            color: null,
-            coloration: 1,
-            dim: 0,
-            attenuation: 0.5,
-            luminosity: 0.5,
-            saturation: 0,
-            contrast: 0,
-            shadows: 0,
-            animation: { type: null, speed: 5, intensity: 5, reverse: false },
-            darkness: { min: 0, max: 1 }
-        },
-        sight: {
-            enabled: false,
-            range: 0,
-            angle: 360,
-            visionMode: 'basic',
-            color: null,
-            attenuation: 0.1,
-            brightness: 0,
-            saturation: 0,
-            contrast: 0
-        },
-        detectionModes: [],
-        occludable: { radius: 0 },
-        ring: {
-            enabled: false,
-            colors: { ring: null, background: null },
-            effects: 1,
-            subject: { scale: 1, texture: null }
-        },
-        flags: {},
-        randomImg: false
-    };
+            alpha: 1,
+            disposition: -1,
+            displayBars: 0,
+            bar1: { attribute: 'health' },
+            bar2: { attribute: 'wp' },
+            light: {
+                negative: false,
+                priority: 0,
+                alpha: 0.5,
+                angle: 360,
+                bright: 0,
+                color: null,
+                coloration: 1,
+                dim: 0,
+                attenuation: 0.5,
+                luminosity: 0.5,
+                saturation: 0,
+                contrast: 0,
+                shadows: 0,
+                animation: { type: null, speed: 5, intensity: 5, reverse: false },
+                darkness: { min: 0, max: 1 }
+            },
+            sight: {
+                enabled: false,
+                range: 0,
+                angle: 360,
+                visionMode: 'basic',
+                color: null,
+                attenuation: 0.1,
+                brightness: 0,
+                saturation: 0,
+                contrast: 0
+            },
+            detectionModes: [],
+            occludable: { radius: 0 },
+            ring: {
+                enabled: false,
+                colors: { ring: null, background: null },
+                effects: 1,
+                subject: { scale: 1, texture: null }
+            },
+            flags: {},
+            randomImg: false
+        };
 
-    // Merge with user prototypeToken if provided
-    let prototypeToken = {};
-    try { prototypeToken = JSON.parse(document.getElementById('cs-prototype-json').value); } catch (e) { prototypeToken = {}; }
-    const finalProtoToken = Object.assign(defaultProtoToken, prototypeToken);
+        // Merge with user prototypeToken if provided
+        let prototypeToken = {};
+        try { prototypeToken = JSON.parse(document.getElementById('cs-prototype-json')?.value || '{}'); } catch (e) {
+            console.warn('Failed to parse custom prototype token JSON:', e);
+            prototypeToken = {};
+        }
+        const finalProtoToken = Object.assign(defaultProtoToken, prototypeToken);
 
-    const foundry = {
-        name: name,
-        type: type,
-        prototypeToken: finalProtoToken,
-        img: img,
-        system: {
-            health: { value: hpVal, min: 0, max: hpVal },
-            wp: { value: wpVal, min: 0, max: wpVal },
-            statistics: statsObj,
-            skills: skillsObj,
-            typedSkills: typedSkillsObj,
-            specialTraining: [],
-            settings: { sorting: { weaponSortAlphabetical: false, armorSortAlphabetical: false, gearSortAlphabetical: false, tomeSortAlphabetical: false, ritualSortAlphabetical: false }, rolling: { defaultPercentileModifier: 20 } },
-            schemaVersion: 1,
-            sanity: { value: sanityValue, currentBreakingPoint: breakingPoint, adaptations: { violence: { incident1: false, incident2: false, incident3: false }, helplessness: { incident1: false, incident2: false, incident3: false } } },
-            physical: { description: physicalDesc, wounds: "", firstAidAttempted: false, exhausted: false, exhaustedPenalty: -20 },
-            biography: { profession: bioProfession, employer: bioEmployer, nationality: bioNationality, sex: bioSex, age: bioAge, education: bioEducation },
-            corruption: { value: corruptionValue, haveSeenTheYellowSign: false, gift: "", insight: "" }
-        },
-        items: items,
-        effects: [],
-        flags: { exportSource: { world: "generated", system: "deltagreen" } }
-    };
+        const foundry = {
+            name: name,
+            type: type,
+            prototypeToken: finalProtoToken,
+            img: img,
+            system: {
+                health: { value: hpVal, min: 0, max: hpVal },
+                wp: { value: wpVal, min: 0, max: wpVal },
+                statistics: statsObj,
+                skills: skillsObj,
+                typedSkills: typedSkillsObj,
+                specialTraining: [],
+                settings: { sorting: { weaponSortAlphabetical: false, armorSortAlphabetical: false, gearSortAlphabetical: false, tomeSortAlphabetical: false, ritualSortAlphabetical: false }, rolling: { defaultPercentileModifier: 20 } },
+                schemaVersion: 1,
+                sanity: { value: sanityValue, currentBreakingPoint: breakingPoint, adaptations: { violence: { incident1: false, incident2: false, incident3: false }, helplessness: { incident1: false, incident2: false, incident3: false } } },
+                physical: { description: physicalDesc, wounds: "", firstAidAttempted: false, exhausted: false, exhaustedPenalty: -20 },
+                biography: { profession: bioProfession, employer: bioEmployer, nationality: bioNationality, sex: bioSex, age: bioAge, education: bioEducation },
+                corruption: { value: corruptionValue, haveSeenTheYellowSign: false, gift: "", insight: "" }
+            },
+            items: items,
+            effects: [],
+            flags: { exportSource: { world: "generated", system: "deltagreen" } }
+        };
 
-    return foundry;
+        return foundry;
+    } catch (error) {
+        console.error('Error building Foundry JSON:', error);
+        alert(`Error building character export: ${error.message}`);
+        throw error;
+    }
 }
 
 /**
  * Populates the character sheet form and updates the JSON preview
  */
 function populateCharacterJSON() {
-    populateCharacterSheetForm();
-    const obj = buildFoundryJSON();
-    const pretty = JSON.stringify(obj, null, 2);
-    const jsonPreviewEl = document.getElementById('cs-json');
-    jsonPreviewEl.innerText = pretty;
-    jsonPreviewEl.style.display = 'block';
+    try {
+        populateCharacterSheetForm();
+        const obj = buildFoundryJSON();
+        const pretty = JSON.stringify(obj, null, 2);
+        const jsonPreviewEl = document.getElementById('cs-json');
+        if (jsonPreviewEl) {
+            jsonPreviewEl.innerText = pretty;
+            jsonPreviewEl.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error populating JSON:', error);
+        alert('Failed to generate JSON preview. Check console for details.');
+    }
 }
 
 /**
@@ -1366,14 +1448,19 @@ function populateCharacterJSON() {
  * Triggers browser download dialog with actor data
  */
 function exportCharacterJSON() {
-    const obj = buildFoundryJSON();
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj, null, 2));
-    const dlAnchor = document.createElement('a');
-    dlAnchor.setAttribute('href', dataStr);
-    dlAnchor.setAttribute('download', (obj.name || 'Agent') + '.json');
-    document.body.appendChild(dlAnchor);
-    dlAnchor.click();
-    dlAnchor.remove();
+    try {
+        const obj = buildFoundryJSON();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj, null, 2));
+        const dlAnchor = document.createElement('a');
+        dlAnchor.setAttribute('href', dataStr);
+        dlAnchor.setAttribute('download', (obj.name || 'Agent') + '.json');
+        document.body.appendChild(dlAnchor);
+        dlAnchor.click();
+        dlAnchor.remove();
+    } catch (error) {
+        console.error('Error exporting JSON:', error);
+        alert('Failed to export character. Check console for details.');
+    }
 }
 
 // Keep the character sheet form in sync when stats change
@@ -1414,7 +1501,7 @@ window.addEventListener('load', () => {
 
 /**
  * Generates a random bond from selected categories with typing effect
- * Stores the result in window.currentBond for later addition to sheet
+ * Stores the result in appState.currentBond for later addition to sheet
  * Bond format from bonds.js: "Name ^ ^ Relationship ^ ^ Description"
  */
 function generateRandomBond() {
@@ -1440,27 +1527,23 @@ function generateRandomBond() {
     }
 
     if (availableBonds.length > 0) {
-        let randomBond = availableBonds[Math.floor(Math.random() * availableBonds.length)];
-        // Store the original bond BEFORE any modifications for later parsing
-        window.currentBondOriginal = randomBond;
-
-        // Replace ^ with space for display
-        let displayBond = randomBond.replace(/\^/g, ' ');
-        window.currentBond = displayBond;
+        const randomBond = availableBonds[Math.floor(Math.random() * availableBonds.length)];
+        // Store the original bond in appState for later parsing
+        appState.currentBond = randomBond;
 
         // Replace ^ with <br> for typing effect
-        randomBond = randomBond.replace(/\^/g, '<br>');
+        let displayBond = randomBond.replace(/\^/g, '<br>');
 
         let i = 0;
         function typeChar() {
-            if (randomBond.substring(i, i + 4) === '<br>') {
+            if (displayBond.substring(i, i + 4) === '<br>') {
                 bondTextElement.innerHTML += '<br>';
                 i += 4; // Skip past the <br> tag
-            } else if (i < randomBond.length) {
-                bondTextElement.innerHTML += randomBond[i];
+            } else if (i < displayBond.length) {
+                bondTextElement.innerHTML += displayBond[i];
                 i++;
             }
-            if (i < randomBond.length) {
+            if (i < displayBond.length) {
                 setTimeout(typeChar, 25); // Adjust typing speed as needed
             } else {
                 bondButton.disabled = false; // Re-enable the button after typing
@@ -1470,7 +1553,7 @@ function generateRandomBond() {
     } else {
         bondTextElement.innerHTML = "No bond available.";
         bondButton.disabled = false;
-        window.currentBond = null;
+        appState.currentBond = null;
     }
 }
 
@@ -1481,45 +1564,55 @@ if (!window.bondsOnSheet) {
 
 /**
  * Adds the currently generated bond to the character's bond sheet
- * Parses bond text using " ^ ^ " delimiter into name, relationship, and description
+ * Parses bond text using CONFIG.BOND_DELIMITER into name, relationship, and description
  * Generates unique ID and renders the bond on the sheet
  */
 function addBondToSheet() {
-    if (!window.currentBondOriginal) {
+    if (!appState.currentBond) {
         alert('Generate a bond first!');
         return;
     }
 
-    // Parse bond text using original format: "Name ^ ^ Relationship ^ ^ Description"
-    const parts = window.currentBondOriginal.split(' ^ ^ ');
-    let bondName = '';
-    let bondRelationship = '';
-    let bondDescription = '';
+    try {
+        // Parse bond text: "Name ^ ^ Relationship ^ ^ Description"
+        const parts = appState.currentBond.split(CONFIG.BOND_DELIMITER);
+        let bondName = '';
+        let bondRelationship = '';
+        let bondDescription = '';
 
-    if (parts.length === 3) {
-        bondName = parts[0].trim();
-        bondRelationship = parts[1].trim();
-        bondDescription = parts[2].trim();
-    } else {
-        // Fallback if format doesn't match
-        bondName = window.currentBondOriginal.substring(0, 30) + (window.currentBondOriginal.length > 30 ? '...' : '');
-        bondDescription = window.currentBondOriginal;
+        if (parts.length === 3) {
+            bondName = parts[0].trim();
+            bondRelationship = parts[1].trim();
+            bondDescription = parts[2].trim();
+        } else {
+            // Fallback if format doesn't match
+            bondName = appState.currentBond.substring(0, 30) + (appState.currentBond.length > 30 ? '...' : '');
+            bondDescription = appState.currentBond;
+        }
+
+        // Validate bond data
+        if (!bondName) {
+            throw new Error('Bond name is empty');
+        }
+
+        // Create a unique ID for this bond entry
+        const bondId = 'bond-' + Date.now() + Math.random().toString(36).substr(2, 9);
+
+        // Create bond object with parsed values
+        const bondObj = {
+            id: bondId,
+            name: bondName,
+            relationship: bondRelationship,
+            description: bondDescription,
+            score: 10
+        };
+
+        window.bondsOnSheet.push(bondObj);
+        renderBondsOnSheet();
+    } catch (error) {
+        console.error('Error adding bond to sheet:', error);
+        alert(`Failed to add bond: ${error.message}`);
     }
-
-    // Create a unique ID for this bond entry
-    const bondId = 'bond-' + Date.now() + Math.random().toString(36).substr(2, 9);
-
-    // Create bond object with parsed values
-    const bondObj = {
-        id: bondId,
-        name: bondName,
-        relationship: bondRelationship,
-        description: bondDescription,
-        score: 10
-    };
-
-    window.bondsOnSheet.push(bondObj);
-    renderBondsOnSheet();
 }
 
 /**
