@@ -2,7 +2,12 @@
 
 https://pigeon-labs-stack.github.io/DELTA-GREEN-STATS/
 
-A user-friendly character creation and management tool for the Delta Green RPG system. Single-page web app designed for simplicity—build characters, manage skills, generate bonds, and export to Foundry VTT. **No need to know the rules or do any math.** Perfect for new players and seasoned veterans alike.
+A user-friendly character creation and management tool for the Delta Green RPG system.
+
+• Single-page web app designed for simplicity
+• Build characters, manage skills, generate bonds, and export to Foundry VTT
+• No need to know the rules or do any math
+• Perfect for new players and seasoned veterans alike
 
 ---
 
