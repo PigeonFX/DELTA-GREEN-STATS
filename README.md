@@ -16,23 +16,20 @@ A character creation and management tool for the Delta Green RPG system. Build c
 <summary style="text-align: center; cursor: pointer; font-size: 16px; font-weight: bold; padding: 10px;">Click to view all themes →</summary>
 
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 20px;">
-  <a href="assets/art/Screenshot xfiles.png" target="_blank" style="text-decoration: none;">
-    <img src="assets/art/Screenshot xfiles.png" alt="X-Files Theme" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #00b521; border-radius: 4px; cursor: pointer;">
+  <a href="assets/art/Screenshot%20X-Files.png" target="_blank" style="text-decoration: none;">
+    <img src="assets/art/Screenshot%20X-Files.png" alt="X-Files Theme" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #00b521; border-radius: 4px; cursor: pointer;">
   </a>
-  <a href="assets/art/Screenshot modern.png" target="_blank" style="text-decoration: none;">
-    <img src="assets/art/Screenshot modern.png" alt="Modern Theme" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #89b4fa; border-radius: 4px; cursor: pointer;">
+  <a href="assets/art/Screenshot%20Modern.png" target="_blank" style="text-decoration: none;">
+    <img src="assets/art/Screenshot%20Modern.png" alt="Modern Theme" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #89b4fa; border-radius: 4px; cursor: pointer;">
   </a>
-  <a href="assets/art/Screenshot morris.png" target="_blank" style="text-decoration: none;">
-    <img src="assets/art/Screenshot morris.png" alt="Morris Theme" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #bd93f9; border-radius: 4px; cursor: pointer;">
+  <a href="assets/art/Screenshot%20Mobile.png" target="_blank" style="text-decoration: none;">
+    <img src="assets/art/Screenshot%20Mobile.png" alt="Mobile Theme" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #5e81f4; border-radius: 4px; cursor: pointer;">
   </a>
-  <a href="assets/art/Screenshot son-of-sam.png" target="_blank" style="text-decoration: none;">
-    <img src="assets/art/Screenshot son-of-sam.png" alt="Son of Sam Theme" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #ff5555; border-radius: 4px; cursor: pointer;">
+  <a href="assets/art/Screenshot%20Son%20of%20sam.png" target="_blank" style="text-decoration: none;">
+    <img src="assets/art/Screenshot%20Son%20of%20sam.png" alt="Son of Sam Theme" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #ff5555; border-radius: 4px; cursor: pointer;">
   </a>
-  <a href="assets/art/Screenshot mobile.png" target="_blank" style="text-decoration: none;">
-    <img src="assets/art/Screenshot mobile.png" alt="Mobile Theme" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #5e81f4; border-radius: 4px; cursor: pointer;">
-  </a>
-  <a href="assets/art/Screenshot printable-sheet.png" target="_blank" style="text-decoration: none;">
-    <img src="assets/art/Screenshot printable-sheet.png" alt="Printable Sheet Export" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #f8f8f2; border-radius: 4px; cursor: pointer;">
+  <a href="assets/art/HTML%20Sheet.png" target="_blank" style="text-decoration: none;">
+    <img src="assets/art/HTML%20Sheet.png" alt="Printable Sheet Export" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #d0d0d0; border-radius: 4px; cursor: pointer;">
   </a>
 </div>
 </details>
