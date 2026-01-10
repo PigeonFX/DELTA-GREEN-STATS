@@ -25,6 +25,57 @@ const CONFIG = {
     DICE_SIDES: 6,
     DICE_KEEP: 3,
     BOND_DELIMITER: ' ^ ^ ',
+    
+    // Default skills with base values [key, label, defaultValue, hasSpecialty?]
+    SKILLS: [
+        ["accounting", "Accounting", 10],
+        ["alertness", "Alertness", 20],
+        ["anthropology", "Anthropology", 0],
+        ["archeology", "Archeology", 0],
+        ["art", "Art", 0, true],
+        ["artillery", "Artillery", 0],
+        ["athletics", "Athletics", 30],
+        ["bureaucracy", "Bureaucracy", 10],
+        ["computer_science", "Computer Science", 0],
+        ["craft", "Craft", 0, true],
+        ["criminology", "Criminology", 10],
+        ["demolitions", "Demolitions", 0],
+        ["disguise", "Disguise", 10],
+        ["dodge", "Dodge", 30],
+        ["drive", "Drive", 20],
+        ["firearms", "Firearms", 20],
+        ["first_aid", "First Aid", 10],
+        ["forensics", "Forensics", 0],
+        ["heavy_machinery", "Heavy Machinery", 10],
+        ["heavy_weapons", "Heavy Weapons", 0],
+        ["history", "History", 10],
+        ["humint", "HUMINT", 10],
+        ["law", "Law", 0],
+        ["medicine", "Medicine", 0],
+        ["melee_weapons", "Melee Weapons", 30],
+        ["military_science", "Military Science", 0, true],
+        ["navigate", "Navigate", 10],
+        ["occult", "Occult", 10],
+        ["persuade", "Persuade", 20],
+        ["pharmacy", "Pharmacy", 0],
+        ["pilot", "Pilot", 0, true],
+        ["psychotherapy", "Psychotherapy", 10],
+        ["ride", "Ride", 10],
+        ["science", "Science", 0, true],
+        ["search", "Search", 20],
+        ["sigint", "SIGINT", 0],
+        ["stealth", "Stealth", 10],
+        ["surgery", "Surgery", 0],
+        ["survival", "Survival", 10],
+        ["swim", "Swim", 20],
+        ["unarmed_combat", "Unarmed Combat", 40],
+        ["unnatural", "Unnatural", 0]
+    ],
+    
+    // Get all skill keys in order
+    SKILL_KEYS: function() {
+        return this.SKILLS.map(s => s[0]);
+    }
 };
 
 // Application state
@@ -247,50 +298,7 @@ function populateCharacterSheetForm() {
 
     // populate skills
     const skillsContainer = document.getElementById('cs-skills');
-    const skillsList = [
-        ["accounting", "Accounting", 10],
-        ["alertness", "Alertness", 20],
-        ["anthropology", "Anthropology", 0],
-        ["archeology", "Archeology", 0],
-        ["art", "Art", 0, true],
-        ["artillery", "Artillery", 0],
-        ["athletics", "Athletics", 30],
-        ["bureaucracy", "Bureaucracy", 10],
-        ["computer_science", "Computer Science", 0],
-        ["craft", "Craft", 0, true],
-        ["criminology", "Criminology", 10],
-        ["demolitions", "Demolitions", 0],
-        ["disguise", "Disguise", 10],
-        ["dodge", "Dodge", 30],
-        ["drive", "Drive", 20],
-        ["firearms", "Firearms", 20],
-        ["first_aid", "First Aid", 10],
-        ["forensics", "Forensics", 0],
-        ["heavy_machinery", "Heavy Machinery", 10],
-        ["heavy_weapons", "Heavy Weapons", 0],
-        ["history", "History", 10],
-        ["humint", "HUMINT", 10],
-        ["law", "Law", 0],
-        ["medicine", "Medicine", 0],
-        ["melee_weapons", "Melee Weapons", 30],
-        ["military_science", "Military Science", 0, true],
-        ["navigate", "Navigate", 10],
-        ["occult", "Occult", 10],
-        ["persuade", "Persuade", 20],
-        ["pharmacy", "Pharmacy", 0],
-        ["pilot", "Pilot", 0, true],
-        ["psychotherapy", "Psychotherapy", 10],
-        ["ride", "Ride", 10],
-        ["science", "Science", 0, true],
-        ["search", "Search", 20],
-        ["sigint", "SIGINT", 0],
-        ["stealth", "Stealth", 10],
-        ["surgery", "Surgery", 0],
-        ["survival", "Survival", 10],
-        ["swim", "Swim", 20],
-        ["unarmed_combat", "Unarmed Combat", 40],
-        ["unnatural", "Unnatural", 0]
-    ];
+    const skillsList = CONFIG.SKILLS;
     skillsContainer.innerHTML = '';
     // We'll render skills into a 6-column grid (label + input for each of 3 columns)
     skillsList.forEach(([key, label, def], idx) => {
@@ -538,7 +546,7 @@ function selectProfession(professionKey) {
  */
 function clearProfessionSkills() {
     // Reset all predefined skills to 0
-    const predefinedSkills = ["accounting", "alertness", "anthropology", "archeology", "art", "artillery", "athletics", "bureaucracy", "computer_science", "craft", "criminology", "demolitions", "disguise", "dodge", "drive", "firearms", "first_aid", "forensics", "heavy_machinery", "heavy_weapons", "history", "humint", "law", "medicine", "melee_weapons", "military_science", "navigate", "occult", "persuade", "pharmacy", "pilot", "psychotherapy", "ride", "science", "search", "sigint", "stealth", "surgery", "survival", "swim", "unarmed_combat", "unnatural"];
+    const predefinedSkills = CONFIG.SKILL_KEYS();
     
     predefinedSkills.forEach(skillKey => {
         const input = document.getElementById(`cs-skill-${skillKey}`);
@@ -583,7 +591,7 @@ function applyProfessionSkills() {
     let appliedCount = 0;
 
     // Predefined skills - these are the base skill keys
-    const predefinedSkills = ["accounting", "alertness", "anthropology", "archeology", "art", "artillery", "athletics", "bureaucracy", "computer_science", "craft", "criminology", "demolitions", "disguise", "dodge", "drive", "firearms", "first_aid", "forensics", "heavy_machinery", "heavy_weapons", "history", "humint", "law", "medicine", "melee_weapons", "military_science", "navigate", "occult", "persuade", "pharmacy", "pilot", "psychotherapy", "ride", "science", "search", "sigint", "stealth", "surgery", "survival", "swim", "unarmed_combat", "unnatural"];
+    const predefinedSkills = CONFIG.SKILL_KEYS();
 
     // Function to extract base skill and specialty from a skill name
     // E.g., "Craft (Electrician)" -> { base: "craft", specialty: "Electrician" }
@@ -1257,7 +1265,7 @@ function buildFoundryJSON() {
         const corruptionValue = 0;
 
         // Skills
-        const skillsKeys = ["accounting", "alertness", "anthropology", "archeology", "art", "artillery", "athletics", "bureaucracy", "computer_science", "craft", "criminology", "demolitions", "disguise", "dodge", "drive", "firearms", "first_aid", "forensics", "heavy_machinery", "heavy_weapons", "history", "humint", "law", "medicine", "melee_weapons", "military_science", "navigate", "occult", "persuade", "pharmacy", "pilot", "psychotherapy", "ride", "science", "search", "sigint", "stealth", "surgery", "survival", "swim", "unarmed_combat", "unnatural"];
+        const skillsKeys = CONFIG.SKILL_KEYS();
         const skillsObj = {};
         const typedSkillsObj = {};
         const specialtyGroupMap = { art: 'Art', craft: 'Craft', science: 'Science', pilot: 'Pilot', military_science: 'Military Science' };
