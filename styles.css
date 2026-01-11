@@ -566,11 +566,14 @@ button:disabled,
     padding: 4px 8px;
 }
 
+.highlight-empty-input {
+    border: 2px solid #fe640b !important;
+    background: #fff3e0 !important;
+}
+
 .custom-skill-name.empty-reminder {
-    border: 3px solid #ff6b6b !important;
-    background: rgba(255, 107, 107, 0.15) !important;
-    animation: pulse-reminder 1.5s ease-in-out infinite;
-    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5) !important;
+    border: 2px solid #fe640b !important;
+    background: #fff3e0 !important;
 }
 
 .custom-skill-value {

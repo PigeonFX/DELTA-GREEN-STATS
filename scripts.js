@@ -443,7 +443,9 @@ function addCustomSkill() {
     nameInput.style.flex = '1';
     nameInput.style.padding = '4px 8px';
     nameInput.style.borderRadius = '4px';
-    // Removed inline border - let CSS handle it
+    nameInput.style.border = '1px solid rgba(255,255,255,0.2)';
+    nameInput.style.backgroundColor = 'transparent';
+    nameInput.style.color = 'inherit';
 
     const valueInput = document.createElement('input');
     valueInput.type = 'number';
@@ -466,7 +468,9 @@ function addCustomSkill() {
 
     // Add event listeners to highlight empty skill names
     const updateEmptyState = () => {
+        console.log('[updateEmptyState] called, value:', nameInput.value);
         if (nameInput.value.trim() === '') {
+            console.log('[updateEmptyState] Empty - adding highlight');
             nameInput.classList.add('empty-reminder');
             // Also apply inline styles to ensure visibility
             nameInput.style.borderColor = '#ff6b6b';
@@ -474,6 +478,7 @@ function addCustomSkill() {
             nameInput.style.backgroundColor = 'rgba(255, 107, 107, 0.15)';
             nameInput.style.boxShadow = '0 0 10px rgba(255, 107, 107, 0.5)';
         } else {
+            console.log('[updateEmptyState] Not empty - removing highlight');
             nameInput.classList.remove('empty-reminder');
             // Reset inline styles
             nameInput.style.borderColor = '';
@@ -663,10 +668,7 @@ function applyProfessionSkills() {
     // Helper function to highlight select elements that need a specialty picked
     function highlightSelectForProfessionSkill(selectElement) {
         if (selectElement) {
-            // Add orange border and background to draw attention
-            selectElement.style.borderColor = '#fe640b';
-            selectElement.style.borderWidth = '2px';
-            selectElement.style.backgroundColor = '#fff3e0';
+            selectElement.classList.add('highlight-empty-input');
             selectElement.style.color = '#fe640b';
             selectElement.style.fontWeight = 'bold';
         }
@@ -1181,6 +1183,23 @@ function addCustomSkillFromProfession(skillName, skillValue) {
         langInput.style.padding = '4px 8px';
         langInput.style.borderRadius = '4px';
         langInput.style.border = '1px solid rgba(255,255,255,0.2)';
+        langInput.style.backgroundColor = 'transparent';
+        langInput.style.color = 'inherit';
+
+        // Add highlighting for empty foreign language input (match dropdown "pick" style)
+        const updateLangInputHighlight = () => {
+            if (langInput.value.trim() === '') {
+                langInput.classList.add('highlight-empty-input');
+            } else {
+                langInput.classList.remove('highlight-empty-input');
+            }
+        };
+
+        langInput.addEventListener('input', updateLangInputHighlight);
+        langInput.addEventListener('blur', updateLangInputHighlight);
+        langInput.addEventListener('focus', updateLangInputHighlight);
+        updateLangInputHighlight(); // Initial check
+
         skillRow.appendChild(langInput);
     } else if (specialtyOptions[skillBase]) {
         // Skill has specialty dropdown
@@ -1195,12 +1214,11 @@ function addCustomSkillFromProfession(skillName, skillValue) {
         specSelect.className = 'cs-skill-specialty';
         specSelect.style.padding = '4px 6px';
         specSelect.style.borderRadius = '4px';
-        specSelect.style.border = '2px solid #fe640b';
-        specSelect.style.backgroundColor = '#fff3e0';
-        specSelect.style.color = '#fe640b';
-        specSelect.style.fontWeight = 'bold';
         specSelect.style.flex = '1';
         specSelect.style.maxWidth = '200px';
+        specSelect.classList.add('highlight-empty-input');
+        specSelect.style.color = '#fe640b';
+        specSelect.style.fontWeight = 'bold';
 
         const pickOption = document.createElement('option');
         pickOption.value = '';
