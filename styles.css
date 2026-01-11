@@ -131,6 +131,14 @@ select {
     box-shadow: 0 0 8px rgba(0, 255, 0, 0.3) !important;
 }
 
+/* X-Files theme highlight for empty/required inputs and pick dropdowns */
+.theme-xfiles .highlight-empty-input,
+.theme-xfiles .custom-skill-name.empty-reminder,
+.theme-xfiles select.highlight-empty-input {
+    border: 2px solid #fe640b !important;
+    background: #fff3e0 !important;
+}
+
 /* ============================================================================
    PAGE LAYOUT
    ============================================================================ */
@@ -1576,6 +1584,14 @@ input[type="checkbox"]:checked+label {
     border-color: rgba(0, 212, 255, 0.8);
     box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2), 0 0 16px rgba(0, 212, 255, 0.3);
     outline: none;
+}
+
+/* Morris theme highlight for empty/required inputs and pick dropdowns */
+.theme-morris .highlight-empty-input,
+.theme-morris .custom-skill-name.empty-reminder,
+.theme-morris select.highlight-empty-input {
+    border: 2px solid #fe640b !important;
+    background: #fff3e0 !important;
 }
 
 .theme-morris button,
