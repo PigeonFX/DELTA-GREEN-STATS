@@ -1,3 +1,20 @@
+<!-- ============================================================================
+     DELTA GREEN STATS - Character Creator & Exporter for Foundry VTT
+     ============================================================================
+     This HTML file defines the structure for a complete Delta Green RPG character
+     creation and management tool with Foundry VTT export support.
+     
+     Key Sections:
+     - Stat management (point buy, random roll, dice roll)
+     - Character sheet with skills and specialties
+     - Biography and character details
+     - Bond generation and management system
+     - JSON preview and export to Foundry format
+     
+     Styling: styles.css (organized by component)
+     Logic: scripts.js (character generation, export)
+     Bonds: bonds.js (bond category data)
+     ============================================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,8 +22,10 @@
     <meta charset="UTF-8">
     <!-- Title of the webpage -->
     <title>Delta Green Point Buy</title>
-    <meta name="description" content="Delta Green Point Buy allows you to strategically allocate stats for your Delta Green characters. Explore options for PISCES (UK), DELTA GREEN (US), and more.">
+    <meta name="description"
+        content="Delta Green Point Buy allows you to strategically allocate stats for your Delta Green characters. Explore options for PISCES (UK), DELTA GREEN (US), and more.">
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script type="application/ld+json">
         {
           "@context": "http://schema.org",
@@ -26,44 +45,213 @@
             <div id="stats"></div>
             <div class="total-points">Remaining Points: <span id="totalPoints">72</span></div>
         </div>
-        <!-- Move the text box to the left -->
-        <div class="text-box text-box-left" id="bondText"></div>
-        <!-- Move the bond categories form to the right -->
-        <form id="bond-categories" class="bond-categories">
-            <label for="PISCES_UK">
-                <input type="checkbox" id="PISCES_UK" name="bond-category" value="PISCES_UK">
-                PISCES (UK)
-            </label>
-            <label for="DELTA_GREEN">
-                <input type="checkbox" id="DELTA_GREEN" name="bond-category" value="DELTA_GREEN" checked>
-                DELTA GREEN (US)
-            </label>
-            <label for="FRIENDS_FAMILY">
-                <input type="checkbox" id="FRIENDS_FAMILY" name="bond-category" value="FRIENDS_FAMILY">
-                FRIENDS & FAMILY
-            </label>
-            <label for="UNDERWORLD">
-                <input type="checkbox" id="UNDERWORLD" name="bond-category" value="UNDERWORLD">
-                UNDERWORLD
-            </label>
-            <label for="LGBTQ">
-                <input type="checkbox" id="LGBTQ" name="bond-category" value="LGBTQ">
-                LGBTQ
-    </div>
-    <div class="button-container">
-        <button type="button" id="random-point-buy" onmouseover="showInfo('pointBuy')" onmouseout="clearInfo()" onclick="randomStats()">RANDOM POINT BUY</button>
-        <button type="button" id="random-dice-roll" onmouseover="showInfo('dice')" onmouseout="clearInfo()" onclick="randomDiceRoll()">RANDOM DICE ROLL</button>
-        <button type="button" id="reset-button" onmouseover="showInfo('reset')" onmouseout="clearInfo()" onclick="resetStats()">RESET</button>
-        <button type="button" id="bonds-button" onmouseover="showInfo('bonds')" onmouseout="clearInfo()" onclick="generateRandomBond()">BONDS</button>
-     
-    </div>
-    <div class="github-link-container">
-        <a href="https://github.com/PigeonFX/DELTA-GREEN-STATS" target="_blank">GitHub</a>
-    </div>
-    <div class="info-text" id="infoText"></div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-    <script src="bonds.js"></script>
-    <script src="scripts.js"></script>
+        <div class="button-container">
+            <button type="button" id="random-point-buy"
+                title="Will distribute 72 points across the six stats using a random allocation algorithm."
+                onclick="randomStats()">RANDOM POINT BUY</button>
+            <button type="button" id="random-dice-roll"
+                title="Will roll 4xD6 and keep the three highest rolls. It will then update the value of each stat."
+                onclick="randomDiceRoll()">RANDOM DICE ROLL</button>
+            <button type="button" id="reset-button"
+                title="Will reset all stats to their default value of 3 and take you back to the Point Buy system with 54 points to spend on your stats for a total of 72 points."
+                onclick="resetStats()">RESET</button>
+        </div>
+        <!-- Character sheet section -->
+        <div class="content">
+            <div class="stats-section">
+                <h2>CHARACTER SHEET (Foundry VTT export And printable HTML)</h2>
+                <div id="character-sheet">
+                    <input type="hidden" id="cs-img" value="assets/art/logo.png">
+                    <input type="hidden" id="cs-type" value="agent">
+                    <fieldset id="cs-biography-fieldset" class="panel panel-bio fieldset-default">
+                        <legend>Biography</legend>
+                        <label>Name: <input type="text" id="cs-name" value="Agent"></label><br>
+                        <label>Profession: <input type="text" id="cs-bio-profession" value=""></label>
+                        <label>Employer: <input type="text" id="cs-bio-employer" value=""></label>
+                        <label>Nationality: <input type="text" id="cs-bio-nationality" value=""></label>
+                        <label>Sex: <input type="text" id="cs-bio-sex" value=""></label>
+                        <label>Age: <input type="number" id="cs-bio-age" value="" min="0"></label>
+                        <label>Education: <input type="text" id="cs-bio-education" value=""></label>
+                        <label>Physical Description:</label>
+                        <textarea id="cs-physical-desc" placeholder="Physical description of agent"></textarea>
+                    </fieldset>
+                    <fieldset class="panel panel-stats fieldset-default">
+                        <legend>Statistics & Derived Attributes (editable)</legend>
+                        <div class="stats-derived-grid">
+                            <div>
+                                <div id="cs-stats"><!-- populated by JS --></div>
+                            </div>
+                            <div>
+                                <div id="cs-derived-attributes"><!-- populated by JS --></div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="panel panel-profession fieldset-default">
+                        <legend>Profession</legend>
+                        <label for="cs-profession-select">Select Profession:</label>
+                        <select id="cs-profession-select" onchange="selectProfession(this.value)">
+                            <option value="">-- Choose a Profession --</option>
+                        </select>
+                        <div id="cs-profession-info"></div>
+                        <div id="cs-profession-optional-skills"></div>
+                        <button type="button" id="apply-profession-button" onclick="applyProfessionSkills()">Apply
+                            Professional
+                            Skills</button>
+                        <span class="reminder-text" id="reminder-apply-profession">← Press me before continuing</span>
+                    </fieldset>
+
+                    <fieldset class="panel panel-skills fieldset-default">
+                        <legend>Skills</legend>
+                        <div id="cs-skills"> <!-- skill inputs created by JS --> </div>
+                        <button type="button" id="add-skill-button" onclick="addCustomSkill()">Add Skill</button>
+                        <div id="cs-custom-skills"></div>
+                    </fieldset>
+
+                    <fieldset class="panel panel-bonus-skills fieldset-default">
+                        <legend>Bonus Skill Points</legend>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <button type="button" id="prepare-bonus-button" onclick="prepareBonusSkills()">Prepare
+                                Skills for Bonus
+                                Points</button>
+                            <span class="reminder-text" id="reminder-prepare-bonus">← Press me before continuing</span>
+                        </div>
+                        <div id="bonus-skills-section">
+                            <p class="bonus-skills-description">
+                                Select up to 8 skills to receive +20 bonus points each (maximum 80%):</p>
+                            <div id="bonus-dropdowns"></div>
+                            <button type="button" id="apply-bonus-button" onclick="applyBonusSkills()">Apply
+                                Bonuses</button>
+                            <span class="reminder-text" id="reminder-apply-bonus">← Press me before continuing</span>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="fieldset-default" id="cs-bonds-fieldset">
+                        <legend>Bonds</legend>
+                        <div class="section-flex">
+                            <!-- Bond generation text box -->
+                            <div class="text-box text-box-left" id="bondText"></div>
+                            <!-- Bond categories form -->
+                            <form id="bond-categories" class="bond-categories">
+                                <label for="PISCES_UK">
+                                    <input type="checkbox" id="PISCES_UK" name="bond-category" value="PISCES_UK">
+                                    PISCES (UK)
+                                </label>
+                                <label for="DELTA_GREEN">
+                                    <input type="checkbox" id="DELTA_GREEN" name="bond-category" value="DELTA_GREEN"
+                                        checked>
+                                    DELTA GREEN (US)
+                                </label>
+                                <label for="FRIENDS_FAMILY">
+                                    <input type="checkbox" id="FRIENDS_FAMILY" name="bond-category"
+                                        value="FRIENDS_FAMILY">
+                                    FRIENDS & FAMILY
+                                </label>
+                                <label for="UNDERWORLD">
+                                    <input type="checkbox" id="UNDERWORLD" name="bond-category" value="UNDERWORLD">
+                                    UNDERWORLD
+                                </label>
+                                <label for="LGBTQ">
+                                    <input type="checkbox" id="LGBTQ" name="bond-category" value="LGBTQ">
+                                    LGBTQ
+                                </label>
+                            </form>
+                        </div>
+                        <!-- Bond generation buttons -->
+                        <div class="section-flex-buttons">
+                            <button type="button" id="bonds-button"
+                                title="Will randomly generate a bond based on the selected categories and display it in the text box."
+                                onclick="generateRandomBond()">GENERATE BOND</button>
+                            <button type="button" id="add-bond-button"
+                                title="Add the generated bond to your character sheet." onclick="addBondToSheet()">ADD
+                                TO SHEET</button>
+                        </div>
+                        <div id="cs-bonds" class="bonds-list">
+                            <p class="description-text">(No bonds yet — generated bonds will appear here.)</p>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="panel panel-proto fieldset-default">
+                        on <legend>Prototype Token / Misc JSON</legend>
+                        <label>Prototype Token (JSON):</label>
+                        <textarea id="cs-prototype-json">{
+  "actorLink": true,
+  "name": "Agent",
+  "width": 1,
+  "height": 1,
+  "texture": { "src": "icons/svg/mystery-man.svg" }
+}</textarea>
+                        <label>Items (JSON array):</label>
+                        <textarea id="cs-items-json">[{
+  "name": "Unarmed Attack",
+  "type": "weapon",
+  "flags": { "deltagreen": { "AutoAdded": true, "SystemName": "unarmed-attack" } },
+  "img": "systems/deltagreen/assets/icons/punch.svg",
+  "system": { "skill": "unarmed_combat", "damage": "1D4-1", "equipped": true }
+}]</textarea>
+                    </fieldset>
+
+                    <div class="section-buttons">
+                        <button type="button" id="preview-json" onclick="populateCharacterJSON()">Preview Foundry
+                            JSON</button>
+                        <button type="button" id="export-json" onclick="exportCharacterJSON()">Export Foundry
+                            JSON</button>
+                        <button type="button" id="export-printable" onclick="exportPrintable()">Export as Printable
+                            HTML</button>
+                        <button type="button" id="refresh-stats" onclick="populateCharacterSheetForm()">Refresh fields
+                            from
+                            Stats</button>
+                    </div>
+                    <pre id="cs-json" class="hidden-section"></pre>
+                </div>
+            </div>
+        </div>
+        <!-- Theme selector -->
+        <div id="theme-selector">
+            <label>Theme:</label>
+            <select id="cs-theme-select" aria-label="Theme selector">
+                <option value="xfiles">X-Files</option>
+                <option value="modern">Modern</option>
+                <option value="morris">Morris</option>
+                <option value="son-of-sam">Son of Sam</option>
+                <option value="mobile">Mobile</option>
+            </select>
+        </div>
+        <div class="github-link-container">
+            <a href="https://pigeon-labs-stack.github.io/DELTA-GREEN-STATS/" target="_blank">
+                <svg class="github-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+                    </path>
+                </svg>
+                GitHub
+            </a>
+        </div>
+        <div style="display: flex; justify-content: center; margin-top: 20px; width: 100%;">
+            <a href="https://www.buymeacoffee.com/pigeon_labs" target="_blank" class="bmc-badge-link">
+                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-black.png" alt="Buy Me A Coffee"
+                    class="bmc-img" data-theme="xfiles">
+                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee"
+                    class="bmc-img" data-theme="modern">
+                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-red.png" alt="Buy Me A Coffee" class="bmc-img"
+                    data-theme="son-of-sam">
+                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-white.png" alt="Buy Me A Coffee"
+                    class="bmc-img" data-theme="mobile">
+                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee"
+                    class="bmc-img" data-theme="morris">
+            </a>
+        </div>
+        <div class="disclaimer">
+            <p>Published by arrangement with the Delta Green Partnership. The intellectual property known as Delta Green
+                is a trademark and copyright owned by the Delta Green Partnership, who has licensed its use here. The
+                contents of this document are © pigeonlabs.org, excepting those elements that are components of the
+                Delta Green intellectual property.</p>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+        <script src="professions.js"></script>
+        <script src="bonds.js"></script>
+        <script src="scripts.js"></script>
+        <script src="printable-sheet.js"></script>
 </body>
 
 </html>
