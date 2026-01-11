@@ -1307,12 +1307,11 @@ function buildFoundryJSON() {
             skillsObj[key] = { label: label, proficiency: prof, failure: false };
         });
 
-        // Add custom skills
+        // Add custom skills (only to typedSkills, not to regular skills to avoid duplication)
         const customSkills = getCustomSkills();
         customSkills.forEach(customSkill => {
             const customSkillId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-            skillsObj[customSkillId] = { label: customSkill.name, proficiency: customSkill.value, failure: false };
-            // Also add to typedSkills for consistency
+            // Only add to typedSkills with the 'Custom' group flag
             typedSkillsObj[customSkillId] = { label: customSkill.name, group: 'Custom', proficiency: customSkill.value, failure: false };
         });
 
