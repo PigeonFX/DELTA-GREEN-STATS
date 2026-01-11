@@ -444,6 +444,8 @@ function addCustomSkill() {
     nameInput.style.padding = '4px 8px';
     nameInput.style.borderRadius = '4px';
     nameInput.style.border = '1px solid rgba(255,255,255,0.2)';
+    nameInput.style.backgroundColor = 'transparent';
+    nameInput.style.color = 'inherit';
 
     const valueInput = document.createElement('input');
     valueInput.type = 'number';
@@ -463,6 +465,35 @@ function addCustomSkill() {
     removeBtn.style.padding = '4px 8px';
     removeBtn.style.width = 'auto';
     removeBtn.onclick = () => skillRow.remove();
+
+    // Add event listeners to highlight empty skill names
+    const updateEmptyState = () => {
+        console.log('[updateEmptyState] called, value:', nameInput.value);
+        if (nameInput.value.trim() === '') {
+            console.log('[updateEmptyState] Empty - adding highlight');
+            nameInput.classList.add('empty-reminder');
+            // Also apply inline styles to ensure visibility
+            nameInput.style.borderColor = '#ff6b6b';
+            nameInput.style.borderWidth = '3px';
+            nameInput.style.backgroundColor = 'rgba(255, 107, 107, 0.15)';
+            nameInput.style.boxShadow = '0 0 10px rgba(255, 107, 107, 0.5)';
+        } else {
+            console.log('[updateEmptyState] Not empty - removing highlight');
+            nameInput.classList.remove('empty-reminder');
+            // Reset inline styles
+            nameInput.style.borderColor = '';
+            nameInput.style.borderWidth = '';
+            nameInput.style.backgroundColor = '';
+            nameInput.style.boxShadow = '';
+        }
+    };
+
+    nameInput.addEventListener('input', updateEmptyState);
+    nameInput.addEventListener('blur', updateEmptyState);
+    nameInput.addEventListener('focus', updateEmptyState);
+
+    // Initial check
+    updateEmptyState();
 
     skillRow.appendChild(nameInput);
     skillRow.appendChild(valueInput);
@@ -637,10 +668,7 @@ function applyProfessionSkills() {
     // Helper function to highlight select elements that need a specialty picked
     function highlightSelectForProfessionSkill(selectElement) {
         if (selectElement) {
-            // Add orange border and background to draw attention
-            selectElement.style.borderColor = '#fe640b';
-            selectElement.style.borderWidth = '2px';
-            selectElement.style.backgroundColor = '#fff3e0';
+            selectElement.classList.add('highlight-empty-input');
             selectElement.style.color = '#fe640b';
             selectElement.style.fontWeight = 'bold';
         }
@@ -742,6 +770,9 @@ function applyProfessionSkills() {
 
     if (appliedCount > 0) {
         alert(`Applied ${appliedCount} professional skill(s)! Check the Skills section to see the changes.`);
+        // Remove reminder after button is pressed
+        const reminder = document.getElementById('reminder-apply-profession');
+        if (reminder) reminder.style.display = 'none';
     } else {
         alert('No skills were applied. Make sure the skills exist in the character sheet.');
     }
@@ -845,6 +876,10 @@ function prepareBonusSkills() {
     } else {
         alert('Bonus skills updated! You can boost base skills or custom skills you added.');
     }
+
+    // Remove reminder after button is pressed
+    const reminder = document.getElementById('reminder-prepare-bonus');
+    if (reminder) reminder.style.display = 'none';
 }
 
 /**
@@ -1093,6 +1128,9 @@ function applyBonusSkills() {
     });
     if (appliedCount > 0) {
         alert(`Applied +${CONFIG.BONUS_SKILL_POINTS} bonus to ${appliedCount} skill(s)!`);
+        // Remove reminder after button is pressed
+        const reminder = document.getElementById('reminder-apply-bonus');
+        if (reminder) reminder.style.display = 'none';
     } else {
         alert('Could not find selected skills to boost.');
     }
@@ -1145,6 +1183,23 @@ function addCustomSkillFromProfession(skillName, skillValue) {
         langInput.style.padding = '4px 8px';
         langInput.style.borderRadius = '4px';
         langInput.style.border = '1px solid rgba(255,255,255,0.2)';
+        langInput.style.backgroundColor = 'transparent';
+        langInput.style.color = 'inherit';
+
+        // Add highlighting for empty foreign language input (match dropdown "pick" style)
+        const updateLangInputHighlight = () => {
+            if (langInput.value.trim() === '') {
+                langInput.classList.add('highlight-empty-input');
+            } else {
+                langInput.classList.remove('highlight-empty-input');
+            }
+        };
+
+        langInput.addEventListener('input', updateLangInputHighlight);
+        langInput.addEventListener('blur', updateLangInputHighlight);
+        langInput.addEventListener('focus', updateLangInputHighlight);
+        updateLangInputHighlight(); // Initial check
+
         skillRow.appendChild(langInput);
     } else if (specialtyOptions[skillBase]) {
         // Skill has specialty dropdown
@@ -1159,12 +1214,11 @@ function addCustomSkillFromProfession(skillName, skillValue) {
         specSelect.className = 'cs-skill-specialty';
         specSelect.style.padding = '4px 6px';
         specSelect.style.borderRadius = '4px';
-        specSelect.style.border = '2px solid #fe640b';
-        specSelect.style.backgroundColor = '#fff3e0';
-        specSelect.style.color = '#fe640b';
-        specSelect.style.fontWeight = 'bold';
         specSelect.style.flex = '1';
         specSelect.style.maxWidth = '200px';
+        specSelect.classList.add('highlight-empty-input');
+        specSelect.style.color = '#fe640b';
+        specSelect.style.fontWeight = 'bold';
 
         const pickOption = document.createElement('option');
         pickOption.value = '';
@@ -1511,13 +1565,13 @@ window.onload = function () {
     resetStats();
     populateProfessionDropdown();
     populateCharacterSheetForm();
-    
+
     // Ensure stats are reset after a short delay to override any DOM mutations
     setTimeout(() => {
         resetStats();
         populateCharacterSheetForm();
     }, 50);
-    
+
     observer.observe(document.getElementById('stats'), { childList: true, subtree: true, characterData: true });
 
     // initialize theme from storage and wire selector

@@ -562,6 +562,18 @@ button:disabled,
     border-radius: var(--radius-md);
     font-family: inherit;
     font-size: 0.95em;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 4px 8px;
+}
+
+.highlight-empty-input {
+    border: 2px solid #fe640b !important;
+    background: #fff3e0 !important;
+}
+
+.custom-skill-name.empty-reminder {
+    border: 2px solid #fe640b !important;
+    background: #fff3e0 !important;
 }
 
 .custom-skill-value {
@@ -570,6 +582,28 @@ button:disabled,
     border-radius: var(--radius-md);
     font-family: inherit;
     font-size: 0.95em;
+}
+
+/* Reminder text styling */
+.reminder-text {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #ff9500;
+    white-space: nowrap;
+}
+
+@keyframes pulse-reminder {
+
+    0%,
+    100% {
+        border-color: #ff6b6b;
+        box-shadow: 0 0 8px rgba(255, 107, 107, 0.4);
+    }
+
+    50% {
+        border-color: #ff9500;
+        box-shadow: 0 0 12px rgba(255, 150, 0, 0.6);
+    }
 }
 
 /* Biography Fields */
@@ -1325,6 +1359,17 @@ input[type="checkbox"]:checked+label {
     background-color: var(--cp-accent) !important;
 }
 
+.theme-modern .reminder-text {
+    color: #89b4fa;
+}
+
+.theme-modern .custom-skill-name.empty-reminder {
+    border: 3px solid #f5a97f !important;
+    background: rgba(245, 169, 127, 0.15) !important;
+    box-shadow: 0 0 10px rgba(245, 169, 127, 0.5) !important;
+    animation: pulse-reminder-modern 1.5s ease-in-out infinite;
+}
+
 /* ============================================================================
    MORRIS THEME - ULTRA-MODERN PREMIUM UI
    Ultra-modern design with glassmorphism, gradients, advanced animations,
@@ -1884,6 +1929,31 @@ input[type="checkbox"]:checked+label {
     backdrop-filter: blur(10px);
 }
 
+.theme-morris .reminder-text {
+    color: #ff79c6;
+}
+
+.theme-morris .custom-skill-name.empty-reminder {
+    border: 3px solid #8be9fd !important;
+    background: rgba(139, 233, 253, 0.15) !important;
+    box-shadow: 0 0 10px rgba(139, 233, 253, 0.5) !important;
+    animation: pulse-reminder-morris 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-reminder-morris {
+
+    0%,
+    100% {
+        border-color: #8be9fd;
+        box-shadow: 0 0 8px rgba(139, 233, 253, 0.4);
+    }
+
+    50% {
+        border-color: #ff79c6;
+        box-shadow: 0 0 12px rgba(255, 121, 198, 0.6);
+    }
+}
+
 .theme-morris .disclaimer p {
     margin: 8px 0;
 }
@@ -2425,6 +2495,31 @@ input[type="checkbox"]:checked+label {
     margin: 8px 0;
 }
 
+.theme-son-of-sam .reminder-text {
+    color: #ff3333;
+}
+
+.theme-son-of-sam .custom-skill-name.empty-reminder {
+    border: 3px solid #ffaa00 !important;
+    background: rgba(255, 170, 0, 0.15) !important;
+    box-shadow: 0 0 10px rgba(255, 170, 0, 0.5) !important;
+    animation: pulse-reminder-sos 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-reminder-sos {
+
+    0%,
+    100% {
+        border-color: #ffaa00;
+        box-shadow: 0 0 8px rgba(255, 170, 0, 0.4);
+    }
+
+    50% {
+        border-color: #ff3333;
+        box-shadow: 0 0 12px rgba(255, 51, 51, 0.6);
+    }
+}
+
 /* Son of Sam pentagram symbols in buttons */
 .theme-son-of-sam #add-skill-button::before {
     content: '⛤ ';
@@ -2736,6 +2831,31 @@ body:not(.theme-modern):not(.theme-morris):not(.theme-son-of-sam) #bmc-button-co
 .theme-mobile .custom-skill-value {
     width: 60px;
     min-height: 40px;
+}
+
+.theme-mobile .reminder-text {
+    color: #4a90e2;
+}
+
+.theme-mobile .custom-skill-name.empty-reminder {
+    border: 3px solid #ff6b6b !important;
+    background: rgba(255, 107, 107, 0.15) !important;
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5) !important;
+    animation: pulse-reminder-mobile 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-reminder-mobile {
+
+    0%,
+    100% {
+        border-color: #ff6b6b;
+        box-shadow: 0 0 8px rgba(255, 107, 107, 0.4);
+    }
+
+    50% {
+        border-color: #4a90e2;
+        box-shadow: 0 0 12px rgba(74, 144, 226, 0.6);
+    }
 }
 
 .theme-mobile .section-flex {
