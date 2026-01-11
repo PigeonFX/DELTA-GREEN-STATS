@@ -1511,6 +1511,13 @@ window.onload = function () {
     resetStats();
     populateProfessionDropdown();
     populateCharacterSheetForm();
+    
+    // Ensure stats are reset after a short delay to override any DOM mutations
+    setTimeout(() => {
+        resetStats();
+        populateCharacterSheetForm();
+    }, 50);
+    
     observer.observe(document.getElementById('stats'), { childList: true, subtree: true, characterData: true });
 
     // initialize theme from storage and wire selector
