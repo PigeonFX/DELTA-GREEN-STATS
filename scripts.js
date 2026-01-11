@@ -1508,7 +1508,7 @@ const observer = new MutationObserver(() => { try { populateCharacterSheetForm()
 
 window.onload = function () {
     generateStatContainers();
-    randomDiceRoll();
+    resetStats();
     populateProfessionDropdown();
     populateCharacterSheetForm();
     observer.observe(document.getElementById('stats'), { childList: true, subtree: true, characterData: true });
