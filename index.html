@@ -97,6 +97,7 @@
                         <button type="button" id="apply-profession-button" onclick="applyProfessionSkills()">Apply
                             Professional
                             Skills</button>
+                        <span class="reminder-text" id="reminder-apply-profession">← Press me before continuing</span>
                     </fieldset>
 
                     <fieldset class="panel panel-skills fieldset-default">
@@ -108,13 +109,19 @@
 
                     <fieldset class="panel panel-bonus-skills fieldset-default">
                         <legend>Bonus Skill Points</legend>
-                        <button type="button" onclick="prepareBonusSkills()">Prepare Skills for Bonus
-                            Points</button>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <button type="button" id="prepare-bonus-button" onclick="prepareBonusSkills()">Prepare
+                                Skills for Bonus
+                                Points</button>
+                            <span class="reminder-text" id="reminder-prepare-bonus">← Press me before continuing</span>
+                        </div>
                         <div id="bonus-skills-section">
                             <p class="bonus-skills-description">
                                 Select up to 8 skills to receive +20 bonus points each (maximum 80%):</p>
                             <div id="bonus-dropdowns"></div>
-                            <button type="button" onclick="applyBonusSkills()">Apply Bonuses</button>
+                            <button type="button" id="apply-bonus-button" onclick="applyBonusSkills()">Apply
+                                Bonuses</button>
+                            <span class="reminder-text" id="reminder-apply-bonus">← Press me before continuing</span>
                         </div>
                     </fieldset>
 

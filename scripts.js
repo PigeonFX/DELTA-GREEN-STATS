@@ -443,7 +443,7 @@ function addCustomSkill() {
     nameInput.style.flex = '1';
     nameInput.style.padding = '4px 8px';
     nameInput.style.borderRadius = '4px';
-    nameInput.style.border = '1px solid rgba(255,255,255,0.2)';
+    // Removed inline border - let CSS handle it
 
     const valueInput = document.createElement('input');
     valueInput.type = 'number';
@@ -463,6 +463,32 @@ function addCustomSkill() {
     removeBtn.style.padding = '4px 8px';
     removeBtn.style.width = 'auto';
     removeBtn.onclick = () => skillRow.remove();
+
+    // Add event listeners to highlight empty skill names
+    const updateEmptyState = () => {
+        if (nameInput.value.trim() === '') {
+            nameInput.classList.add('empty-reminder');
+            // Also apply inline styles to ensure visibility
+            nameInput.style.borderColor = '#ff6b6b';
+            nameInput.style.borderWidth = '3px';
+            nameInput.style.backgroundColor = 'rgba(255, 107, 107, 0.15)';
+            nameInput.style.boxShadow = '0 0 10px rgba(255, 107, 107, 0.5)';
+        } else {
+            nameInput.classList.remove('empty-reminder');
+            // Reset inline styles
+            nameInput.style.borderColor = '';
+            nameInput.style.borderWidth = '';
+            nameInput.style.backgroundColor = '';
+            nameInput.style.boxShadow = '';
+        }
+    };
+
+    nameInput.addEventListener('input', updateEmptyState);
+    nameInput.addEventListener('blur', updateEmptyState);
+    nameInput.addEventListener('focus', updateEmptyState);
+
+    // Initial check
+    updateEmptyState();
 
     skillRow.appendChild(nameInput);
     skillRow.appendChild(valueInput);
@@ -742,6 +768,9 @@ function applyProfessionSkills() {
 
     if (appliedCount > 0) {
         alert(`Applied ${appliedCount} professional skill(s)! Check the Skills section to see the changes.`);
+        // Remove reminder after button is pressed
+        const reminder = document.getElementById('reminder-apply-profession');
+        if (reminder) reminder.style.display = 'none';
     } else {
         alert('No skills were applied. Make sure the skills exist in the character sheet.');
     }
@@ -845,6 +874,10 @@ function prepareBonusSkills() {
     } else {
         alert('Bonus skills updated! You can boost base skills or custom skills you added.');
     }
+
+    // Remove reminder after button is pressed
+    const reminder = document.getElementById('reminder-prepare-bonus');
+    if (reminder) reminder.style.display = 'none';
 }
 
 /**
@@ -1093,6 +1126,9 @@ function applyBonusSkills() {
     });
     if (appliedCount > 0) {
         alert(`Applied +${CONFIG.BONUS_SKILL_POINTS} bonus to ${appliedCount} skill(s)!`);
+        // Remove reminder after button is pressed
+        const reminder = document.getElementById('reminder-apply-bonus');
+        if (reminder) reminder.style.display = 'none';
     } else {
         alert('Could not find selected skills to boost.');
     }
@@ -1511,13 +1547,13 @@ window.onload = function () {
     resetStats();
     populateProfessionDropdown();
     populateCharacterSheetForm();
-    
+
     // Ensure stats are reset after a short delay to override any DOM mutations
     setTimeout(() => {
         resetStats();
         populateCharacterSheetForm();
     }, 50);
-    
+
     observer.observe(document.getElementById('stats'), { childList: true, subtree: true, characterData: true });
 
     // initialize theme from storage and wire selector
