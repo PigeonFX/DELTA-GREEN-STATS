@@ -1596,9 +1596,11 @@ window.onload = function () {
 function setTheme(theme) {
     try {
         const body = document.body;
-        body.classList.remove('theme-modern', 'theme-morris', 'theme-son-of-sam', 'theme-mobile');
+        body.classList.remove('theme-xfiles', 'theme-modern', 'theme-morris', 'theme-son-of-sam', 'theme-mobile');
 
-        if (theme === 'modern') {
+        if (theme === 'xfiles') {
+            body.classList.add('theme-xfiles');
+        } else if (theme === 'modern') {
             body.classList.add('theme-modern');
         } else if (theme === 'morris') {
             body.classList.add('theme-morris');

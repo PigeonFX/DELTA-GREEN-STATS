@@ -108,6 +108,27 @@ select {
     padding: var(--spacing-xs) var(--spacing-md);
     border: 1px solid #bbb;
     border-radius: var(--radius-md);
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+/* X-Files (default) theme select styling - CRT green on black */
+.theme-xfiles select {
+    background-color: #000000 !important;
+    color: #00b521 !important;
+    border: 2px solid #00b521 !important;
+    font-weight: 500;
+}
+
+.theme-xfiles select:hover {
+    border-color: #00ff00 !important;
+}
+
+.theme-xfiles select:focus {
+    outline: none;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.3) !important;
 }
 
 /* ============================================================================
@@ -537,6 +558,14 @@ button:disabled,
     color: var(--primary-color);
 }
 
+/* X-Files theme select options - ensure all dropdowns follow CRT theme */
+.theme-xfiles #cs-profession-select option,
+.theme-xfiles select option,
+.theme-xfiles .cs-bonus-skill-select option {
+    background: #000000 !important;
+    color: #00b521 !important;
+}
+
 #cs-profession-info {
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -807,24 +836,89 @@ input[type="checkbox"]:checked+label {
 
 /* Buy Me A Coffee Button removed - now uses simple link styled like GitHub button */
 
-/* Bonus Skill Select Styling */
+/* Bonus Skill Select Styling - Theme Unified */
 .cs-bonus-skill-select {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    color: inherit;
+    background: var(--input-bg);
+    color: var(--text-color);
+    border: 2px solid var(--input-border);
     border-radius: var(--radius-md);
     padding: var(--spacing-xs) var(--spacing-md);
     font-family: inherit;
     font-size: 0.95em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cs-bonus-skill-select:hover {
+    border-color: var(--primary-color);
 }
 
 .cs-bonus-skill-select:focus {
     outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(0, 181, 33, 0.3);
 }
 
 .theme-modern .cs-bonus-skill-select {
     background: var(--cp-surface1) !important;
-    color: #8aadf4 !important;
+    color: var(--cp-text) !important;
+    border-color: rgba(137, 180, 250, 0.3) !important;
+}
+
+.theme-modern .cs-bonus-skill-select:hover {
+    border-color: rgba(137, 180, 250, 0.6) !important;
+}
+
+.theme-modern .cs-bonus-skill-select:focus {
+    border-color: rgba(137, 180, 250, 0.8) !important;
+    box-shadow: 0 0 8px rgba(137, 180, 250, 0.4) !important;
+}
+
+.theme-morris .cs-bonus-skill-select {
+    background: rgba(20, 40, 80, 0.3) !important;
+    color: #f8f8f2 !important;
+    border: 1px solid var(--morris-border) !important;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xs) var(--spacing-md);
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.theme-morris .cs-bonus-skill-select option {
+    background: var(--morris-bg-dark);
+    color: var(--morris-accent);
+    font-weight: 500;
+}
+
+.theme-morris .cs-bonus-skill-select:hover {
+    border-color: rgba(139, 233, 253, 0.7) !important;
+}
+
+.theme-morris .cs-bonus-skill-select:focus {
+    background: rgba(20, 40, 80, 0.4) !important;
+    border-color: #00d4ff !important;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2), 0 0 12px rgba(0, 212, 255, 0.3) !important;
+}
+
+.theme-son-of-sam .cs-bonus-skill-select {
+    background: rgba(0, 0, 0, 0.6) !important;
+    color: #ff3333 !important;
+    border-color: #ff3333 !important;
+}
+
+.theme-son-of-sam .cs-bonus-skill-select:focus {
+    border-color: #ffaa00 !important;
+    box-shadow: 0 0 8px rgba(255, 170, 0, 0.4) !important;
+}
+
+.theme-mobile .cs-bonus-skill-select {
+    background: rgba(74, 144, 226, 0.1) !important;
+    color: #4a90e2 !important;
+    border-color: #4a90e2 !important;
+}
+
+.theme-mobile .cs-bonus-skill-select:focus {
+    border-color: #4a90e2 !important;
+    box-shadow: 0 0 8px rgba(74, 144, 226, 0.3) !important;
 }
 
 .disclaimer {
@@ -1453,24 +1547,34 @@ input[type="checkbox"]:checked+label {
 .theme-morris input[type="number"],
 .theme-morris textarea,
 .theme-morris select {
-    background: linear-gradient(135deg, rgba(30, 50, 100, 0.3) 0%, rgba(20, 40, 80, 0.2) 100%);
-    color: var(--morris-text);
-    border: 1px solid var(--morris-border);
+    background: linear-gradient(135deg, rgba(50, 80, 150, 0.2) 0%, rgba(30, 60, 120, 0.1) 100%) !important;
+    color: #f8f8f2 !important;
+    border: 1px solid var(--morris-border-light) !important;
     border-radius: 12px;
     padding: 12px 16px;
     font-weight: 500;
     backdrop-filter: blur(10px);
-    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3), var(--morris-glow);
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
+}
+
+.theme-morris select:hover {
+    border-color: #00d4ff !important;
+}
+
+.theme-morris select:focus {
+    background: linear-gradient(135deg, rgba(50, 80, 150, 0.3) 0%, rgba(30, 60, 120, 0.2) 100%) !important;
+    border-color: #00d4ff !important;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2), 0 0 16px rgba(0, 212, 255, 0.3) !important;
+    outline: none;
 }
 
 .theme-morris input[type="text"]:focus,
 .theme-morris input[type="number"]:focus,
-.theme-morris textarea:focus,
-.theme-morris select:focus {
-    background: linear-gradient(135deg, rgba(40, 70, 130, 0.5) 0%, rgba(30, 60, 100, 0.3) 100%);
-    border-color: var(--morris-primary);
-    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 212, 255, 0.3), 0 0 40px rgba(0, 212, 255, 0.1);
+.theme-morris textarea:focus {
+    background: linear-gradient(135deg, rgba(50, 80, 150, 0.3) 0%, rgba(30, 60, 120, 0.2) 100%);
+    border-color: rgba(0, 212, 255, 0.8);
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2), 0 0 16px rgba(0, 212, 255, 0.3);
     outline: none;
 }
 
@@ -1538,13 +1642,13 @@ input[type="checkbox"]:checked+label {
 
 .theme-morris .panel,
 .theme-morris fieldset {
-    background: var(--morris-surface);
-    border: 1px solid var(--morris-border);
+    background: linear-gradient(135deg, rgba(50, 80, 150, 0.15) 0%, rgba(30, 60, 120, 0.08) 100%);
+    border: 1px solid var(--morris-border-light);
     border-radius: 16px;
     padding: 24px;
     margin-bottom: 20px;
     backdrop-filter: blur(20px);
-    box-shadow: var(--morris-shadow-sm);
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.1);
     position: relative;
     overflow: hidden;
 }
@@ -1725,15 +1829,15 @@ input[type="checkbox"]:checked+label {
 }
 
 .theme-morris .text-box {
-    background: linear-gradient(135deg, rgba(20, 40, 100, 0.3) 0%, rgba(15, 30, 80, 0.2) 100%);
-    border: 1px solid var(--morris-border);
+    background: linear-gradient(135deg, rgba(50, 80, 150, 0.2) 0%, rgba(30, 60, 120, 0.1) 100%);
+    border: 1px solid var(--morris-border-light);
     border-radius: 12px;
     padding: 20px;
     min-height: 150px;
     color: var(--morris-text);
     font-style: italic;
     backdrop-filter: blur(15px);
-    box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.4), var(--morris-glow);
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2), var(--morris-glow);
     overflow-y: auto;
 }
 
