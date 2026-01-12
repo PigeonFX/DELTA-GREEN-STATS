@@ -74,6 +74,20 @@
                         <label>Education: <input type="text" id="cs-bio-education" value=""></label>
                         <label>Physical Description:</label>
                         <textarea id="cs-physical-desc" placeholder="Physical description of agent"></textarea>
+                        <div id="bio-generator-section"
+                            style="display: flex; flex-direction: column; gap: 12px; justify-content: center; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+                            <button type="button" id="random-bio-button" onclick="generateRandomBio()"
+                                title="Generate a random biography">RANDOM BIO</button>
+                            <div style="display: flex; gap: 0; align-items: center;">
+                                <label for="bio-gender-select"
+                                    style="white-space: nowrap; margin: 0; padding: 0;">Gender:</label>
+                                <select id="bio-gender-select">
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="non-binary">Non-binary</option>
+                                </select>
+                            </div>
+                        </div>
                     </fieldset>
                     <fieldset class="panel panel-stats fieldset-default">
                         <legend>Statistics & Derived Attributes (editable)</legend>
@@ -103,7 +117,63 @@
                     <fieldset class="panel panel-skills fieldset-default">
                         <legend>Skills</legend>
                         <div id="cs-skills"> <!-- skill inputs created by JS --> </div>
-                        <button type="button" id="add-skill-button" onclick="addCustomSkill()">Add Skill</button>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+                            <button type="button" id="add-skill-button" onclick="addCustomSkill()">Add Skill</button>
+                            <div class="sanity-adaptations-section"
+                                style="margin-top: 0; padding-top: 0; border-top: none; text-align: right;">
+                                <div style="font-weight: bold; margin-bottom: 8px; font-size: 0.9em;">Sanity
+                                    Adaptations:</div>
+                                <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label style="margin: 0; flex: 0 0 auto;">Violence:</label>
+                                        <div style="display: flex; gap: 4px;">
+                                            <label style="display: flex; align-items: center; gap: 2px; margin: 0;">
+                                                <input type="checkbox" id="cs-violence-incident1"
+                                                    class="sanity-adaptation-checkbox"
+                                                    onchange="updateSanityAdaptations()">
+                                                <span>1</span>
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 2px; margin: 0;">
+                                                <input type="checkbox" id="cs-violence-incident2"
+                                                    class="sanity-adaptation-checkbox"
+                                                    onchange="updateSanityAdaptations()">
+                                                <span>2</span>
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 2px; margin: 0;">
+                                                <input type="checkbox" id="cs-violence-incident3"
+                                                    class="sanity-adaptation-checkbox"
+                                                    onchange="updateSanityAdaptations()">
+                                                <span>3</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label style="margin: 0; flex: 0 0 auto;">Helplessness:</label>
+                                        <div style="display: flex; gap: 4px;">
+                                            <label style="display: flex; align-items: center; gap: 2px; margin: 0;">
+                                                <input type="checkbox" id="cs-helplessness-incident1"
+                                                    class="sanity-adaptation-checkbox"
+                                                    onchange="updateSanityAdaptations()">
+                                                <span>1</span>
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 2px; margin: 0;">
+                                                <input type="checkbox" id="cs-helplessness-incident2"
+                                                    class="sanity-adaptation-checkbox"
+                                                    onchange="updateSanityAdaptations()">
+                                                <span>2</span>
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 2px; margin: 0;">
+                                                <input type="checkbox" id="cs-helplessness-incident3"
+                                                    class="sanity-adaptation-checkbox"
+                                                    onchange="updateSanityAdaptations()">
+                                                <span>3</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div id="cs-custom-skills"></div>
                     </fieldset>
 
@@ -250,6 +320,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
         <script src="professions.js"></script>
         <script src="bonds.js"></script>
+        <script src="bio.js"></script>
         <script src="scripts.js"></script>
         <script src="printable-sheet.js"></script>
 </body>

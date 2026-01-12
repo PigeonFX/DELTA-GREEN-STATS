@@ -495,17 +495,17 @@ function exportPrintable() {
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 8px;">
                     <div style="text-align: left; display: flex; align-items: center; gap: 4px;">
                         <span>Violence</span>
-                        <input type="checkbox" style="width: 14px; height: 14px;">
-                        <input type="checkbox" style="width: 14px; height: 14px;">
-                        <input type="checkbox" style="width: 14px; height: 14px;">
-                        <span>Adapted</span>
+                        <input type="checkbox" style="width: 14px; height: 14px; accent-color: #000; cursor: pointer;" ${document.getElementById('cs-violence-incident1')?.checked ? 'checked' : ''}>
+                        <input type="checkbox" style="width: 14px; height: 14px; accent-color: #000; cursor: pointer;" ${document.getElementById('cs-violence-incident2')?.checked ? 'checked' : ''}>
+                        <input type="checkbox" style="width: 14px; height: 14px; accent-color: #000; cursor: pointer;" ${document.getElementById('cs-violence-incident3')?.checked ? 'checked' : ''}>
+                        ${(document.getElementById('cs-violence-incident1')?.checked || document.getElementById('cs-violence-incident2')?.checked || document.getElementById('cs-violence-incident3')?.checked) ? '<span>Adapted</span>' : ''}
                     </div>
                     <div style="text-align: left; display: flex; align-items: center; gap: 4px;">
                         <span>Helplessness</span>
-                        <input type="checkbox" style="width: 14px; height: 14px;">
-                        <input type="checkbox" style="width: 14px; height: 14px;">
-                        <input type="checkbox" style="width: 14px; height: 14px;">
-                        <span>Adapted</span>
+                        <input type="checkbox" style="width: 14px; height: 14px; accent-color: #000; cursor: pointer;" ${document.getElementById('cs-helplessness-incident1')?.checked ? 'checked' : ''}>
+                        <input type="checkbox" style="width: 14px; height: 14px; accent-color: #000; cursor: pointer;" ${document.getElementById('cs-helplessness-incident2')?.checked ? 'checked' : ''}>
+                        <input type="checkbox" style="width: 14px; height: 14px; accent-color: #000; cursor: pointer;" ${document.getElementById('cs-helplessness-incident3')?.checked ? 'checked' : ''}>
+                        ${(document.getElementById('cs-helplessness-incident1')?.checked || document.getElementById('cs-helplessness-incident2')?.checked || document.getElementById('cs-helplessness-incident3')?.checked) ? '<span>Adapted</span>' : ''}
                     </div>
                 </div>
             </div>

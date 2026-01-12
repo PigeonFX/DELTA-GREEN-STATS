@@ -131,6 +131,21 @@ select {
     box-shadow: 0 0 8px rgba(0, 255, 0, 0.3) !important;
 }
 
+.theme-xfiles #bio-gender-select {
+    background-color: #000000 !important;
+    color: #00b521 !important;
+    border: 2px solid #00b521 !important;
+    font-weight: 500;
+    padding: 2px 6px !important;
+    margin: 0 !important;
+}
+
+.theme-xfiles #bio-gender-select:hover,
+.theme-xfiles #bio-gender-select:focus {
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.3) !important;
+}
+
 /* X-Files theme highlight for empty/required inputs and pick dropdowns */
 .theme-xfiles .highlight-empty-input,
 .theme-xfiles .custom-skill-name.empty-reminder,
@@ -451,6 +466,50 @@ button:disabled,
 #add-bond-button {
     padding: var(--spacing-md) var(--spacing-lg);
     font-size: var(--font-sm);
+}
+
+#random-bio-button {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: var(--font-sm);
+    margin-bottom: var(--spacing-lg);
+    background-color: #00b521;
+    color: #000000;
+    border: 1px solid #00b521;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: var(--radius-md);
+}
+
+#random-bio-button:hover {
+    background-color: #00ff2b;
+    border-color: #00ff2b;
+}
+
+#bio-gender-select {
+    padding: 2px 6px;
+    margin: 0;
+    background-color: #000000;
+    color: #00b521;
+    border: 1px solid #00b521;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#bio-gender-select:hover,
+#bio-gender-select:focus {
+    border-color: #00ff2b;
+    color: #00ff2b;
+}
+
+/* Override biography fieldset label styling for gender selector */
+#cs-biography-fieldset div label[for="bio-gender-select"] {
+    display: inline;
+    grid-template-columns: auto;
+    align-items: auto;
+    gap: 0;
+    margin-top: 0;
+    margin-right: 0;
 }
 
 /* ============================================================================
@@ -810,6 +869,80 @@ input[type="checkbox"]:checked+label {
     color: #ffffff;
 }
 
+/* Sanity adaptation checkboxes */
+.sanity-adaptation-checkbox {
+    display: inline-block !important;
+    width: 14px !important;
+    height: 14px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.sanity-adaptation-checkbox+span {
+    display: inline;
+}
+
+/* X-Files theme sanity checkboxes */
+.theme-xfiles .sanity-adaptation-checkbox {
+    accent-color: #00b521;
+}
+
+.theme-xfiles .sanity-adaptation-checkbox+span {
+    color: #00b521;
+}
+
+/* Sanity adaptations section */
+.sanity-adaptations-section {
+    font-size: 0.9em;
+}
+
+/* Modern theme sanity checkboxes */
+.theme-modern .sanity-adaptation-checkbox {
+    accent-color: var(--cp-green);
+}
+
+.theme-modern .sanity-adaptation-checkbox+span {
+    color: var(--cp-sapphire) !important;
+}
+
+/* Modern theme sanity adaptations section */
+.theme-modern .sanity-adaptations-section {
+    color: var(--cp-sapphire) !important;
+}
+
+.theme-modern .sanity-adaptations-section label {
+    color: var(--cp-sapphire) !important;
+}
+
+/* Morris theme sanity checkboxes */
+.theme-morris .sanity-adaptation-checkbox {
+    accent-color: #00d4ff;
+}
+
+.theme-morris .sanity-adaptation-checkbox+span {
+    color: #f8f8f2;
+}
+
+/* Son of Sam theme sanity checkboxes */
+.theme-son-of-sam .sanity-adaptation-checkbox {
+    accent-color: #ff3333;
+}
+
+.theme-son-of-sam .sanity-adaptation-checkbox+span {
+    color: #ff3333;
+}
+
+/* Mobile theme sanity checkboxes */
+.theme-mobile .sanity-adaptation-checkbox {
+    accent-color: #4a90e2;
+}
+
+.theme-mobile .sanity-adaptation-checkbox+span {
+    color: #4a90e2;
+}
+
 /* ============================================================================
    MISC COMPONENTS
    ============================================================================ */
@@ -907,6 +1040,26 @@ input[type="checkbox"]:checked+label {
     box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2), 0 0 12px rgba(0, 212, 255, 0.3) !important;
 }
 
+.theme-morris #bio-gender-select {
+    background: rgba(20, 40, 80, 0.3) !important;
+    color: #f8f8f2 !important;
+    border: 1px solid var(--morris-border) !important;
+    border-radius: var(--radius-md);
+    padding: 2px 6px !important;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2);
+    margin: 0 !important;
+}
+
+.theme-morris #bio-gender-select:hover {
+    border-color: rgba(139, 233, 253, 0.7) !important;
+}
+
+.theme-morris #bio-gender-select:focus {
+    background: rgba(20, 40, 80, 0.4) !important;
+    border-color: #00d4ff !important;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2), 0 0 12px rgba(0, 212, 255, 0.3) !important;
+}
+
 .theme-son-of-sam .cs-bonus-skill-select {
     background: rgba(0, 0, 0, 0.6) !important;
     color: #ff3333 !important;
@@ -918,6 +1071,44 @@ input[type="checkbox"]:checked+label {
     box-shadow: 0 0 8px rgba(255, 170, 0, 0.4) !important;
 }
 
+.theme-son-of-sam #bio-gender-select {
+    background: rgba(0, 0, 0, 0.6) !important;
+    color: #ff3333 !important;
+    border-color: #ff3333 !important;
+    padding: 2px 6px !important;
+    margin: 0 !important;
+}
+
+.theme-son-of-sam #bio-gender-select:hover {
+    border-color: #ffaa00 !important;
+}
+
+.theme-son-of-sam #bio-gender-select:focus {
+    border-color: #ffaa00 !important;
+    box-shadow: 0 0 8px rgba(255, 170, 0, 0.4) !important;
+}
+
+.theme-son-of-sam #random-bio-button {
+    background: var(--sos-primary) !important;
+    color: var(--sos-bg) !important;
+    border: 1px solid var(--sos-primary) !important;
+    border-radius: 0px !important;
+    padding: 12px 20px !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    box-shadow: var(--sos-shadow) !important;
+    transition: all 0.2s ease !important;
+    font-family: 'Courier New', monospace !important;
+}
+
+.theme-son-of-sam #random-bio-button:hover {
+    background: var(--sos-accent) !important;
+    border-color: var(--sos-accent) !important;
+    box-shadow: var(--sos-shadow) !important;
+}
+
 .theme-mobile .cs-bonus-skill-select {
     background: rgba(74, 144, 226, 0.1) !important;
     color: #4a90e2 !important;
@@ -925,6 +1116,23 @@ input[type="checkbox"]:checked+label {
 }
 
 .theme-mobile .cs-bonus-skill-select:focus {
+    border-color: #4a90e2 !important;
+    box-shadow: 0 0 8px rgba(74, 144, 226, 0.3) !important;
+}
+
+.theme-mobile #bio-gender-select {
+    background: rgba(74, 144, 226, 0.1) !important;
+    color: #4a90e2 !important;
+    border-color: #4a90e2 !important;
+    padding: 2px 6px !important;
+    margin: 0 !important;
+}
+
+.theme-mobile #bio-gender-select:hover {
+    border-color: #4a90e2 !important;
+}
+
+.theme-mobile #bio-gender-select:focus {
     border-color: #4a90e2 !important;
     box-shadow: 0 0 8px rgba(74, 144, 226, 0.3) !important;
 }
@@ -1215,6 +1423,37 @@ body * {
     background: linear-gradient(180deg, var(--cp-mauve), var(--cp-accent));
     border: none;
     color: #071126;
+}
+
+.theme-modern #random-bio-button {
+    background: var(--cp-peach);
+    border: none;
+    color: #071126;
+}
+
+.theme-modern #bio-gender-select {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)) !important;
+    color: var(--cp-text) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    border-radius: var(--radius-lg);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+    padding: 2px 6px !important;
+    margin: 0 !important;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.theme-modern #bio-gender-select option {
+    background: #2e2e4a;
+    color: var(--cp-text);
+    border: none;
+}
+
+.theme-modern #bio-gender-select:hover,
+.theme-modern #bio-gender-select:focus {
+    border-color: var(--cp-green);
+    box-shadow: 0 0 8px rgba(166, 209, 137, 0.3);
 }
 
 .theme-modern input,

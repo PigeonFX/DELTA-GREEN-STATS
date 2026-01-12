@@ -7,7 +7,10 @@
 // - Skill management with specialties
 // - Bond generation and management
 // - Foundry VTT JSON export
+// - Biography generation
 // ============================================================================
+
+// Note: bioData is defined in bio.js and loaded before this script
 
 // ============================================================================
 // CONFIGURATION & CONSTANTS
@@ -101,6 +104,50 @@ function populateProfessionDropdown() {
         option.textContent = professions[key].title;
         select.appendChild(option);
     });
+}
+
+/**
+ * Generates a random biography by selecting random entries from bio.json
+ * Populates the biography form fields with random data
+ */
+function generateRandomBio() {
+    if (!bioData) {
+        alert('Biography data is still loading. Please try again in a moment.');
+        return;
+    }
+
+    // Helper function to get random item from array
+    const getRandomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    // Get selected gender from dropdown
+    const genderSelect = document.getElementById('bio-gender-select');
+    const selectedGender = genderSelect ? genderSelect.value : 'male';
+
+    // Generate random name based on selected gender
+    const firstName = getRandomItem(bioData.firstNames[selectedGender]);
+    const lastName = getRandomItem(bioData.lastNames);
+    const fullName = `${firstName} ${lastName}`;
+
+    // Map gender selection to sex display value
+    const genderToSex = {
+        'male': 'Male',
+        'female': 'Female',
+        'non-binary': 'Non-binary'
+    };
+    const sex = genderToSex[selectedGender] || 'Male';
+
+    // Populate all biography fields
+    document.getElementById('cs-name').value = fullName;
+    // Keep profession blank - it's a key stat that should be chosen manually
+    document.getElementById('cs-bio-employer').value = getRandomItem(bioData.employers);
+    document.getElementById('cs-bio-nationality').value = getRandomItem(bioData.nationalities);
+    document.getElementById('cs-bio-sex').value = sex;
+    // Generate random age between 25 and 65
+    const randomAge = Math.floor(Math.random() * (65 - 25 + 1)) + 25;
+    document.getElementById('cs-bio-age').value = randomAge;
+    document.getElementById('cs-bio-education').value = getRandomItem(bioData.educations);
+    // Get physical description based on selected gender
+    document.getElementById('cs-physical-desc').value = getRandomItem(bioData.physicalDescriptions[selectedGender]);
 }
 
 /**
@@ -1473,6 +1520,19 @@ function buildFoundryJSON() {
         }
         const finalProtoToken = Object.assign(defaultProtoToken, prototypeToken);
 
+        // Get sanity adaptations from checkboxes
+        const violenceAdaptations = {
+            incident1: document.getElementById('cs-violence-incident1')?.checked || false,
+            incident2: document.getElementById('cs-violence-incident2')?.checked || false,
+            incident3: document.getElementById('cs-violence-incident3')?.checked || false
+        };
+
+        const helplessnessAdaptations = {
+            incident1: document.getElementById('cs-helplessness-incident1')?.checked || false,
+            incident2: document.getElementById('cs-helplessness-incident2')?.checked || false,
+            incident3: document.getElementById('cs-helplessness-incident3')?.checked || false
+        };
+
         const foundry = {
             name: name,
             type: type,
@@ -1487,7 +1547,7 @@ function buildFoundryJSON() {
                 specialTraining: [],
                 settings: { sorting: { weaponSortAlphabetical: false, armorSortAlphabetical: false, gearSortAlphabetical: false, tomeSortAlphabetical: false, ritualSortAlphabetical: false }, rolling: { defaultPercentileModifier: 20 } },
                 schemaVersion: 1,
-                sanity: { value: sanityValue, currentBreakingPoint: breakingPoint, adaptations: { violence: { incident1: false, incident2: false, incident3: false }, helplessness: { incident1: false, incident2: false, incident3: false } } },
+                sanity: { value: sanityValue, currentBreakingPoint: breakingPoint, adaptations: { violence: violenceAdaptations, helplessness: helplessnessAdaptations } },
                 physical: { description: physicalDesc, wounds: "", firstAidAttempted: false, exhausted: false, exhaustedPenalty: -20 },
                 biography: { profession: bioProfession, employer: bioEmployer, nationality: bioNationality, sex: bioSex, age: bioAge, education: bioEducation },
                 corruption: { value: corruptionValue, haveSeenTheYellowSign: false, gift: "", insight: "" }
@@ -1849,3 +1909,30 @@ function renderBondsOnSheet() {
  * Includes filled sections plus blank spaces for user to fill in
  * Can be saved, printed to PDF, or viewed in browser
  */
+
+/**
+ * Updates the sanity adaptations based on checkbox states
+ * Stores the state in the form for JSON export
+ */
+function updateSanityAdaptations() {
+    // Get all checkbox states
+    const violenceIncident1 = document.getElementById('cs-violence-incident1')?.checked || false;
+    const violenceIncident2 = document.getElementById('cs-violence-incident2')?.checked || false;
+    const violenceIncident3 = document.getElementById('cs-violence-incident3')?.checked || false;
+    const helplessnessIncident1 = document.getElementById('cs-helplessness-incident1')?.checked || false;
+    const helplessnessIncident2 = document.getElementById('cs-helplessness-incident2')?.checked || false;
+    const helplessnessIncident3 = document.getElementById('cs-helplessness-incident3')?.checked || false;
+
+    // Store in a data attribute for later retrieval during JSON export
+    document.getElementById('character-sheet').dataset.violenceAdaptations = JSON.stringify({
+        incident1: violenceIncident1,
+        incident2: violenceIncident2,
+        incident3: violenceIncident3
+    });
+
+    document.getElementById('character-sheet').dataset.helplessnessAdaptations = JSON.stringify({
+        incident1: helplessnessIncident1,
+        incident2: helplessnessIncident2,
+        incident3: helplessnessIncident3
+    });
+}
