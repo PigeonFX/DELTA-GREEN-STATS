@@ -13,6 +13,26 @@
 // Note: bioData is defined in bio.js and loaded before this script
 
 // ============================================================================
+// UTILITIES
+// ============================================================================
+
+/**
+ * Escapes a string for safe insertion into HTML attributes and text content.
+ * Prevents XSS when rendering user-supplied data back into the DOM.
+ * @param {*} str - Value to escape
+ * @returns {string} HTML-safe string
+ */
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+}
+
+// ============================================================================
 // CONFIGURATION & CONSTANTS
 // ============================================================================
 const CONFIG = {
@@ -107,8 +127,12 @@ function populateProfessionDropdown() {
 }
 
 /**
- * Generates a random biography by selecting random entries from bio.json
- * Populates the biography form fields with random data
+ * Generates a random biography.
+ * - Name is drawn from the gendered name pool matching the gender dropdown.
+ * - Physical description is assembled from component parts and influenced by
+ *   the character's current STR and CON stats (build, height tendency).
+ * - Employer and Education are drawn from a profession-specific pool when a
+ *   profession is already selected, or from the generic pool otherwise.
  */
 function generateRandomBio() {
     if (!bioData) {
@@ -116,38 +140,93 @@ function generateRandomBio() {
         return;
     }
 
-    // Helper function to get random item from array
     const getRandomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-    // Get selected gender from dropdown
+    // --- Gender / Name ---
     const genderSelect = document.getElementById('bio-gender-select');
     const selectedGender = genderSelect ? genderSelect.value : 'male';
 
-    // Generate random name based on selected gender
     const firstName = getRandomItem(bioData.firstNames[selectedGender]);
     const lastName = getRandomItem(bioData.lastNames);
-    const fullName = `${firstName} ${lastName}`;
+    document.getElementById('cs-name').value = `${firstName} ${lastName}`;
 
-    // Map gender selection to sex display value
-    const genderToSex = {
-        'male': 'Male',
-        'female': 'Female',
-        'non-binary': 'Non-binary'
+    const genderToSex = { 'male': 'Male', 'female': 'Female', 'non-binary': 'Non-binary' };
+    document.getElementById('cs-bio-sex').value = genderToSex[selectedGender] || 'Male';
+
+    // --- Read current STR and CON from the stat buy panel to shape the description ---
+    const readStat = (id) => {
+        const el = document.getElementById(`${id}-value`);
+        return el ? parseInt(el.innerText) || 10 : 10;
     };
-    const sex = genderToSex[selectedGender] || 'Male';
+    const str = readStat('STR');
+    const con = readStat('CON');
+    const combinedPhysical = str + con;
 
-    // Populate all biography fields
-    document.getElementById('cs-name').value = fullName;
-    // Keep profession blank - it's a key stat that should be chosen manually
-    document.getElementById('cs-bio-employer').value = getRandomItem(bioData.employers);
-    document.getElementById('cs-bio-nationality').value = getRandomItem(bioData.nationalities);
-    document.getElementById('cs-bio-sex').value = sex;
-    // Generate random age between 25 and 65
+    // Determine build tier from STR+CON total (typical range 20–40)
+    let buildLabel, featurePool;
+    if (combinedPhysical >= 36) {
+        buildLabel = 'Heavily built';
+        featurePool = bioData.notableFeatures.high_str_con;
+    } else if (combinedPhysical >= 28) {
+        buildLabel = 'Athletic';
+        featurePool = bioData.notableFeatures.neutral;
+    } else if (combinedPhysical >= 22) {
+        buildLabel = 'Average build';
+        featurePool = bioData.notableFeatures.neutral;
+    } else {
+        buildLabel = 'Lean';
+        featurePool = bioData.notableFeatures.low_str_con;
+    }
+
+    // Height tendency: higher STR nudges tall, lower nudges short
+    let heightLabel;
+    if (str >= 16) heightLabel = 'tall';
+    else if (str >= 12) heightLabel = 'average height';
+    else heightLabel = 'compact';
+
+    const hair = getRandomItem(bioData.hairColors);
+    const eyes = getRandomItem(bioData.eyeColors);
+    const feature = getRandomItem(featurePool);
+    document.getElementById('cs-physical-desc').value =
+        `${buildLabel}, ${heightLabel}. ${hair.charAt(0).toUpperCase() + hair.slice(1)} hair, ${eyes} eyes. Notable: ${feature}.`;
+
+    // --- Age ---
     const randomAge = Math.floor(Math.random() * (65 - 25 + 1)) + 25;
     document.getElementById('cs-bio-age').value = randomAge;
-    document.getElementById('cs-bio-education').value = getRandomItem(bioData.educations);
-    // Get physical description based on selected gender
-    document.getElementById('cs-physical-desc').value = getRandomItem(bioData.physicalDescriptions[selectedGender]);
+
+    // --- Nationality ---
+    document.getElementById('cs-bio-nationality').value = getRandomItem(bioData.nationalities);
+
+    // --- Profession-linked Employer + Education ---
+    // Try to read the currently selected profession key
+    const professionSelect = document.getElementById('cs-profession-select');
+    let profKey = professionSelect ? professionSelect.value : '';
+
+    // Map profession select values to professionProfiles keys
+    const profKeyMap = {
+        'anthropologist': 'anthropologist',
+        'federal_agent': 'federal_agent',
+        'physician': 'physician',
+        'computer_scientist': 'engineer',
+        'scientist': 'scientist',
+        'special_operator': 'special_operator',
+        'criminal': 'criminal',
+        'firefighter': 'firefighter',
+        'police_officer': 'police_officer',
+        'soldier_marine': 'soldier',
+        'foreign_service': 'foreign_service_officer',
+        'intelligence_analyst': 'intelligence_analyst',
+        'intelligence_case_officer': 'intelligence_case_officer',
+        'lawyer_executive': 'lawyer',
+        'media_specialist': 'media_specialist',
+        'nurse_paramedic': 'nurse_paramedic',
+        'pilot_sailor': 'pilot',
+        'program_manager': 'program_manager'
+    };
+
+    const profile = bioData.professionProfiles[profKeyMap[profKey]] || bioData.professionProfiles['default'];
+    document.getElementById('cs-bio-employer').value = getRandomItem(profile.employers);
+    document.getElementById('cs-bio-education').value = getRandomItem(profile.educations);
 }
 
 /**
@@ -206,21 +285,20 @@ function getDescriptor(stat, value) {
  */
 function generateStatContainers() {
     const container = document.getElementById('stats');
-    container.innerHTML = '';
-    stats.forEach((stat, index) => {
-        const plusSymbol = document.body.classList.contains('theme-son-of-sam') ? '⛤' : '+';
-        container.innerHTML += `
+    const plusSymbol = document.body.classList.contains('theme-son-of-sam') ? '⛤' : '+';
+    const parts = stats.map(stat => `
                     <div class="stat-container">
                         <span class="stat-label">${stat}</span>
-                        <button onclick="adjustStat('${stat}', -1)" class="adjust-button">-</button>
                         <span class="stat-value" id="${stat}-value">3</span>
-                        <button onclick="adjustStat('${stat}', 1)" class="adjust-button">${plusSymbol}</button>
-                        <span class="x5-label">x5=</span>
+                        <div class="stat-controls">
+                            <button onclick="adjustStat('${stat}', -1)" class="adjust-button">−</button>
+                            <button onclick="adjustStat('${stat}', 1)" class="adjust-button">${plusSymbol}</button>
+                        </div>
                         <span class="x5-value" id="${stat}-x5-value">15</span>
                         <span class="descriptor" id="${stat}-descriptor">${getDescriptor(stat, 3)}</span>
                     </div>
-                `;
-    });
+                `);
+    container.innerHTML = parts.join('');
     updateAttributesValues();
     updateTotalPoints();
 }
@@ -307,27 +385,6 @@ function resetStats() {
     });
     updateAttributesValues();
     updateTotalPoints();
-}
-
-
-function generateCharacterSheet() {
-    var wb = XLSX.utils.book_new(),
-        wsData = [["Stat", "Value", "Multiplier (x5)", "Descriptor"]];
-
-    stats.forEach(stat => {
-        let value = document.getElementById(`${stat}-value`).innerText;
-        let x5 = document.getElementById(`${stat}-x5-value`).innerText;
-        let descriptor = document.getElementById(`${stat}-descriptor`).innerText;
-        wsData.push([stat, value, x5, descriptor]);
-    });
-
-    // Attributes part can be added similarly
-    // wsData.push(["Attribute Name", "Value"]);
-
-    var ws = XLSX.utils.aoa_to_sheet(wsData);
-    XLSX.utils.book_append_sheet(wb, ws, "Character Stats");
-
-    XLSX.writeFile(wb, "DeltaGreenCharacterSheet.xlsx");
 }
 
 /* Character sheet export helpers */
@@ -427,7 +484,6 @@ function populateCharacterSheetForm() {
     const wp = POWv;
     const san = POWv * 5;
     const bp = san - POWv;
-    console.log(`[populateCharacterSheetForm] Calculated: STR=${STRv}, CON=${CONv}, POW=${POWv} → HP=${hp}, WP=${wp}, SAN=${san}, BP=${bp}`);
     const csSanEl = document.getElementById('cs-sanity-value');
     const csBpEl = document.getElementById('cs-breaking-point');
     const csHpEl = document.getElementById('cs-hp');
@@ -460,7 +516,7 @@ function populateCharacterSheetForm() {
 
     // populate biography fields
     const setIfEmpty = (id, def = '') => { const el = document.getElementById(id); if (!el) return; if (!el.value) el.value = def; };
-    setIfEmpty('cs-bio-profession', '');
+    // cs-bio-profession is now a read-only display driven by the profession dropdown
     setIfEmpty('cs-bio-employer', '');
     setIfEmpty('cs-bio-nationality', '');
     setIfEmpty('cs-bio-sex', '');
@@ -515,9 +571,7 @@ function addCustomSkill() {
 
     // Add event listeners to highlight empty skill names
     const updateEmptyState = () => {
-        console.log('[updateEmptyState] called, value:', nameInput.value);
         if (nameInput.value.trim() === '') {
-            console.log('[updateEmptyState] Empty - adding highlight');
             nameInput.classList.add('empty-reminder');
             // Also apply inline styles to ensure visibility
             nameInput.style.borderColor = '#ff6b6b';
@@ -525,7 +579,6 @@ function addCustomSkill() {
             nameInput.style.backgroundColor = 'rgba(255, 107, 107, 0.15)';
             nameInput.style.boxShadow = '0 0 10px rgba(255, 107, 107, 0.5)';
         } else {
-            console.log('[updateEmptyState] Not empty - removing highlight');
             nameInput.classList.remove('empty-reminder');
             // Reset inline styles
             nameInput.style.borderColor = '';
@@ -560,12 +613,13 @@ function addCustomSkill() {
 function selectProfession(professionKey) {
     const infoDiv = document.getElementById('cs-profession-info');
     const optionalDiv = document.getElementById('cs-profession-optional-skills');
+    const applyRow = document.getElementById('bio-profession-apply-row');
     const applyBtn = document.getElementById('apply-profession-button');
 
     if (!professionKey || !professions[professionKey]) {
         infoDiv.textContent = '';
         optionalDiv.innerHTML = '';
-        applyBtn.style.display = 'none';
+        if (applyRow) applyRow.style.display = 'none';
         return;
     }
 
@@ -631,7 +685,8 @@ function selectProfession(professionKey) {
         optionalDiv.innerHTML = '';
     }
 
-    applyBtn.style.display = profession.requiredSkills.length > 0 ? 'inline-block' : 'none';
+    if (applyRow) applyRow.style.display = profession.requiredSkills.length > 0 ? 'block' : 'none';
+    if (applyBtn) applyBtn.style.display = profession.requiredSkills.length > 0 ? 'inline-block' : 'none';
 }
 
 /**
@@ -937,50 +992,8 @@ function populateBonusSkillDropdowns() {
     bonusSkillsDiv.innerHTML = '';
 
     // Get all available skills: base skills + custom/typed skills
-    const baseSkillsList = [
-        ["accounting", "Accounting"],
-        ["alertness", "Alertness"],
-        ["anthropology", "Anthropology"],
-        ["archeology", "Archeology"],
-        ["art", "Art"],
-        ["artillery", "Artillery"],
-        ["athletics", "Athletics"],
-        ["bureaucracy", "Bureaucracy"],
-        ["computer_science", "Computer Science"],
-        ["craft", "Craft"],
-        ["criminology", "Criminology"],
-        ["demolitions", "Demolitions"],
-        ["disguise", "Disguise"],
-        ["dodge", "Dodge"],
-        ["drive", "Drive"],
-        ["firearms", "Firearms"],
-        ["first_aid", "First Aid"],
-        ["forensics", "Forensics"],
-        ["heavy_machinery", "Heavy Machinery"],
-        ["heavy_weapons", "Heavy Weapons"],
-        ["history", "History"],
-        ["humint", "HUMINT"],
-        ["law", "Law"],
-        ["medicine", "Medicine"],
-        ["melee_weapons", "Melee Weapons"],
-        ["military_science", "Military Science"],
-        ["navigate", "Navigate"],
-        ["occult", "Occult"],
-        ["persuade", "Persuade"],
-        ["pharmacy", "Pharmacy"],
-        ["pilot", "Pilot"],
-        ["psychotherapy", "Psychotherapy"],
-        ["ride", "Ride"],
-        ["science", "Science"],
-        ["search", "Search"],
-        ["sigint", "SIGINT"],
-        ["stealth", "Stealth"],
-        ["surgery", "Surgery"],
-        ["survival", "Survival"],
-        ["swim", "Swim"],
-        ["unarmed_combat", "Unarmed Combat"],
-        ["unnatural", "Unnatural"]
-    ];
+    // Derived from CONFIG.SKILLS to keep a single source of truth
+    const baseSkillsList = CONFIG.SKILLS.map(s => [s[0], s[1]]);
 
     // Get custom/typed skills
     const customSkills = getCustomSkills();
@@ -1377,7 +1390,11 @@ function buildFoundryJSON() {
         const sanityValue = (document.getElementById('cs-sanity-value') && parseInt(document.getElementById('cs-sanity-value').value)) ? parseInt(document.getElementById('cs-sanity-value').value) : (statsObj.pow.value * 5);
         const breakingPoint = (document.getElementById('cs-breaking-point') && parseInt(document.getElementById('cs-breaking-point').value)) ? parseInt(document.getElementById('cs-breaking-point').value) : (sanityValue - statsObj.pow.value);
         const physicalDesc = (document.getElementById('cs-physical-desc') && document.getElementById('cs-physical-desc').value) ? document.getElementById('cs-physical-desc').value : '';
-        const bioProfession = document.getElementById('cs-bio-profession')?.value || '';
+        // Derive profession title from the dropdown's selected option (single source of truth)
+        const profSelect = document.getElementById('cs-profession-select');
+        const bioProfession = profSelect && profSelect.selectedIndex > 0
+            ? profSelect.options[profSelect.selectedIndex].text
+            : '';
         const bioEmployer = document.getElementById('cs-bio-employer')?.value || '';
         const bioNationality = document.getElementById('cs-bio-nationality')?.value || '';
         const bioSex = document.getElementById('cs-bio-sex')?.value || '';
@@ -1401,7 +1418,7 @@ function buildFoundryJSON() {
                 const specialty = specEl.value.trim();
                 label = `${label} (${specialty})`;
                 // Add to typedSkills with a generated ID (timestamp-based)
-                const typedSkillId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+                const typedSkillId = Date.now().toString() + Math.random().toString(36).substring(2, 11);
                 const group = specialtyGroupMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                 typedSkillsObj[typedSkillId] = { label: specialty, group: group, proficiency: prof, failure: false };
             }
@@ -1411,7 +1428,7 @@ function buildFoundryJSON() {
         // Add custom skills (only to typedSkills, not to regular skills to avoid duplication)
         const customSkills = getCustomSkills();
         customSkills.forEach(customSkill => {
-            const customSkillId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+            const customSkillId = Date.now().toString() + Math.random().toString(36).substring(2, 11);
             // Only add to typedSkills with the 'Custom' group flag
             typedSkillsObj[customSkillId] = { label: customSkill.name, group: 'Custom', proficiency: customSkill.value, failure: false };
         });
@@ -1785,7 +1802,7 @@ function addBondToSheet() {
         }
 
         // Create a unique ID for this bond entry
-        const bondId = 'bond-' + Date.now() + Math.random().toString(36).substr(2, 9);
+        const bondId = 'bond-' + Date.now() + Math.random().toString(36).substring(2, 11);
 
         // Create bond object with parsed values
         const bondObj = {
@@ -1864,28 +1881,12 @@ function renderBondsOnSheet() {
 
     let html = '';
     window.bondsOnSheet.forEach(bond => {
-        html += `
-            <div class="bond-entry">
-                <div style="display:flex;gap:8px;margin-bottom:6px;">
-                    <input type="text" class="bond-entry-field" placeholder="Bond Name" value="${bond.name}" onchange="updateBondName('${bond.id}', this.value)" style="flex:1;min-width:0;">
-                    <button type="button" class="bond-remove-button" onclick="removeBondFromSheet('${bond.id}')">Remove</button>
-                </div>
-                <div style="margin-bottom:6px;">
-                    <textarea class="bond-entry-field" placeholder="Bond Description/Text" readonly style="height:80px;resize:vertical;">${bond.description}</textarea>
-                </div>
-                <div style="display:flex;gap:8px;">
-                    <div style="flex:1;">
-                        <label style="font-size:0.85em;opacity:0.8;">Relationship:</label>
-                        <input type="text" class="bond-entry-field" placeholder="Edit relationship..." value="${bond.relationship}" onchange="updateBondRelationship('${bond.id}', this.value)">
-                    </div>
-                    <div style="flex:0 0 100px;">
-                        <label style="font-size:0.85em;opacity:0.8;">Score:</label>
-                        <input type="number" class="bond-entry-field" value="${bond.score}" min="0" max="20" onchange="updateBondScore('${bond.id}', this.value)">
-                    </div>
-                </div>
-                <details style="margin-top:6px;font-size:0.85em;">
-                    <summary style="cursor:pointer;opacity:0.8;">JSON Code</summary>
-                    <pre><code>${JSON.stringify({
+        const safeId = escapeHtml(bond.id);
+        const safeName = escapeHtml(bond.name);
+        const safeRelationship = escapeHtml(bond.relationship);
+        const safeDescription = escapeHtml(bond.description);
+        const safeScore = escapeHtml(bond.score);
+        const jsonPreview = escapeHtml(JSON.stringify({
             name: bond.name || 'New Bond',
             type: bond.relationship || 'bond',
             system: {
@@ -1895,7 +1896,29 @@ function renderBondsOnSheet() {
                 relationship: '',
                 hasBeenDamagedSinceLastHomeScene: false
             }
-        }, null, 2)}</code></pre>
+        }, null, 2));
+        html += `
+            <div class="bond-entry">
+                <div style="display:flex;gap:8px;margin-bottom:6px;">
+                    <input type="text" class="bond-entry-field" placeholder="Bond Name" value="${safeName}" onchange="updateBondName('${safeId}', this.value)" style="flex:1;min-width:0;">
+                    <button type="button" class="bond-remove-button" onclick="removeBondFromSheet('${safeId}')">Remove</button>
+                </div>
+                <div style="margin-bottom:6px;">
+                    <textarea class="bond-entry-field" placeholder="Bond Description/Text" readonly style="height:80px;resize:vertical;">${safeDescription}</textarea>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <div style="flex:1;">
+                        <label style="font-size:0.85em;opacity:0.8;">Relationship:</label>
+                        <input type="text" class="bond-entry-field" placeholder="Edit relationship..." value="${safeRelationship}" onchange="updateBondRelationship('${safeId}', this.value)">
+                    </div>
+                    <div style="flex:0 0 100px;">
+                        <label style="font-size:0.85em;opacity:0.8;">Score:</label>
+                        <input type="number" class="bond-entry-field" value="${safeScore}" min="0" max="20" onchange="updateBondScore('${safeId}', this.value)">
+                    </div>
+                </div>
+                <details style="margin-top:6px;font-size:0.85em;">
+                    <summary style="cursor:pointer;opacity:0.8;">JSON Code</summary>
+                    <pre><code>${jsonPreview}</code></pre>
                 </details>
             </div>
         `;

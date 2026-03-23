@@ -36,77 +36,184 @@ const bioData = {
         "Evans", "Edwards", "Collins", "Reeves", "Morris", "Murphy", "Cook", "Morgan",
         "Bell", "Rogers", "Gibbs", "Sawyer", "Sutton", "Richmond", "Pearson", "Blake"
     ],
-    "employers": [
-        "FBI", "CIA", "NSA", "DHS", "US Army", "US Navy", "Air Force", "Department of State",
-        "CDC", "Interpol", "Freelance", "Private Corporation", "University", "Think Tank",
-        "State Department", "Defense Intelligence Agency", "Secret Service", "Marshal Service",
-        "NYPD", "LAPD", "Independent Contractor", "Non-profit", "International Organization",
-        "Fortune 500 Company", "Tech Startup", "Medical Research Institute", "Archaeological Firm"
-    ],
     "nationalities": [
         "American", "British", "Canadian", "Australian", "French", "German", "Italian",
         "Spanish", "Dutch", "Swedish", "Norwegian", "Danish", "Irish", "Polish",
         "Czech", "Hungarian", "Russian", "Greek", "Turkish", "Israeli", "Japanese",
         "South Korean", "Chinese", "Indian", "Brazilian", "Mexican", "Argentine", "Chilean"
     ],
-    "educations": [
-        "High School Diploma", "Some College", "Bachelor's Degree", "Master's Degree",
-        "PhD", "Military Academy", "Police Academy", "Technical Certification",
-        "Foreign Service Institute Training", "Advanced Military Training",
-        "Ivy League Education", "State University", "Community College", "School of Hard Knocks"
-    ],
-    "physicalDescriptions": {
-        "male": [
-            "Tall and athletic build, brown hair, blue eyes",
-            "Average height, fit, black hair, dark eyes",
-            "Muscular, sandy blonde hair, piercing gaze",
-            "Lean and sharp features, dark hair, clean shaven",
-            "Medium build, red hair, freckled complexion",
-            "Stocky frame, grey hair, steady demeanor",
-            "Broad shoulders, blonde hair, weathered face",
-            "Tall, athletic, salt-and-pepper hair, commanding presence",
-            "Average build, black hair, scar on left cheek",
-            "Lanky, sandy hair, thin mustache",
-            "Compact and muscular, shaved head, tactical appearance",
-            "Broad-shouldered, receding hairline, stern expression",
-            "Stocky, reddish beard, intense gaze",
-            "Average height, blonde, athletic build",
-            "Lean and intense, dark eyes, focused demeanor"
+
+    // -------------------------------------------------------------------------
+    // Physical description component pools — assembled at runtime based on stats
+    // -------------------------------------------------------------------------
+    "hairColors": ["black", "dark brown", "brown", "auburn", "chestnut", "dirty blonde",
+        "blonde", "sandy", "red", "grey", "silver", "salt-and-pepper", "close-cropped dark"],
+    "eyeColors": ["brown", "dark brown", "hazel", "green", "blue", "grey", "sharp brown",
+        "pale blue", "deep green", "amber"],
+    "notableFeatures": {
+        "high_str_con": [
+            "a weathered, hard-edged face", "a jaw set like granite", "calloused hands and a squared stance",
+            "a thick neck and military bearing", "broad shoulders that fill a doorframe",
+            "forearms laced with old scars", "a nose that's been broken at least once"
         ],
-        "female": [
-            "Tall and athletic build, brown hair, blue eyes",
-            "Average height, fit, black hair, dark eyes",
-            "Petite frame, auburn hair, intelligent eyes",
-            "Slender, dark curly hair, warm smile",
-            "Medium build, red hair, freckled complexion",
-            "Tall and elegant, light brown hair, graceful movements",
-            "Slim, dark hair in bun, professional appearance",
-            "Average height, blonde, athletic build",
-            "Curvy, dark hair, expressive eyes",
-            "Muscular, sandy blonde hair, confident demeanor",
-            "Lean and intense, dark eyes, focused expression",
-            "Average height, auburn hair, sharp features",
-            "Tall, athletic build, black hair, commanding presence",
-            "Petite, red hair, striking appearance",
-            "Slender and graceful, blonde hair, intelligent gaze"
+        "low_str_con": [
+            "wire-rimmed glasses", "ink-stained fingers", "a perpetually tired expression",
+            "a bookish air and careful posture", "reading glasses perpetually pushed up",
+            "pale skin from long hours indoors", "precise, deliberate movements"
         ],
-        "non-binary": [
-            "Tall and athletic build, brown hair, blue eyes",
-            "Average height, fit, black hair, dark eyes",
-            "Lean and sharp features, dark hair, androgynous appearance",
-            "Medium build, varied hair color, steady demeanor",
-            "Athletic build, shoulder-length hair, piercing gaze",
-            "Slender, diverse features, intelligent expression",
-            "Average height, undercut hair, tactical appearance",
-            "Tall and striking, unconventional style, commanding presence",
-            "Compact build, colorful hair, focused demeanor",
-            "Lean and intense, minimalist style, strong features",
-            "Average build, short hair, professional appearance",
-            "Athletic frame, styled hair, confident expression",
-            "Androgynous features, expressive eyes, unique style",
-            "Tall frame, flexible presentation, commanding gaze",
-            "Average height, polished appearance, steady demeanor"
+        "neutral": [
+            "a steady, unreadable gaze", "a quiet, watchful manner", "unremarkable features that blend into a crowd",
+            "a flat affect that gives little away", "quick eyes that miss nothing",
+            "a slight scar above one brow", "a tired but alert expression"
         ]
+    },
+
+    // -------------------------------------------------------------------------
+    // Profession-linked employer + education pools
+    // Keys match profession keys in professions.js; "default" is the fallback
+    // -------------------------------------------------------------------------
+    "professionProfiles": {
+        "anthropologist": {
+            "employers": ["State University", "Miskatonic University", "National Geographic", "Smithsonian Institution",
+                "National Endowment for the Humanities", "University Archaeological Department", "Think Tank"],
+            "educations": ["PhD in Anthropology", "Master's in Archaeology", "PhD in History",
+                "Master's in Cultural Studies", "Doctorate in Linguistics", "Post-Doctoral Fellowship"]
+        },
+        "federal_agent": {
+            "employers": ["FBI", "DEA", "ATF", "Secret Service", "US Marshal Service",
+                "DHS", "Postal Inspection Service", "IRS Criminal Investigation"],
+            "educations": ["FBI National Academy", "Federal Law Enforcement Training Center",
+                "Bachelor's in Criminal Justice", "Bachelor's in Law", "Master's in Criminology",
+                "US Military Academy", "State University (Law Pre-Req)"]
+        },
+        "physician": {
+            "employers": ["Johns Hopkins Hospital", "CDC", "NIH", "Military Medical Corps",
+                "State Medical Examiner's Office", "Private Practice", "Emergency Medicine Group",
+                "Veteran Affairs Medical Center", "FEMA Medical Reserve Corps"],
+            "educations": ["MD — State Medical School", "MD — Ivy League Medical School",
+                "MD / PhD (Research)", "Doctor of Osteopathic Medicine", "Medical Residency (Completed)",
+                "Military Medical Officer Training"]
+        },
+        "engineer": {
+            "employers": ["DARPA", "Lockheed Martin Skunk Works", "NSA Technical Division",
+                "MIT Lincoln Laboratory", "Private Tech Corporation", "DoD Contractor",
+                "Silicon Valley Startup", "Raytheon Technologies"],
+            "educations": ["BS in Computer Science", "BS in Electrical Engineering",
+                "MS in Computer Engineering", "PhD in Applied Mathematics",
+                "MS in Cybersecurity", "MIT Graduate Program", "Technical Institute Certification"]
+        },
+        "scientist": {
+            "employers": ["NIH", "CERN Research Partnership", "Oak Ridge National Laboratory",
+                "University Research Division", "Private Research Institute", "CDC", "DARPA",
+                "Los Alamos National Laboratory", "Naval Research Laboratory"],
+            "educations": ["PhD in Biology", "PhD in Physics", "PhD in Chemistry",
+                "PhD in Neuroscience", "Master's in Forensic Science",
+                "Post-Doctoral Research Position", "National Science Foundation Grant Recipient"]
+        },
+        "special_operator": {
+            "employers": ["US Army Rangers", "Navy SEALs", "USMC Raider Battalion",
+                "Delta Force", "CIA Special Activities Center", "FBI Hostage Rescue Team",
+                "Joint Special Operations Command"],
+            "educations": ["US Military Academy (West Point)", "Ranger School", "BUD/S Training",
+                "Special Forces Qualification Course", "Airborne School",
+                "Advanced Military Training — Classified", "Non-Commissioned Officer Academy"]
+        },
+        "criminal": {
+            "employers": ["Self-Employed", "Organized Crime Affiliate", "Freelance", "Street Crew",
+                "Contract Work (Unspecified)", "Former Employer (Estranged)"],
+            "educations": ["High School Diploma", "GED", "Some College (Dropped Out)",
+                "Prison Education Program", "Street Education", "Self-Taught"]
+        },
+        "firefighter": {
+            "employers": ["FDNY", "Los Angeles County Fire Department", "US Forest Service Fire Crew",
+                "Municipal Fire Department", "Wildland Fire Crew", "Industrial Fire Brigade",
+                "FEMA Urban Search & Rescue"],
+            "educations": ["Fire Academy Certification", "EMT Certification", "Paramedic Certification",
+                "Associate's in Fire Science", "Bachelor's in Emergency Management",
+                "Hazmat Operations Certification"]
+        },
+        "police_officer": {
+            "employers": ["NYPD", "LAPD", "Metropolitan Police", "County Sheriff's Office",
+                "State Police", "Transit Police", "University Police Department", "Port Authority Police"],
+            "educations": ["Police Academy", "Associate's in Criminal Justice",
+                "Bachelor's in Criminal Justice", "Detective Training Program",
+                "SWAT Qualification Course", "In-Service Training — Homicide Division"]
+        },
+        "soldier": {
+            "employers": ["US Army", "US Marine Corps", "National Guard", "Army Reserve",
+                "US Navy", "Air Force Security Forces"],
+            "educations": ["Basic Combat Training", "Advanced Individual Training",
+                "Non-Commissioned Officer Academy", "US Military Academy",
+                "Officer Candidate School", "Infantry School", "Warrant Officer Training"]
+        },
+        "foreign_service_officer": {
+            "employers": ["US Department of State", "USAID", "US Commercial Service",
+                "Foreign Agriculture Service", "UN Diplomatic Mission", "Embassy Staff"],
+            "educations": ["Foreign Service Institute Training", "Master's in International Relations",
+                "Bachelor's in Political Science", "Master's in Foreign Policy",
+                "Law Degree (International Focus)", "Ivy League — International Studies"]
+        },
+        "intelligence_analyst": {
+            "employers": ["CIA", "NSA", "DIA", "FBI Analytical Division",
+                "Department of State Intelligence Bureau", "NGA", "ODNI"],
+            "educations": ["Master's in Intelligence Studies", "Bachelor's in Political Science",
+                "Master's in International Security", "Intelligence Community Certification Program",
+                "PhD in Area Studies", "NSA Language Training Program"]
+        },
+        "intelligence_case_officer": {
+            "employers": ["CIA Directorate of Operations", "DIA HUMINT", "NSA Field Liaison",
+                "State Department (Cover)", "Defense Attaché Office (Cover)", "Private Consulting (Cover)"],
+            "educations": ["Farm Training (CIA Clandestine Service)", "Master's in Foreign Affairs",
+                "Bachelor's in Regional Studies", "Military Intelligence Officer Course",
+                "Foreign Language Intensive Program", "Ivy League Graduate School"]
+        },
+        "lawyer": {
+            "employers": ["US Attorney's Office", "Department of Justice", "Private Law Firm",
+                "Corporate Legal Counsel", "Public Defender's Office", "Federal Judiciary Clerk",
+                "Securities and Exchange Commission"],
+            "educations": ["JD — State Law School", "JD — Ivy League",
+                "MBA / JD Dual Degree", "Master's in Tax Law",
+                "Prosecutor Training Program", "Bar Exam (Licensed — Multiple States)"]
+        },
+        "media_specialist": {
+            "employers": ["Major News Network", "Independent Publication", "University Press",
+                "Government Communications Office", "Documentary Production Company",
+                "Investigative Journalism Non-Profit", "Freelance"],
+            "educations": ["Bachelor's in Journalism", "Master's in Communications",
+                "Bachelor's in English Literature", "Self-Taught / Portfolio Career",
+                "Graduate Program in Creative Writing", "School of Public Affairs"]
+        },
+        "nurse_paramedic": {
+            "employers": ["County Hospital", "Veterans Affairs Medical Center", "Flight Medic Service",
+                "Combat Medic — Active Duty", "Urban EMS Agency", "Rural Trauma Center"],
+            "educations": ["Registered Nurse Certification", "Paramedic Certification",
+                "Associate's in Nursing", "Bachelor's in Nursing (BSN)",
+                "Emergency Medical Technician Certification", "Combat Medic Training"]
+        },
+        "pilot": {
+            "employers": ["US Air Force", "Naval Air Station", "Commercial Airline (Retired)",
+                "Coast Guard Aviation", "CIA Air Branch", "Contract Pilot — Classified",
+                "Army Aviation Regiment"],
+            "educations": ["US Air Force Academy", "Naval Test Pilot School",
+                "Commercial Pilot License", "Military Flight Training",
+                "Instrument Rating Certification", "FAA Air Traffic Control Training"]
+        },
+        "program_manager": {
+            "employers": ["Department of Defense (Acquisition)", "Fortune 500 Corporation",
+                "Government Contractor", "Intelligence Community Program Office",
+                "Non-Governmental Organization", "National Security Agency — Programs"],
+            "educations": ["MBA", "Master's in Public Administration",
+                "PMP Certification", "Master's in Systems Engineering",
+                "Bachelor's in Business Administration", "Senior Executive Service Program"]
+        },
+        "default": {
+            "employers": ["FBI", "CIA", "NSA", "DHS", "Department of State",
+                "CDC", "Interpol", "Private Corporation", "University", "Think Tank",
+                "Defense Intelligence Agency", "Secret Service", "Non-profit",
+                "Medical Research Institute", "Independent Contractor"],
+            "educations": ["Bachelor's Degree", "Master's Degree", "Some College",
+                "Technical Certification", "State University", "Community College"]
+        }
     }
 };
 

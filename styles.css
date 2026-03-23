@@ -154,6 +154,52 @@ select {
     background: #fff3e0 !important;
 }
 
+/* X-Files: specialty selects inside skills grid get full CRT treatment */
+.theme-xfiles .cs-skill-specialty {
+    background-color: #000000 !important;
+    color: #00b521 !important;
+    border: 1px solid #00b521 !important;
+    font-weight: 500 !important;
+}
+
+.theme-xfiles .cs-skill-specialty:hover {
+    border-color: #00ff00 !important;
+}
+
+.theme-xfiles .cs-skill-specialty:focus {
+    outline: none !important;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 6px rgba(0, 255, 0, 0.3) !important;
+}
+
+/* X-Files stat buy section: terminal panel */
+.theme-xfiles #stats-buy-section {
+    border: 1px solid rgba(0, 181, 33, 0.35);
+    border-radius: 4px;
+    padding: 24px 20px 18px;
+    background: rgba(0, 181, 33, 0.02);
+    box-shadow: 0 0 30px rgba(0, 181, 33, 0.06), inset 0 0 60px rgba(0, 0, 0, 0.4);
+    max-width: 960px;
+    width: 100%;
+}
+
+.theme-xfiles #stats-buy-section h2 {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #00b521;
+    opacity: 0.75;
+    margin-bottom: 16px;
+    border: none;
+    padding: 0;
+}
+
+.theme-xfiles #stats-buy-section .button-container {
+    margin-top: 16px !important;
+    margin-bottom: 0 !important;
+}
+
 /* ============================================================================
    PAGE LAYOUT
    ============================================================================ */
@@ -164,7 +210,10 @@ select {
     color: var(--primary-color);
     text-align: center;
     width: 100%;
-    margin-bottom: var(--spacing-xl);
+    max-width: 1600px;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--primary-color);
     font-family: 'JetBrains Mono', 'Courier New', monospace;
     letter-spacing: 1px;
 }
@@ -173,7 +222,7 @@ select {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    max-width: 1400px;
+    max-width: 1600px;
     width: 100%;
     flex-wrap: wrap;
     gap: var(--spacing-lg);
@@ -191,15 +240,23 @@ select {
     margin-top: 0px;
 }
 
+/* Stat grid: 6 cards on desktop, collapses on smaller screens */
 #stats {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    width: 100%;
+    max-width: 900px;
 }
 
 /* ============================================================================
    STAT CONTAINERS (Statistics Display)
+   Card-style stat blocks arranged in a grid on the main stats panel.
+   Character-sheet stat rows (#cs-stats) share .stat-container but use
+   the default row layout, so scoped overrides live under #stats.
    ============================================================================ */
 
+/* --- Default row layout (used in character-sheet stat inputs) --- */
 .stat-container {
     display: flex;
     align-items: center;
@@ -207,6 +264,90 @@ select {
     gap: var(--spacing-md);
 }
 
+/* --- Main stat grid cards --- */
+#stats .stat-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-md);
+    padding: 14px 6px 10px;
+    gap: 5px;
+    background: rgba(0, 181, 33, 0.04);
+    transition: box-shadow 0.25s ease, border-color 0.25s ease;
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+#stats .stat-container:hover {
+    box-shadow: 0 0 14px rgba(0, 181, 33, 0.3);
+}
+
+#stats .stat-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    min-width: unset;
+    text-align: center;
+}
+
+#stats .stat-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text-color);
+    line-height: 1;
+    min-width: unset;
+    text-align: center;
+}
+
+/* Inline [−][+] button row inside card */
+#stats .stat-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+}
+
+#stats .adjust-button {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+#stats .x5-label {
+    display: none;
+}
+
+#stats .x5-value {
+    font-size: 0.68rem;
+    color: var(--primary-color);
+    opacity: 0.65;
+    min-width: unset;
+    margin: 0;
+    text-align: center;
+}
+
+#stats .descriptor {
+    font-size: 0.6rem;
+    color: var(--primary-color);
+    opacity: 0.85;
+    text-align: center;
+    width: 100%;
+    min-width: unset;
+    letter-spacing: 0.3px;
+}
+
+/* Legacy classes kept for compatibility */
 .stat-label {
     text-align: left;
     color: var(--primary-color);
@@ -260,6 +401,19 @@ select {
     font-weight: bold;
 }
 
+/* Responsive stat grid */
+@media (max-width: 900px) {
+    #stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 400px) {
+    #stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 /* ============================================================================
    BUTTONS
    ============================================================================ */
@@ -307,11 +461,15 @@ button:disabled,
 
 .total-points {
     color: var(--primary-color);
-    margin-top: var(--spacing-xl);
-    padding-left: 0;
-    width: 100%;
-    font-weight: bold;
+    margin-top: var(--spacing-md);
+    font-weight: 700;
     text-align: center;
+    border: 2px solid var(--primary-color);
+    padding: 6px 24px;
+    border-radius: 24px;
+    display: inline-block;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
 }
 
 /* ============================================================================
@@ -517,7 +675,7 @@ button:disabled,
    ============================================================================ */
 
 #character-sheet {
-    max-width: 980px;
+    max-width: 1400px;
     width: 100%;
 }
 
@@ -596,18 +754,19 @@ button:disabled,
 #cs-skills .cs-skill-name {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: var(--spacing-xs);
     padding: var(--spacing-xs);
     color: var(--primary-color);
-    font-size: 0.95rem;
-    white-space: nowrap;
+    font-size: 0.9rem;
+    min-width: 0;
     overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 #cs-skills .cs-skill-input {
     width: 7ch;
     text-align: center;
+    min-width: 0;
 }
 
 #cs-profession-select {
@@ -618,6 +777,7 @@ button:disabled,
     border-radius: var(--radius-md);
     cursor: pointer;
     font-family: inherit;
+    width: 100%;
 }
 
 #cs-profession-select option {
@@ -634,11 +794,17 @@ button:disabled,
 }
 
 #cs-profession-info {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.25);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: var(--spacing-md);
+    padding: 14px 18px;
     border-radius: var(--radius-md);
-    font-family: 'Courier New', monospace;
+    font-family: inherit;
+    margin-top: 8px;
+    font-size: 0.9em;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .cs-skill-specialty {
@@ -727,21 +893,27 @@ button:disabled,
 
 fieldset {
     border: 1px solid var(--primary-color);
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg) var(--spacing-md) var(--spacing-md);
     margin-top: var(--spacing-md);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
 }
 
 fieldset.fieldset-default {
-    margin-top: 8px;
-    border: 1px solid #00b521;
-    padding: 8px;
+    margin-top: 12px;
+    border: 1px solid var(--primary-color);
+    padding: var(--spacing-lg) var(--spacing-md) var(--spacing-md);
+    border-radius: var(--radius-md);
 }
 
 legend {
-    color: var(--primary-color);
-    padding: 0 var(--spacing-sm);
-    font-weight: bold;
+    color: var(--bg-color);
+    background: var(--primary-color);
+    padding: 3px 12px;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-radius: 3px;
 }
 
 .panel {
@@ -813,16 +985,63 @@ textarea {
     margin-top: 8px;
 }
 
+/* Profession row in biography fieldset */
+#bio-profession-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    margin-bottom: 6px;
+}
+
 /* Info divs */
 #cs-profession-info {
-    margin-top: 12px;
-    font-size: 0.9em;
-    line-height: 1.6;
-    white-space: pre-wrap;
+    margin-top: 8px;
 }
 
 #cs-profession-optional-skills {
-    margin-top: 12px;
+    margin-top: 8px;
+    width: 100%;
+}
+
+/* Bio generator toolbar — horizontal row using full panel width */
+#bio-generator-section {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 24px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    width: 100%;
+}
+
+#bio-generator-hint {
+    flex: 1;
+    min-width: 200px;
+    margin: 0;
+    font-size: 0.82rem;
+    opacity: 0.6;
+    line-height: 1.55;
+}
+
+#bio-gender-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* Override the biography fieldset's label grid for elements inside the generator, gender, and optional-skills rows */
+#bio-gender-row label,
+#bio-profession-apply-row label,
+#cs-profession-optional-skills label {
+    display: inline;
+    grid-template-columns: unset;
+    margin-top: 0;
+    white-space: nowrap;
+    font-size: 0.85rem;
 }
 
 #bonus-dropdowns {
@@ -1141,7 +1360,7 @@ input[type="checkbox"]:checked+label {
     margin-top: var(--spacing-2xl);
     text-align: center;
     width: 100%;
-    max-width: 900px;
+    max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
     padding: var(--spacing-lg);
@@ -1156,7 +1375,7 @@ input[type="checkbox"]:checked+label {
 }
 
 #theme-selector {
-    width: 980px;
+    width: 1600px;
     max-width: 100%;
     margin: var(--spacing-xl) auto var(--spacing-lg);
     display: flex;
@@ -1232,15 +1451,28 @@ input[type="checkbox"]:checked+label {
     }
 }
 
-body,
-body * {
+/* Only apply the CRT flicker in the X-Files theme — other themes opt out explicitly */
+.theme-xfiles body,
+.theme-xfiles * {
     animation: textFlicker 20s infinite;
 }
 
+/* Disable flicker for non-xfiles themes */
 .theme-morris,
-.theme-morris * {
+.theme-morris *,
+.theme-modern,
+.theme-modern *,
+.theme-son-of-sam,
+.theme-son-of-sam *,
+.theme-mobile,
+.theme-mobile * {
     animation: none !important;
     text-shadow: none !important;
+}
+
+/* Keep the blinking cursor working regardless of theme */
+.blinking-cursor {
+    animation: blink 1s step-start 5s infinite !important;
 }
 
 /* ============================================================================
@@ -1252,12 +1484,14 @@ body * {
         grid-template-columns: 1fr;
     }
 
-    #cs-skills {
-        grid-template-columns: 1fr 6ch;
-    }
-
     .text-box {
         width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    #cs-skills {
+        grid-template-columns: 1fr 6ch;
     }
 }
 
@@ -1325,13 +1559,22 @@ body * {
     background-color: #24273a !important;
     color: var(--cp-text);
     animation: none !important;
-    font-family: 'JetBrains Mono', 'Fira Mono', 'Menlo', 'Consolas', 'Liberation Mono', monospace !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif !important;
 }
 
 .theme-modern * {
     animation: none !important;
     text-shadow: none !important;
-    font-family: 'JetBrains Mono', 'Fira Mono', 'Menlo', 'Consolas', 'Liberation Mono', monospace !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+}
+
+/* Keep monospace only for code/JSON areas */
+.theme-modern #cs-json,
+.theme-modern #cs-prototype-json,
+.theme-modern #cs-items-json,
+.theme-modern #cs-profession-info,
+.theme-modern .bond-entry code {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Fira Mono', monospace !important;
 }
 
 .theme-modern .page-title {
@@ -1709,6 +1952,234 @@ input[type="checkbox"]:checked+label {
     background: rgba(245, 169, 127, 0.15) !important;
     box-shadow: 0 0 10px rgba(245, 169, 127, 0.5) !important;
     animation: pulse-reminder-modern 1.5s ease-in-out infinite;
+}
+
+/* Modern stat section — 2026 clean redesign */
+.theme-modern #stats-buy-section {
+    background: var(--cp-surface0) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 20px !important;
+    padding: 28px 24px 20px !important;
+    max-width: 960px !important;
+    width: 100% !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25) !important;
+}
+
+.theme-modern #stats-buy-section h2 {
+    font-size: 0.68rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    color: var(--cp-subtle) !important;
+    margin-bottom: 16px !important;
+    text-align: center !important;
+    border: none !important;
+    padding: 0 !important;
+    opacity: 0.7 !important;
+}
+
+.theme-modern #stats {
+    gap: 10px !important;
+    max-width: 100% !important;
+}
+
+.theme-modern #stats .stat-container {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    padding: 20px 6px 16px !important;
+    gap: 8px !important;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease !important;
+}
+
+.theme-modern #stats .stat-container:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28) !important;
+    border-color: rgba(137, 180, 250, 0.3) !important;
+}
+
+.theme-modern #stats .stat-label {
+    font-size: 9px !important;
+    letter-spacing: 2px !important;
+    color: var(--cp-subtle) !important;
+    font-weight: 600 !important;
+    opacity: 0.75 !important;
+}
+
+.theme-modern #stats .stat-value {
+    font-size: 2.7rem !important;
+    font-weight: 700 !important;
+    color: var(--cp-text) !important;
+    line-height: 1 !important;
+}
+
+.theme-modern #stats .stat-controls {
+    gap: 10px !important;
+}
+
+.theme-modern #stats .adjust-button {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: none !important;
+    border-radius: 50% !important;
+    color: var(--cp-subtle) !important;
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 1.1rem !important;
+    transition: background 0.15s ease, color 0.15s ease !important;
+}
+
+.theme-modern #stats .adjust-button:hover {
+    background: rgba(137, 180, 250, 0.2) !important;
+    color: var(--cp-sapphire) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.theme-modern #stats .x5-value,
+.theme-modern #stats .descriptor {
+    color: var(--cp-subtle) !important;
+    opacity: 0.45 !important;
+}
+
+.theme-modern .button-container {
+    margin-top: 14px !important;
+    margin-bottom: 24px !important;
+    max-width: 960px !important;
+}
+
+.theme-modern .total-points {
+    margin-top: 12px !important;
+    font-size: 0.85rem !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* ============================================================================
+   MODERN 2026 — Clean Apple-style overhaul
+   System fonts, clean section headers, card panels, no green badge legends.
+   ============================================================================ */
+
+/* Legend: remove green badge, clean uppercase section label */
+.theme-modern legend {
+    background: transparent !important;
+    color: var(--cp-subtle) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    padding: 0 8px 0 0 !important;
+    border-radius: 0 !important;
+    text-shadow: none !important;
+}
+
+.theme-modern fieldset.panel-stats legend {
+    color: var(--cp-sapphire) !important;
+}
+
+.theme-modern fieldset.panel-profession legend {
+    color: var(--cp-green) !important;
+}
+
+.theme-modern fieldset.panel-skills legend {
+    color: var(--cp-yellow) !important;
+}
+
+.theme-modern fieldset.panel-bio legend {
+    color: var(--cp-peach) !important;
+}
+
+.theme-modern fieldset.panel-bonds legend {
+    color: var(--cp-mauve) !important;
+}
+
+/* Fieldsets: clean cards, no harsh colored border ring */
+.theme-modern fieldset {
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 16px !important;
+    padding: 28px 24px 24px !important;
+    background: var(--cp-surface0) !important;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25) !important;
+    margin-top: 16px !important;
+}
+
+/* Strip accent left-borders — section label does this job */
+.theme-modern .panel.panel-stats,
+.theme-modern .panel.panel-derived,
+.theme-modern .panel.panel-profession,
+.theme-modern .panel.panel-skills,
+.theme-modern .panel.panel-bio,
+.theme-modern .panel.panel-bonds,
+.theme-modern .panel.panel-proto {
+    border-left: none !important;
+}
+
+/* Page title: clean, weight-forward, no border or tinted background */
+.theme-modern .page-title {
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.5px !important;
+    border: none !important;
+    background: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 0 24px 0 !important;
+    color: var(--cp-text) !important;
+}
+
+/* Buttons: natural weight, no uppercase */
+.theme-modern button,
+.theme-modern .adjust-button {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    border-radius: 10px !important;
+    font-weight: 500 !important;
+    padding: 10px 18px !important;
+    font-size: 14px !important;
+}
+
+/* h2 section headings: tone down to match modern type scale */
+.theme-modern h2 {
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    padding-bottom: 12px !important;
+    color: var(--cp-text) !important;
+}
+
+/* Total points pill */
+.theme-modern .total-points {
+    border-color: var(--cp-sapphire) !important;
+    color: var(--cp-sapphire) !important;
+    background: rgba(137, 180, 250, 0.08) !important;
+    font-weight: 500 !important;
+    border-width: 1.5px !important;
+}
+
+/* Inputs: tighter radius + iOS-style focus ring */
+.theme-modern input[type="text"],
+.theme-modern input[type="number"],
+.theme-modern input[type="date"],
+.theme-modern textarea {
+    border-radius: 10px !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.09) !important;
+}
+
+.theme-modern input:focus,
+.theme-modern textarea:focus,
+.theme-modern select:focus {
+    border-color: rgba(137, 180, 250, 0.5) !important;
+    box-shadow: 0 0 0 3px rgba(137, 180, 250, 0.10) !important;
+    outline: none !important;
+}
+
+/* Bond entries: subtle card without harsh border */
+.theme-modern .bond-entry {
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    padding: 16px !important;
 }
 
 /* ============================================================================
@@ -2317,6 +2788,109 @@ input[type="checkbox"]:checked+label {
     margin: 8px 0;
 }
 
+/* Morris stat section — 2026 glassmorphism redesign */
+.theme-morris #stats-buy-section {
+    background: rgba(40, 42, 54, 0.7) !important;
+    border: 1px solid rgba(139, 233, 253, 0.1) !important;
+    border-radius: 20px !important;
+    padding: 28px 24px 20px !important;
+    max-width: 960px !important;
+    width: 100% !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+}
+
+.theme-morris #stats-buy-section h2 {
+    font-size: 0.68rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    color: var(--morris-primary) !important;
+    opacity: 0.6 !important;
+    margin-bottom: 16px !important;
+    text-align: center !important;
+    border: none !important;
+    padding: 0 !important;
+    text-shadow: none !important;
+}
+
+.theme-morris #stats {
+    gap: 10px !important;
+    max-width: 100% !important;
+}
+
+.theme-morris #stats .stat-container {
+    background: rgba(68, 71, 90, 0.6) !important;
+    border: 1px solid rgba(139, 233, 253, 0.1) !important;
+    border-radius: 16px !important;
+    padding: 20px 6px 16px !important;
+    gap: 8px !important;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.theme-morris #stats .stat-container:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 28px rgba(139, 233, 253, 0.12) !important;
+    border-color: rgba(139, 233, 253, 0.3) !important;
+}
+
+.theme-morris #stats .stat-label {
+    font-size: 9px !important;
+    letter-spacing: 2px !important;
+    color: var(--morris-primary) !important;
+    font-weight: 600 !important;
+    opacity: 0.6 !important;
+}
+
+.theme-morris #stats .stat-value {
+    font-size: 2.7rem !important;
+    font-weight: 700 !important;
+    color: var(--morris-text) !important;
+    line-height: 1 !important;
+}
+
+.theme-morris #stats .stat-controls {
+    gap: 10px !important;
+}
+
+.theme-morris #stats .adjust-button {
+    background: rgba(139, 233, 253, 0.08) !important;
+    border: none !important;
+    border-radius: 50% !important;
+    color: var(--morris-primary) !important;
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 1.1rem !important;
+    transition: background 0.15s ease !important;
+}
+
+.theme-morris #stats .adjust-button:hover {
+    background: rgba(139, 233, 253, 0.22) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.theme-morris #stats .x5-value,
+.theme-morris #stats .descriptor {
+    color: var(--morris-primary) !important;
+    opacity: 0.4 !important;
+}
+
+.theme-morris .button-container {
+    margin-top: 14px !important;
+    margin-bottom: 24px !important;
+    max-width: 960px !important;
+}
+
+.theme-morris .total-points {
+    margin-top: 12px !important;
+    font-size: 0.85rem !important;
+    letter-spacing: 0.5px !important;
+}
+
 /* Morris comprehensive override for all --primary-color uses */
 .theme-morris {
     --primary-color: #ff79c6 !important;
@@ -2345,6 +2919,85 @@ input[type="checkbox"]:checked+label {
 .theme-morris .github-link-container a svg {
     stroke: var(--morris-accent) !important;
     color: var(--morris-accent) !important;
+}
+
+/* ============================================================================
+   MORRIS 2026 — Premium glassmorphism overhaul
+   System font, clean inline section headers, refined glassmorphism cards.
+   ============================================================================ */
+
+/* System font: drop Courier New for Inter/system-ui */
+.theme-morris body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+}
+
+.theme-morris * {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+}
+
+.theme-morris #cs-json,
+.theme-morris #cs-prototype-json,
+.theme-morris #cs-items-json {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+}
+
+/* Legend: no pink badge — glowing inline section header */
+.theme-morris legend {
+    background: transparent !important;
+    color: var(--morris-primary) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 1.5px !important;
+    border-radius: 0 !important;
+    padding: 0 8px 0 0 !important;
+    text-shadow: 0 0 10px rgba(139, 233, 253, 0.5) !important;
+}
+
+/* Fieldsets: refined glassmorphism depth */
+.theme-morris fieldset {
+    border: 1px solid rgba(139, 233, 253, 0.10) !important;
+    border-radius: 16px !important;
+    padding: 28px 24px 24px !important;
+    background: rgba(40, 42, 54, 0.95) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    margin-top: 16px !important;
+}
+
+/* Page title: clean, no border clutter */
+.theme-morris .page-title {
+    border: none !important;
+    background: none !important;
+    box-shadow: none !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif !important;
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.3px !important;
+}
+
+/* Buttons: no uppercase, clean weight */
+.theme-morris button,
+.theme-morris .adjust-button {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    border-radius: 10px !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+}
+
+/* h2 headings */
+.theme-morris h2 {
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+/* Total points */
+.theme-morris .total-points {
+    border-color: var(--morris-primary) !important;
+    color: var(--morris-primary) !important;
+    background: rgba(139, 233, 253, 0.06) !important;
+    font-weight: 500 !important;
 }
 
 /* ============================================================================
@@ -2923,6 +3576,121 @@ input[type="checkbox"]:checked+label {
     border-color: var(--sos-primary) !important;
 }
 
+/* Son of Sam stat section — 2026 clinical redesign */
+.theme-son-of-sam #stats-buy-section {
+    border-top: 1px solid rgba(255, 0, 0, 0.12) !important;
+    border-bottom: 1px solid rgba(255, 0, 0, 0.12) !important;
+    padding: 28px 0 !important;
+    max-width: 960px !important;
+    width: 100% !important;
+}
+
+.theme-son-of-sam #stats-buy-section h2 {
+    font-size: 0.65rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 3px !important;
+    text-transform: uppercase !important;
+    color: rgba(255, 0, 0, 0.45) !important;
+    margin-bottom: 20px !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+.theme-son-of-sam #stats {
+    gap: 8px !important;
+    max-width: 100% !important;
+}
+
+.theme-son-of-sam #stats .stat-container {
+    background: #0c0c0c !important;
+    border: 1px solid rgba(255, 0, 0, 0.14) !important;
+    border-radius: 4px !important;
+    padding: 20px 6px 16px !important;
+    gap: 8px !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.theme-son-of-sam #stats .stat-container:hover {
+    border-color: rgba(255, 0, 0, 0.4) !important;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.07) !important;
+    transform: none !important;
+}
+
+.theme-son-of-sam #stats .stat-label {
+    font-size: 9px !important;
+    letter-spacing: 2.5px !important;
+    color: rgba(255, 0, 0, 0.5) !important;
+    text-transform: uppercase !important;
+}
+
+.theme-son-of-sam #stats .stat-value {
+    font-size: 2.7rem !important;
+    font-weight: 700 !important;
+    color: var(--sos-text) !important;
+    line-height: 1 !important;
+}
+
+.theme-son-of-sam #stats .stat-controls {
+    gap: 10px !important;
+}
+
+.theme-son-of-sam #stats .adjust-button {
+    background: rgba(255, 0, 0, 0.06) !important;
+    border: 1px solid rgba(255, 0, 0, 0.2) !important;
+    border-radius: 50% !important;
+    color: var(--sos-primary) !important;
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 1.1rem !important;
+    transition: background 0.15s ease, border-color 0.15s ease !important;
+}
+
+.theme-son-of-sam #stats .adjust-button:hover {
+    background: rgba(255, 0, 0, 0.16) !important;
+    border-color: rgba(255, 0, 0, 0.4) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.theme-son-of-sam #stats .x5-value,
+.theme-son-of-sam #stats .descriptor {
+    color: rgba(255, 0, 0, 0.38) !important;
+    opacity: 1 !important;
+}
+
+.theme-son-of-sam .button-container {
+    margin-top: 14px !important;
+    margin-bottom: 24px !important;
+    max-width: 960px !important;
+}
+
+/* ============================================================================
+   SON OF SAM 2026 — Clinical overhaul
+   Fix red-on-red legend, more breathing room, keep the stark document aesthetic.
+   ============================================================================ */
+
+/* Fix: legend had red text on red background — enforce white on red */
+.theme-son-of-sam legend {
+    color: #ffffff !important;
+    background: var(--sos-primary) !important;
+    border-radius: 2px !important;
+}
+
+/* More generous spacing in fieldsets */
+.theme-son-of-sam fieldset {
+    border-radius: 4px !important;
+    padding: 24px !important;
+    margin-top: 16px !important;
+}
+
+/* Total points */
+.theme-son-of-sam .total-points {
+    border-color: var(--sos-primary) !important;
+    color: var(--sos-primary) !important;
+    background: rgba(255, 0, 0, 0.04) !important;
+    font-weight: 600 !important;
+}
+
 /* ============================================================================
    Buy Me a Coffee Button - Theme-Specific Styling
    ============================================================================ */
@@ -3329,6 +4097,105 @@ body:not(.theme-modern):not(.theme-morris):not(.theme-son-of-sam) #bmc-button-co
     border-color: var(--mobile-border) !important;
 }
 
+/* Mobile stat section — 2026 iOS redesign */
+.theme-mobile #stats-buy-section {
+    background: #ffffff !important;
+    border-radius: 18px !important;
+    padding: 20px 16px 16px !important;
+    max-width: 960px !important;
+    width: 100% !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+}
+
+.theme-mobile #stats-buy-section h2 {
+    font-size: 0.65rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    color: #8e8e93 !important;
+    margin-bottom: 14px !important;
+    text-align: left !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+.theme-mobile #stats {
+    gap: 8px !important;
+    max-width: 100% !important;
+}
+
+.theme-mobile #stats .stat-container {
+    background: #f2f2f7 !important;
+    border: none !important;
+    border-radius: 14px !important;
+    padding: 18px 4px 14px !important;
+    gap: 7px !important;
+    box-shadow: none !important;
+    transition: box-shadow 0.18s ease !important;
+}
+
+.theme-mobile #stats .stat-container:hover {
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.12) !important;
+    transform: none !important;
+}
+
+.theme-mobile #stats .stat-label {
+    font-size: 9px !important;
+    letter-spacing: 1.5px !important;
+    color: #8e8e93 !important;
+    text-transform: uppercase !important;
+    font-weight: 600 !important;
+}
+
+.theme-mobile #stats .stat-value {
+    font-size: 2.5rem !important;
+    font-weight: 700 !important;
+    color: #1c1c1e !important;
+    line-height: 1 !important;
+}
+
+.theme-mobile #stats .stat-controls {
+    gap: 8px !important;
+}
+
+.theme-mobile #stats .adjust-button {
+    background: var(--mobile-primary) !important;
+    border: none !important;
+    border-radius: 50% !important;
+    color: #ffffff !important;
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 1.1rem !important;
+    transition: background 0.15s ease !important;
+    min-height: unset !important;
+    flex: none !important;
+}
+
+.theme-mobile #stats .adjust-button:hover {
+    background: var(--mobile-primary-light) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.theme-mobile #stats .x5-value,
+.theme-mobile #stats .descriptor {
+    color: #8e8e93 !important;
+    opacity: 1 !important;
+}
+
+.theme-mobile .button-container {
+    margin-top: 12px !important;
+    margin-bottom: 20px !important;
+    max-width: 960px !important;
+}
+
+.theme-mobile .total-points {
+    font-size: 0.85rem !important;
+    margin-top: 12px !important;
+    font-weight: 500 !important;
+}
+
 /* Mobile Theme - Skills Grid Single Column */
 .theme-mobile #cs-skills {
     display: grid !important;
@@ -3364,6 +4231,87 @@ body:not(.theme-modern):not(.theme-morris):not(.theme-son-of-sam) #bmc-button-co
     padding: 8px;
     text-align: left;
     margin-bottom: 8px;
+}
+
+/* ============================================================================
+   MOBILE 2026 — iOS-style clean overhaul
+   System font, transparent labels, off-white body, more rounded cards.
+   ============================================================================ */
+
+/* System font reinforce */
+.theme-mobile body,
+.theme-mobile * {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif !important;
+}
+
+.theme-mobile #cs-json,
+.theme-mobile #cs-prototype-json,
+.theme-mobile #cs-items-json {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Menlo', monospace !important;
+}
+
+/* Legend: transparent bg, blue label on white card background */
+.theme-mobile legend,
+.theme-mobile fieldset legend {
+    background: transparent !important;
+    color: var(--mobile-primary) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    border-radius: 0 !important;
+    padding: 0 8px 0 0 !important;
+}
+
+/* Body: iOS-style off-white system background */
+.theme-mobile body {
+    background: #f2f2f7 !important;
+}
+
+/* Page title: clean type hierarchy */
+.theme-mobile .page-title {
+    font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: var(--mobile-text) !important;
+    border: none !important;
+    letter-spacing: -0.3px !important;
+    padding-bottom: 8px !important;
+    background: none !important;
+}
+
+/* Fieldsets: more rounded iOS-style cards */
+.theme-mobile .panel,
+.theme-mobile fieldset {
+    border-radius: 14px !important;
+    padding: 20px 18px 18px !important;
+    margin-top: 0 !important;
+    margin-bottom: 14px !important;
+}
+
+/* h2 headings */
+.theme-mobile h2 {
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.2px !important;
+    text-transform: none !important;
+    color: var(--mobile-text) !important;
+}
+
+/* Total points */
+.theme-mobile .total-points {
+    border-color: var(--mobile-primary) !important;
+    color: var(--mobile-primary) !important;
+    background: rgba(37, 99, 235, 0.06) !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+}
+
+/* Buttons: no uppercase */
+.theme-mobile button,
+.theme-mobile .adjust-button {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
 }
 
 /* ============================================================================
