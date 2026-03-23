@@ -247,15 +247,7 @@ function calculateAttributes() {
     return [hp, wp, san, bp];
 }
 
-/**
- * Updates the display of derived attribute values on the character sheet
- */
-function updateAttributesValues() {
-    // Derived attributes are now only displayed in the character sheet form
-    // Main stats section no longer shows them, so this function is kept for compatibility
-    // but does nothing. The character sheet form (populateCharacterSheetForm) handles
-    // calculating and displaying HP, WP, SAN, BP.
-}
+
 
 /**
  * Returns a descriptive phrase for an ability score
@@ -299,7 +291,6 @@ function generateStatContainers() {
                     </div>
                 `);
     container.innerHTML = parts.join('');
-    updateAttributesValues();
     updateTotalPoints();
 }
 
@@ -316,7 +307,6 @@ function adjustStat(stat, adjustment) {
     valueElement.innerText = currentValue;
     document.getElementById(`${stat}-x5-value`).innerText = currentValue * 5;
     document.getElementById(`${stat}-descriptor`).innerText = getDescriptor(stat, currentValue);
-    updateAttributesValues();
     updateTotalPoints();
 }
 
@@ -359,7 +349,6 @@ function randomStats() {
         }
     }
 
-    updateAttributesValues();
     updateTotalPoints();
 }
 
@@ -373,7 +362,6 @@ function randomDiceRoll() {
         document.getElementById(`${stat}-x5-value`).innerText = finalValue * 5;
         document.getElementById(`${stat}-descriptor`).innerText = getDescriptor(stat, finalValue);
     });
-    updateAttributesValues();
     updateTotalPoints();
 }
 
@@ -383,7 +371,6 @@ function resetStats() {
         document.getElementById(`${stat}-x5-value`).innerText = '15';
         document.getElementById(`${stat}-descriptor`).innerText = getDescriptor(stat, 3);
     });
-    updateAttributesValues();
     updateTotalPoints();
 }
 
@@ -530,7 +517,6 @@ function populateCharacterSheetForm() {
  */
 function addCustomSkill() {
     const customSkillsDiv = document.getElementById('cs-custom-skills');
-    const skillId = 'cs-custom-skill-' + Date.now();
 
     const skillRow = document.createElement('div');
     skillRow.className = 'custom-skill-row';
@@ -600,11 +586,6 @@ function addCustomSkill() {
     skillRow.appendChild(removeBtn);
     customSkillsDiv.appendChild(skillRow);
 }
-
-/**
- * Get all custom skills from the form
- * @returns {array} Array of custom skill objects with name and value
- */
 
 /**
  * Select a profession and display its information and optional skills
@@ -811,7 +792,7 @@ function applyProfessionSkills() {
 
                             for (let option of specSelect.options) {
                                 if (option.text === specialtyToMatch) {
-                                    specSelect.value = option.value;
+                                    option.selected = true;
                                     found = true;
                                     break;
                                 }
@@ -819,10 +800,19 @@ function applyProfessionSkills() {
                             if (!found) {
                                 for (let option of specSelect.options) {
                                     if (option.text.toLowerCase() === specialtyToMatch.toLowerCase()) {
-                                        specSelect.value = option.value;
+                                        option.selected = true;
+                                        found = true;
                                         break;
                                     }
                                 }
+                            }
+                            if (found) {
+                                specSelect.classList.remove('highlight-empty-input');
+                                specSelect.style.backgroundColor = '';
+                                specSelect.style.borderColor = '';
+                                specSelect.style.borderWidth = '';
+                                specSelect.style.color = '';
+                                specSelect.style.fontWeight = '';
                             }
                         }
                         const event = new Event('change', { bubbles: true });
@@ -1304,7 +1294,7 @@ function addCustomSkillFromProfession(skillName, skillValue) {
 
             for (let option of specSelect.options) {
                 if (option.text === specialtyToMatch) {
-                    specSelect.value = option.value;
+                    option.selected = true;
                     found = true;
                     break;
                 }
@@ -1312,12 +1302,30 @@ function addCustomSkillFromProfession(skillName, skillValue) {
             if (!found) {
                 for (let option of specSelect.options) {
                     if (option.text.toLowerCase() === specialtyToMatch.toLowerCase()) {
-                        specSelect.value = option.value;
+                        option.selected = true;
+                        found = true;
                         break;
                     }
                 }
             }
+            if (found) {
+                specSelect.classList.remove('highlight-empty-input');
+                specSelect.style.color = '';
+                specSelect.style.fontWeight = '';
+            }
         }
+
+        specSelect.addEventListener('change', () => {
+            if (specSelect.value === '') {
+                specSelect.classList.add('highlight-empty-input');
+                specSelect.style.color = '#fe640b';
+                specSelect.style.fontWeight = 'bold';
+            } else {
+                specSelect.classList.remove('highlight-empty-input');
+                specSelect.style.color = '';
+                specSelect.style.fontWeight = '';
+            }
+        });
 
         skillRow.appendChild(specSelect);
     } else {
@@ -1663,7 +1671,87 @@ window.onload = function () {
             sel.addEventListener('change', (e) => setTheme(e.target.value));
         }
     } catch (e) { }
+
+    initBondPyramid();
 };
+
+/**
+ * Initialises the rotating wireframe pyramid rendered inside the bond text box.
+ * Uses canvas 2D with a perspective projection of a square pyramid.
+ * Visibility is controlled by CSS opacity — only shown in the X-Files theme.
+ */
+function initBondPyramid() {
+    const canvas = document.getElementById('bond-pyramid-canvas');
+    const container = document.getElementById('bondText');
+    if (!canvas || !container) return;
+
+    // Square pyramid: apex + 4 base corners (Y-up, unit scale)
+    const verts = [
+        [0, -1.2, 0],  // apex
+        [-1, 0.6, -1],  // base NW
+        [1, 0.6, -1],  // base NE
+        [1, 0.6, 1],  // base SE
+        [-1, 0.6, 1],  // base SW
+    ];
+    const edges = [[0, 1], [0, 2], [0, 3], [0, 4], [1, 2], [2, 3], [3, 4], [4, 1]];
+
+    let ay = 0;
+    const ax = 0.38; // fixed forward tilt so the base square is always visible
+
+    function rotY(v, a) {
+        return [v[0] * Math.cos(a) + v[2] * Math.sin(a), v[1], -v[0] * Math.sin(a) + v[2] * Math.cos(a)];
+    }
+    function rotX(v, a) {
+        return [v[0], v[1] * Math.cos(a) - v[2] * Math.sin(a), v[1] * Math.sin(a) + v[2] * Math.cos(a)];
+    }
+    function project(v, cx, cy, scale) {
+        const fov = 4.5;
+        const s = (fov / (v[2] + fov)) * scale;
+        return [cx + v[0] * s, cy + v[1] * s];
+    }
+
+    function draw() {
+        const W = container.offsetWidth || 300;
+        const H = container.offsetHeight || 150;
+        if (canvas.width !== W) canvas.width = W;
+        if (canvas.height !== H) canvas.height = H;
+
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, W, H);
+
+        const scale = Math.min(W, H) * 0.26;
+        const pts = verts.map(v => project(rotX(rotY(v, ay), ax), W / 2, H / 2, scale));
+
+        // Wide dim glow pass
+        ctx.strokeStyle = 'rgba(0, 255, 50, 0.14)';
+        ctx.lineWidth = 8;
+        ctx.shadowColor = 'transparent';
+        edges.forEach(([a, b]) => {
+            ctx.beginPath();
+            ctx.moveTo(pts[a][0], pts[a][1]);
+            ctx.lineTo(pts[b][0], pts[b][1]);
+            ctx.stroke();
+        });
+
+        // Core phosphor line pass
+        ctx.strokeStyle = 'rgba(0, 195, 40, 0.95)';
+        ctx.lineWidth = 1.2;
+        ctx.shadowColor = 'rgba(0, 255, 60, 0.85)';
+        ctx.shadowBlur = 10;
+        edges.forEach(([a, b]) => {
+            ctx.beginPath();
+            ctx.moveTo(pts[a][0], pts[a][1]);
+            ctx.lineTo(pts[b][0], pts[b][1]);
+            ctx.stroke();
+        });
+        ctx.shadowBlur = 0;
+
+        ay += 0.006;
+        requestAnimationFrame(draw);
+    }
+
+    draw();
+}
 
 /**
  * Theme Management: Switch between X-Files, Modern, Morris, and Son of Sam themes
@@ -1706,9 +1794,10 @@ function generateRandomBond() {
     const availableBonds = selectedCategories.flatMap(category => bonds[category] || []);
 
     const bondTextElement = document.getElementById('bondText');
-    bondTextElement.innerHTML = ''; // Clear previous text
+    const bondContentEl = document.getElementById('bond-text-content');
+    bondContentEl.innerHTML = ''; // Clear previous text — canvas is a sibling, not a child of this span
 
-    // Apply theme-appropriate styling
+    // Apply theme-appropriate styling to the container box
     if (document.body.classList.contains('theme-modern')) {
         bondTextElement.style.fontFamily = 'inherit';
         bondTextElement.style.color = '#cdd6f4';
@@ -1743,10 +1832,10 @@ function generateRandomBond() {
         let i = 0;
         function typeChar() {
             if (displayBond.substring(i, i + 4) === '<br>') {
-                bondTextElement.innerHTML += '<br>';
+                bondContentEl.innerHTML += '<br>';
                 i += 4; // Skip past the <br> tag
             } else if (i < displayBond.length) {
-                bondTextElement.innerHTML += displayBond[i];
+                bondContentEl.innerHTML += displayBond[i];
                 i++;
             }
             if (i < displayBond.length) {
@@ -1757,7 +1846,7 @@ function generateRandomBond() {
         }
         typeChar(); // Start typing effect
     } else {
-        bondTextElement.innerHTML = "No bond available.";
+        bondContentEl.innerHTML = 'No bond available.';
         bondButton.disabled = false;
         appState.currentBond = null;
     }
