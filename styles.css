@@ -5027,10 +5027,12 @@ body:not(.theme-modern):not(.theme-morris):not(.theme-son-of-sam):not(.theme-mob
     border-color: var(--primary-color, #00b521);
 }
 
+/* ── Two-panel layout ── */
 .eq-panels {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 12px;
+    align-items: start;
 }
 
 @media (max-width: 600px) {
@@ -5039,9 +5041,9 @@ body:not(.theme-modern):not(.theme-morris):not(.theme-son-of-sam):not(.theme-mob
 
 .eq-panel-header {
     font-size: 9px;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
     font-weight: bold;
-    opacity: 0.55;
+    opacity: 0.5;
     margin-bottom: 6px;
     display: flex;
     justify-content: space-between;
@@ -5049,30 +5051,70 @@ body:not(.theme-modern):not(.theme-morris):not(.theme-son-of-sam):not(.theme-mob
 }
 
 .eq-scrolllist {
-    max-height: 260px;
+    max-height: 320px;
     overflow-y: auto;
-    border: 1px solid rgba(128, 128, 128, 0.2);
+    border: 1px solid rgba(128, 128, 128, 0.18);
     border-radius: 4px;
-    padding: 4px;
+    padding: 3px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(128,128,128,0.3) transparent;
 }
 
+/* ── Catalog: category group headers ── */
+.eq-cat-group { margin-bottom: 2px; }
+
+.eq-cat-group-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 6px 4px;
+    font-size: 8px;
+    letter-spacing: 0.16em;
+    font-weight: bold;
+    opacity: 0.7;
+    position: sticky;
+    top: 0;
+    background: var(--bg-color, #0a0a0a);
+    z-index: 1;
+    border-bottom: 1px solid rgba(128,128,128,0.1);
+    margin-bottom: 1px;
+}
+
+.eq-cat-group-bar {
+    display: inline-block;
+    width: 3px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--eq-cat-color, #888);
+    flex-shrink: 0;
+}
+
+.eq-cat-group-label { flex: 1; }
+
+.eq-cat-group-count {
+    font-weight: normal;
+    opacity: 0.5;
+    font-size: 8px;
+}
+
+/* ── Catalog items ── */
 .eq-catalog-item {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 5px 6px;
+    padding: 5px 6px 5px 10px;
     border-radius: 3px;
-    transition: background 0.1s;
+    border-left: 2px solid transparent;
+    border-left-color: transparent;
+    transition: background 0.12s, border-left-color 0.12s;
 }
 
 .eq-catalog-item:hover {
-    background: rgba(128, 128, 128, 0.08);
+    background: rgba(128, 128, 128, 0.07);
+    border-left-color: var(--eq-cat-color, transparent);
 }
 
-.eq-item-info {
-    flex: 1;
-    min-width: 0;
-}
+.eq-item-info { flex: 1; min-width: 0; }
 
 .eq-item-name {
     display: block;
@@ -5081,17 +5123,16 @@ body:not(.theme-modern):not(.theme-morris):not(.theme-son-of-sam):not(.theme-mob
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--primary-color, #00b521);
 }
 
 .eq-item-meta {
     display: block;
     font-size: 9px;
-    opacity: 0.55;
+    opacity: 0.5;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
 }
 
 .eq-expense-badge {
@@ -5104,70 +5145,98 @@ body:not(.theme-modern):not(.theme-morris):not(.theme-son-of-sam):not(.theme-mob
     width: 22px;
     height: 22px;
     padding: 0;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1;
     background: transparent;
-    border: 1px solid rgba(128, 128, 128, 0.35);
+    border: 1px solid rgba(128, 128, 128, 0.3);
     border-radius: 3px;
     color: inherit;
     cursor: pointer;
-    opacity: 0.5;
-    transition: opacity 0.15s, border-color 0.15s, color 0.15s;
+    opacity: 0.4;
+    transition: opacity 0.15s, border-color 0.15s, color 0.15s, background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .eq-add-btn:hover {
     opacity: 1;
-    border-color: var(--primary-color, #00b521);
-    color: var(--primary-color, #00b521);
+    background: var(--eq-cat-color, rgba(0,181,33,0.15));
+    border-color: var(--eq-cat-color, var(--primary-color, #00b521));
+    color: var(--eq-cat-color, var(--primary-color, #00b521));
 }
 
-.eq-loadout-item {
+/* ── Loadout: card grid ── */
+.eq-loadout-section { margin-bottom: 10px; }
+.eq-loadout-section:last-child { margin-bottom: 0; }
+
+.eq-loadout-section-header {
+    font-size: 8px;
+    letter-spacing: 0.14em;
+    font-weight: bold;
+    opacity: 0.55;
+    padding: 2px 0 2px 7px;
+    margin-bottom: 5px;
+    border-left: 3px solid rgba(128,128,128,0.4);
+}
+
+.eq-loadout-cards {
     display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 6px;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.eq-loadout-card {
+    position: relative;
+    flex: 1 1 110px;
+    min-width: 100px;
+    max-width: 100%;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    border-left: 3px solid var(--eq-cat-color, rgba(128,128,128,0.4));
     border-radius: 3px;
+    padding: 6px 22px 6px 8px;
+    background: rgba(128, 128, 128, 0.04);
+    transition: background 0.12s;
+    cursor: default;
 }
 
-.eq-loadout-item:hover {
-    background: rgba(128, 128, 128, 0.08);
+.eq-loadout-card:hover {
+    background: rgba(128, 128, 128, 0.1);
 }
 
-.eq-loadout-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.eq-loadout-name {
-    display: block;
-    font-size: 11px;
+.eq-card-name {
+    font-size: 10px;
     font-weight: bold;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.3;
 }
 
-.eq-loadout-meta {
-    display: block;
-    font-size: 9px;
-    opacity: 0.45;
+.eq-card-stats {
+    font-size: 8px;
+    opacity: 0.5;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin-top: 2px;
+    letter-spacing: 0.02em;
 }
 
 .eq-remove-btn {
-    flex-shrink: 0;
-    width: 20px;
-    height: 20px;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
     padding: 0;
-    font-size: 15px;
+    font-size: 13px;
     line-height: 1;
     background: transparent;
     border: none;
     color: inherit;
     cursor: pointer;
-    opacity: 0.35;
+    opacity: 0.25;
     transition: opacity 0.15s, color 0.15s;
     display: flex;
     align-items: center;
@@ -5200,20 +5269,20 @@ body:not(.theme-modern):not(.theme-morris):not(.theme-son-of-sam):not(.theme-mob
 
 .eq-count {
     font-weight: normal;
-    opacity: 0.7;
+    opacity: 0.6;
 }
 
 .eq-empty {
-    padding: 14px 8px;
+    padding: 18px 8px;
     font-size: 10px;
-    opacity: 0.4;
+    opacity: 0.35;
     text-align: center;
     letter-spacing: 0.05em;
 }
 
 .eq-hint {
     font-size: 9px;
-    opacity: 0.35;
+    opacity: 0.3;
     text-align: center;
     letter-spacing: 0.03em;
     margin-top: 8px;
