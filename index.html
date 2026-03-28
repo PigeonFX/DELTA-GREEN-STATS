@@ -129,30 +129,27 @@
                     <fieldset class="panel panel-skills fieldset-default">
                         <legend>Skills</legend>
                         <div id="cs-skills"> <!-- skill inputs created by JS --> </div>
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+                        <div class="skills-footer-row">
                             <button type="button" id="add-skill-button" onclick="addCustomSkill()">Add Skill</button>
-                            <div class="sanity-adaptations-section"
-                                style="margin-top: 0; padding-top: 0; border-top: none; text-align: right;">
-                                <div style="font-weight: bold; margin-bottom: 8px; font-size: 0.9em;">Sanity
-                                    Adaptations:</div>
-                                <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <label style="margin: 0; flex: 0 0 auto;">Violence:</label>
-                                        <div style="display: flex; gap: 4px;">
-                                            <label style="display: flex; align-items: center; gap: 2px; margin: 0;">
+                            <div class="sanity-adaptations-section">
+                                <div class="sanity-adaptations-title">Sanity Adaptations:</div>
+                                <div class="sanity-adaptations-list">
+                                    <div class="sanity-row">
+                                        <label class="sanity-category-label">Violence:</label>
+                                        <div class="sanity-checkboxes">
+                                            <label class="sanity-checkbox-label">
                                                 <input type="checkbox" id="cs-violence-incident1"
                                                     class="sanity-adaptation-checkbox"
                                                     onchange="updateSanityAdaptations()">
                                                 <span>1</span>
                                             </label>
-                                            <label style="display: flex; align-items: center; gap: 2px; margin: 0;">
+                                            <label class="sanity-checkbox-label">
                                                 <input type="checkbox" id="cs-violence-incident2"
                                                     class="sanity-adaptation-checkbox"
                                                     onchange="updateSanityAdaptations()">
                                                 <span>2</span>
                                             </label>
-                                            <label style="display: flex; align-items: center; gap: 2px; margin: 0;">
+                                            <label class="sanity-checkbox-label">
                                                 <input type="checkbox" id="cs-violence-incident3"
                                                     class="sanity-adaptation-checkbox"
                                                     onchange="updateSanityAdaptations()">
@@ -160,22 +157,22 @@
                                             </label>
                                         </div>
                                     </div>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <label style="margin: 0; flex: 0 0 auto;">Helplessness:</label>
-                                        <div style="display: flex; gap: 4px;">
-                                            <label style="display: flex; align-items: center; gap: 2px; margin: 0;">
+                                    <div class="sanity-row">
+                                        <label class="sanity-category-label">Helplessness:</label>
+                                        <div class="sanity-checkboxes">
+                                            <label class="sanity-checkbox-label">
                                                 <input type="checkbox" id="cs-helplessness-incident1"
                                                     class="sanity-adaptation-checkbox"
                                                     onchange="updateSanityAdaptations()">
                                                 <span>1</span>
                                             </label>
-                                            <label style="display: flex; align-items: center; gap: 2px; margin: 0;">
+                                            <label class="sanity-checkbox-label">
                                                 <input type="checkbox" id="cs-helplessness-incident2"
                                                     class="sanity-adaptation-checkbox"
                                                     onchange="updateSanityAdaptations()">
                                                 <span>2</span>
                                             </label>
-                                            <label style="display: flex; align-items: center; gap: 2px; margin: 0;">
+                                            <label class="sanity-checkbox-label">
                                                 <input type="checkbox" id="cs-helplessness-incident3"
                                                     class="sanity-adaptation-checkbox"
                                                     onchange="updateSanityAdaptations()">
@@ -191,7 +188,7 @@
 
                     <fieldset class="panel panel-bonus-skills fieldset-default">
                         <legend>Bonus Skill Points</legend>
-                        <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="bonus-prep-row">
                             <button type="button" id="prepare-bonus-button" onclick="prepareBonusSkills()">Prepare
                                 Skills for Bonus
                                 Points</button>
@@ -211,7 +208,10 @@
                         <legend>Bonds</legend>
                         <div class="section-flex">
                             <!-- Bond generation text box -->
-                            <div class="text-box text-box-left" id="bondText"></div>
+                            <div class="text-box text-box-left" id="bondText">
+                                <canvas id="bond-pyramid-canvas"></canvas>
+                                <span id="bond-text-content"></span>
+                            </div>
                             <!-- Bond categories form -->
                             <form id="bond-categories" class="bond-categories">
                                 <label for="PISCES_UK">
@@ -284,6 +284,19 @@
                             Stats</button>
                     </div>
                     <pre id="cs-json" class="hidden-section"></pre>
+
+                    <fieldset class="fieldset-default" id="json-to-printable-fieldset">
+                        <legend>Restore &amp; Print from Saved JSON</legend>
+                        <p class="description-text">Paste a previously exported Foundry VTT character JSON to generate
+                            a printable sheet — includes all equipment, gear, armour, and bonds saved in the
+                            file.</p>
+                        <textarea id="json-import-area"
+                            placeholder="Paste exported Foundry VTT character JSON here..."></textarea>
+                        <div class="section-buttons">
+                            <button type="button" id="json-to-printable-button"
+                                onclick="exportPrintableFromJSON()">Export Printable from JSON</button>
+                        </div>
+                    </fieldset>
                 </div>
             </div>
         </div>
@@ -309,7 +322,7 @@
                 GitHub
             </a>
         </div>
-        <div style="display: flex; justify-content: center; margin-top: 20px; width: 100%;">
+        <div class="bmc-container">
             <a href="https://www.buymeacoffee.com/pigeon_labs" target="_blank" class="bmc-badge-link">
                 <img src="https://cdn.buymeacoffee.com/buttons/v2/default-black.png" alt="Buy Me A Coffee"
                     class="bmc-img" data-theme="xfiles">
