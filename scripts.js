@@ -1448,6 +1448,11 @@ function buildFoundryJSON() {
             items = [];
         }
 
+        // Merge equipment picker loadout
+        if (typeof window.dgEquipment?.getLoadout === 'function') {
+            items = window.dgEquipment.getLoadout().concat(items);
+        }
+
         // Add bonds as items
         const bondsToAdd = (window.bondsOnSheet || []).map((bond) => {
             return {

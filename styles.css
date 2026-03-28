@@ -1005,6 +1005,529 @@ textarea {
     height: 180px;
 }
 
+/* ── Export & Save fieldset grid ────────────────────────────────────── */
+.export-actions-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.export-action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.export-action-group-label {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.55;
+    padding-bottom: 2px;
+    border-bottom: 1px solid currentColor;
+    width: fit-content;
+    min-width: 80px;
+}
+
+/* ── Auto-save flash indicator ─────────────────────────────────────── */
+#dg-save-status {
+    display: inline-block;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.08em;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    align-self: center;
+    padding: 2px 6px;
+}
+
+#dg-save-status.dg-saved-visible {
+    opacity: 0.7;
+}
+
+/* ── Toast notification ─────────────────────────────────────────────── */
+#dg-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 10px 20px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.25s;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+#dg-toast.dg-toast-visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DICE ROLLER PANEL
+═══════════════════════════════════════════════════════════════════ */
+
+#dr-panel {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 270px;
+    background: var(--bg-color, #0a0a0a);
+    border: 1px solid var(--primary-color, #00b521);
+    border-radius: 8px;
+    box-shadow: 0 0 28px rgba(0, 181, 33, 0.2), 0 6px 20px rgba(0, 0, 0, 0.7);
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--primary-color, #00b521);
+    z-index: 8000;
+    user-select: none;
+}
+
+/* Handle */
+#dr-handle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    cursor: grab;
+    border-bottom: 1px solid rgba(0, 181, 33, 0.3);
+    background: rgba(0, 181, 33, 0.06);
+    border-radius: 8px 8px 0 0;
+}
+
+#dr-handle:active {
+    cursor: grabbing;
+}
+
+#dr-title {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    font-weight: bold;
+    flex: 1;
+}
+
+.dr-handle-controls button {
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0 3px;
+    width: auto;
+    min-width: 0;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+    line-height: 1;
+}
+
+.dr-handle-controls button:hover {
+    opacity: 1;
+}
+
+/* Body */
+#dr-body {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ── Die selector pills ─────────────────────────────────────────── */
+#dr-die-pills {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.dr-die-btn {
+    padding: 4px 0;
+    width: 34px;
+    text-align: center;
+    font-size: 10px;
+    font-family: inherit;
+    letter-spacing: 0.05em;
+    font-weight: bold;
+    background: transparent;
+    border: 1px solid rgba(128, 128, 128, 0.35);
+    border-radius: 4px;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity 0.15s, border-color 0.15s, background 0.15s;
+    min-width: 0;
+    width: auto;
+    flex: 1;
+    max-width: 38px;
+}
+
+.dr-die-btn:hover {
+    opacity: 0.85;
+    border-color: var(--primary-color, #00b521);
+}
+
+.dr-die-btn-active {
+    opacity: 1 !important;
+    border-color: var(--primary-color, #00b521) !important;
+    background: rgba(0, 181, 33, 0.12) !important;
+}
+
+/* ── Face area ──────────────────────────────────────────────────── */
+#dr-face-area {
+    display: flex;
+    justify-content: center;
+    min-height: 84px;
+    align-items: center;
+}
+
+.dr-face-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+}
+
+/* Single-die face (d4–d20) */
+#dr-face-single .dr-die-face {
+    width: 70px;
+    height: 70px;
+    font-size: 28px;
+}
+
+.dr-face-type {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    opacity: 0.45;
+    margin-top: 2px;
+}
+
+/* Percentile pair */
+.dr-pct-pair {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dr-pct-die {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+
+.dr-pct-lbl {
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    opacity: 0.45;
+}
+
+.dr-pct-sep {
+    font-size: 16px;
+    opacity: 0.3;
+    margin-bottom: 14px;
+}
+
+/* Shared die face */
+.dr-die-face {
+    width: 58px;
+    height: 58px;
+    border: 2px solid var(--primary-color, #00b521);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: -1px;
+    background: rgba(0, 181, 33, 0.04);
+    box-shadow: inset 0 0 10px rgba(0, 181, 33, 0.08);
+}
+
+/* ── Die shape variants (clip-path polygon per die type) ─────────── */
+/* D4 — tetrahedron / equilateral triangle                            */
+.dr-shape-d4 {
+    clip-path: polygon(50% 0%, 3% 97%, 97% 97%);
+    border: none;
+    filter: drop-shadow(0 0 3px var(--primary-color, #00b521));
+    border-radius: 0;
+    padding-top: 14px;
+}
+
+/* D6 — cube / square                                                  */
+.dr-shape-d6 {
+    border-radius: 4px;
+}
+
+/* D8 — octahedron / diamond                                           */
+.dr-shape-d8 {
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    border: none;
+    filter: drop-shadow(0 0 3px var(--primary-color, #00b521));
+    border-radius: 0;
+}
+
+/* D10 — pentagonal trapezohedron / elongated kite                     */
+.dr-shape-d10 {
+    clip-path: polygon(50% 0%, 100% 36%, 82% 100%, 18% 100%, 0% 36%);
+    border: none;
+    filter: drop-shadow(0 0 3px var(--primary-color, #00b521));
+    border-radius: 0;
+    padding-top: 6px;
+}
+
+/* D12 — dodecahedron / pentagon                                        */
+.dr-shape-d12 {
+    clip-path: polygon(50% 0%, 100% 36%, 80% 100%, 20% 100%, 0% 36%);
+    border: none;
+    filter: drop-shadow(0 0 3px var(--primary-color, #00b521));
+    border-radius: 0;
+    padding-top: 6px;
+}
+
+/* D20 — icosahedron / larger flat-top triangle                         */
+.dr-shape-d20 {
+    clip-path: polygon(50% 3%, 2% 97%, 98% 97%);
+    border: none;
+    filter: drop-shadow(0 0 3px var(--primary-color, #00b521));
+    border-radius: 0;
+    padding-top: 16px;
+}
+
+/* Larger single-face overrides for shaped dice */
+#dr-face-single .dr-shape-d4,
+#dr-face-single .dr-shape-d20 {
+    padding-top: 20px;
+}
+
+#dr-face-single .dr-shape-d10,
+#dr-face-single .dr-shape-d12 {
+    padding-top: 10px;
+}
+
+/* Animations */
+@keyframes dr-spin-anim {
+    0% {
+        transform: rotateX(0deg) scale(1);
+        opacity: 1;
+    }
+
+    40% {
+        transform: rotateX(90deg) scale(0.82);
+        opacity: 0.35;
+    }
+
+    60% {
+        transform: rotateX(270deg) scale(0.82);
+        opacity: 0.35;
+    }
+
+    100% {
+        transform: rotateX(360deg) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes dr-land-anim {
+    0% {
+        transform: scale(1.22);
+        opacity: 0.5;
+    }
+
+    60% {
+        transform: scale(0.94);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.dr-die-face.dr-spin {
+    animation: dr-spin-anim 0.08s linear;
+}
+
+.dr-die-face.dr-land {
+    animation: dr-land-anim 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* ── Result box ─────────────────────────────────────────────────── */
+.dr-result-box {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid rgba(128, 128, 128, 0.25);
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 6px;
+    gap: 1px;
+    transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+}
+
+#dr-target-display {
+    font-size: 9px;
+    opacity: 0.45;
+    letter-spacing: 0.08em;
+}
+
+#dr-result-label {
+    font-size: 15px;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    text-align: center;
+    transition: color 0.25s;
+}
+
+.dr-result-box.dr-rolling {
+    border-color: rgba(128, 128, 128, 0.3);
+}
+
+.dr-result-box.dr-result-critical {
+    border-color: #ffd700;
+    background: rgba(255, 215, 0, 0.07);
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.3);
+}
+
+.dr-result-box.dr-result-extreme {
+    border-color: #00e5ff;
+    background: rgba(0, 229, 255, 0.07);
+}
+
+.dr-result-box.dr-result-hard {
+    border-color: #00e676;
+    background: rgba(0, 230, 118, 0.07);
+}
+
+.dr-result-box.dr-result-success {
+    border-color: #69f0ae;
+    background: rgba(105, 240, 174, 0.05);
+}
+
+.dr-result-box.dr-result-failure {
+    border-color: #ff6d00;
+    background: rgba(255, 109, 0, 0.07);
+}
+
+.dr-result-box.dr-result-fumble {
+    border-color: #ff1744;
+    background: rgba(255, 23, 68, 0.10);
+    box-shadow: 0 0 16px rgba(255, 23, 68, 0.3);
+}
+
+/* ── Skill context label ────────────────────────────────────────── */
+#dr-skill-name {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-align: center;
+    opacity: 0.5;
+    text-transform: uppercase;
+    min-height: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+}
+
+/* ── Manual row ─────────────────────────────────────────────────── */
+#dr-manual-row {
+    display: flex;
+    gap: 6px;
+}
+
+#dr-manual-target {
+    flex: 1;
+    padding: 5px 8px;
+    background: transparent;
+    border: 1px solid rgba(128, 128, 128, 0.35);
+    border-radius: 4px;
+    color: inherit;
+    font-family: inherit;
+    font-size: 12px;
+    text-align: center;
+    min-width: 0;
+}
+
+#dr-manual-target:focus {
+    outline: none;
+    border-color: var(--primary-color, #00b521);
+}
+
+#dr-manual-row button {
+    padding: 5px 14px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    width: auto;
+    flex-shrink: 0;
+}
+
+#dr-hint {
+    font-size: 8px;
+    opacity: 0.3;
+    text-align: center;
+    line-height: 1.4;
+    letter-spacing: 0.03em;
+}
+
+/* ── Skill inputs: pointer + hover ring ─────────────────────────── */
+#cs-skills .cs-skill-input,
+#cs-custom-skills .custom-skill-value {
+    cursor: pointer;
+}
+
+#cs-skills .cs-skill-input:hover,
+#cs-custom-skills .custom-skill-value:hover {
+    outline: 1px solid var(--primary-color, #00b521);
+}
+
+/* ── Theme tints ────────────────────────────────────────────────── */
+.theme-modern #dr-panel {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px rgba(92, 124, 250, 0.18), 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.theme-son-of-sam #dr-panel {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px rgba(229, 57, 53, 0.22), 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+.theme-morris #dr-panel {
+    border-color: var(--primary-color);
+}
+
+/* ── Mobile: full-width bottom sheet ───────────────────────────── */
+@media (max-width: 600px) {
+    #dr-panel {
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        border-radius: 12px 12px 0 0;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+    }
+
+    #dr-die-pills {
+        gap: 5px;
+    }
+
+    .dr-die-btn {
+        max-width: none;
+        flex: 1;
+    }
+}
+
 #cs-json {
     white-space: pre-wrap;
     padding: 10px;
@@ -4462,4 +4985,237 @@ body:not(.theme-modern):not(.theme-morris):not(.theme-son-of-sam):not(.theme-mob
 .bmc-badge-link {
     display: flex;
     justify-content: center;
+}
+
+/* ── Equipment Picker ─────────────────────────────────────────────── */
+.eq-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.eq-search-input {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 10px;
+    background: transparent;
+    border: 1px solid rgba(128, 128, 128, 0.35);
+    border-radius: 4px;
+    color: inherit;
+    font-family: inherit;
+    font-size: 12px;
+}
+
+.eq-search-input:focus {
+    outline: none;
+    border-color: var(--primary-color, #00b521);
+}
+
+.eq-cat-select {
+    padding: 6px 8px;
+    background: var(--bg-color, #0a0a0a);
+    border: 1px solid rgba(128, 128, 128, 0.35);
+    border-radius: 4px;
+    color: inherit;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.eq-cat-select:focus {
+    outline: none;
+    border-color: var(--primary-color, #00b521);
+}
+
+.eq-panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .eq-panels { grid-template-columns: 1fr; }
+}
+
+.eq-panel-header {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    font-weight: bold;
+    opacity: 0.55;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.eq-scrolllist {
+    max-height: 260px;
+    overflow-y: auto;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    border-radius: 4px;
+    padding: 4px;
+}
+
+.eq-catalog-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 6px;
+    border-radius: 3px;
+    transition: background 0.1s;
+}
+
+.eq-catalog-item:hover {
+    background: rgba(128, 128, 128, 0.08);
+}
+
+.eq-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.eq-item-name {
+    display: block;
+    font-size: 11px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--primary-color, #00b521);
+}
+
+.eq-item-meta {
+    display: block;
+    font-size: 9px;
+    opacity: 0.55;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.03em;
+}
+
+.eq-expense-badge {
+    font-weight: bold;
+    font-size: 9px;
+}
+
+.eq-add-btn {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    font-size: 15px;
+    line-height: 1;
+    background: transparent;
+    border: 1px solid rgba(128, 128, 128, 0.35);
+    border-radius: 3px;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.eq-add-btn:hover {
+    opacity: 1;
+    border-color: var(--primary-color, #00b521);
+    color: var(--primary-color, #00b521);
+}
+
+.eq-loadout-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 6px;
+    border-radius: 3px;
+}
+
+.eq-loadout-item:hover {
+    background: rgba(128, 128, 128, 0.08);
+}
+
+.eq-loadout-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.eq-loadout-name {
+    display: block;
+    font-size: 11px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.eq-loadout-meta {
+    display: block;
+    font-size: 9px;
+    opacity: 0.45;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.eq-remove-btn {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    font-size: 15px;
+    line-height: 1;
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.35;
+    transition: opacity 0.15s, color 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.eq-remove-btn:hover {
+    opacity: 1;
+    color: #ff6d00;
+}
+
+.eq-clear-btn {
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    padding: 2px 6px;
+    background: transparent;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    border-radius: 3px;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.45;
+    transition: opacity 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.eq-clear-btn:hover {
+    opacity: 1;
+    border-color: #ff6d00;
+    color: #ff6d00;
+}
+
+.eq-count {
+    font-weight: normal;
+    opacity: 0.7;
+}
+
+.eq-empty {
+    padding: 14px 8px;
+    font-size: 10px;
+    opacity: 0.4;
+    text-align: center;
+    letter-spacing: 0.05em;
+}
+
+.eq-hint {
+    font-size: 9px;
+    opacity: 0.35;
+    text-align: center;
+    letter-spacing: 0.03em;
+    margin-top: 8px;
+    margin-bottom: 0;
 }

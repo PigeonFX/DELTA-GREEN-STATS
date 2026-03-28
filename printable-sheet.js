@@ -49,7 +49,12 @@ function _dataFromDOM() {
 
     // Derived attributes
     const attrs = calculateAttributes();
-    const attributes = { HP: attrs[0], WP: attrs[1], SAN: attrs[2], BP: attrs[3] };
+    const attributes = {
+        HP: { max: attrs[0], current: parseInt(document.getElementById('cs-hp')?.value) ?? attrs[0] },
+        WP: { max: attrs[1], current: parseInt(document.getElementById('cs-wp')?.value) ?? attrs[1] },
+        SAN: { max: attrs[2], current: parseInt(document.getElementById('cs-sanity-value')?.value) ?? attrs[2] },
+        BP: { max: attrs[3], current: parseInt(document.getElementById('cs-breaking-point')?.value) ?? attrs[3] }
+    };
 
     // Biography
     const bio = {
@@ -145,10 +150,10 @@ function _dataFromFoundryJSON(obj) {
     });
 
     const attributes = {
-        HP: sys.health?.max ?? sys.health?.value ?? 0,
-        WP: sys.wp?.max ?? sys.wp?.value ?? 0,
-        SAN: sys.sanity?.value ?? 0,
-        BP: sys.sanity?.currentBreakingPoint ?? 0
+        HP: { max: sys.health?.max ?? 0, current: sys.health?.value ?? sys.health?.max ?? 0 },
+        WP: { max: sys.wp?.max ?? 0, current: sys.wp?.value ?? sys.wp?.max ?? 0 },
+        SAN: { max: (sys.statistics?.pow?.value ?? 0) * 5, current: sys.sanity?.value ?? 0 },
+        BP: { max: sys.sanity?.currentBreakingPoint ?? 0, current: sys.sanity?.currentBreakingPoint ?? 0 }
     };
 
     // ---  Skills  ---
@@ -269,11 +274,11 @@ function _buildPrintableHTML(data) {
                     <div style="font-weight: bold; font-size: 11px;">${key}</div>
                     <div>
                         <div style="font-size: 9px; margin-bottom: 2px;">MAX</div>
-                        <div style="font-size: 18px; font-weight: bold; line-height: 1;">${attributes[key]}</div>
+                        <div style="font-size: 18px; font-weight: bold; line-height: 1;">${attributes[key].max}</div>
                     </div>
                     <div style="border-top: 1px solid #000; padding-top: 4px;">
                         <div style="font-size: 9px; margin-bottom: 2px;">CURRENT</div>
-                        <div style="height: 20px; border: 1px solid #ccc;"></div>
+                        <div style="font-size: 18px; font-weight: bold; line-height: 1;">${attributes[key].current}</div>
                     </div>
                 </div>`).join('');
 
@@ -426,11 +431,11 @@ function _buildPrintableHTML(data) {
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
                 <div style="border: 1px solid #000; padding: 8px; text-align: center;">
                     <div style="font-size: 9px; font-weight: bold; margin-bottom: 4px;">Current SAN</div>
-                    <div style="font-size: 18px; min-height: 20px;">${attributes.SAN}</div>
+                    <div style="font-size: 18px; min-height: 20px;">${attributes.SAN.current}</div>
                 </div>
                 <div style="border: 1px solid #000; padding: 8px; text-align: center;">
                     <div style="font-size: 9px; font-weight: bold; margin-bottom: 4px;">Breaking Point</div>
-                    <div style="font-size: 18px; min-height: 20px;">${attributes.BP}</div>
+                    <div style="font-size: 18px; min-height: 20px;">${attributes.BP.current}</div>
                 </div>
             </div>
             <div style="min-height: 120px; border: 1px solid #000; padding: 8px; font-size: 9px; display: flex; flex-direction: column;">

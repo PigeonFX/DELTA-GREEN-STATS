@@ -252,6 +252,11 @@
                         </div>
                     </fieldset>
 
+                    <fieldset class="fieldset-default" id="eq-picker-fieldset">
+                        <legend id="eq-picker-legend">EQUIPMENT LOADOUT</legend>
+                        <div id="eq-picker-container"></div>
+                    </fieldset>
+
                     <fieldset class="panel panel-proto fieldset-default">
                         <legend>Prototype Token / Misc JSON</legend>
                         <label>Prototype Token (JSON):</label>
@@ -272,29 +277,64 @@
 }]</textarea>
                     </fieldset>
 
-                    <div class="section-buttons">
-                        <button type="button" id="preview-json" onclick="populateCharacterJSON()">Preview Foundry
-                            JSON</button>
-                        <button type="button" id="export-json" onclick="exportCharacterJSON()">Export Foundry
-                            JSON</button>
-                        <button type="button" id="export-printable" onclick="exportPrintable()">Export as Printable
-                            HTML</button>
-                        <button type="button" id="refresh-stats" onclick="populateCharacterSheetForm()">Refresh fields
-                            from
-                            Stats</button>
-                    </div>
                     <pre id="cs-json" class="hidden-section"></pre>
 
+                    <fieldset class="fieldset-default" id="export-actions-fieldset">
+                        <legend>Export &amp; Save</legend>
+                        <p class="description-text">Your sheet is auto-saved in this browser as you type. Use these
+                            buttons to export, print, or share your character.</p>
+
+                        <div class="export-actions-grid">
+                            <div class="export-action-group">
+                                <div class="export-action-group-label">Foundry VTT</div>
+                                <div class="section-buttons">
+                                    <button type="button" id="preview-json" onclick="populateCharacterJSON()"
+                                        title="Renders the Foundry VTT JSON for your character below — useful for a quick review before exporting.">Preview
+                                        JSON</button>
+                                    <button type="button" id="export-json" onclick="exportCharacterJSON()"
+                                        title="Downloads your character as a .json file ready to import directly into Foundry VTT via the Actors tab.">Export
+                                        to Foundry</button>
+                                    <button type="button" id="refresh-stats" onclick="populateCharacterSheetForm()"
+                                        title="Re-reads your stat values from the top section and updates the character sheet fields — useful if you changed your stats after filling in the sheet.">Sync
+                                        Stats → Sheet</button>
+                                </div>
+                            </div>
+
+                            <div class="export-action-group">
+                                <div class="export-action-group-label">Print</div>
+                                <div class="section-buttons">
+                                    <button type="button" id="export-printable" onclick="exportPrintable()"
+                                        title="Generates a clean, printer-friendly HTML character sheet from the current form — open it in your browser and use Print to PDF.">Export
+                                        Printable Sheet</button>
+                                </div>
+                            </div>
+
+                            <div class="export-action-group">
+                                <div class="export-action-group-label">Save &amp; Share</div>
+                                <div class="section-buttons" id="save-share-buttons">
+                                    <button type="button" id="share-link-btn" onclick="dgSaveLoad.share()"
+                                        title="Encodes your entire character into a shareable URL and copies it to your clipboard. Send it to anyone — opening the link instantly loads your character.">Copy
+                                        Share Link</button>
+                                    <button type="button" id="clear-save-btn" onclick="dgSaveLoad.clearSave()"
+                                        title="Clears the auto-saved character data stored in this browser. Useful if you want to start fresh without a previous character loading on page open.">Clear
+                                        Save</button>
+                                    <span id="dg-save-status">AUTO-SAVED</span>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
                     <fieldset class="fieldset-default" id="json-to-printable-fieldset">
-                        <legend>Restore &amp; Print from Saved JSON</legend>
-                        <p class="description-text">Paste a previously exported Foundry VTT character JSON to generate
-                            a printable sheet — includes all equipment, gear, armour, and bonds saved in the
-                            file.</p>
+                        <legend>Print from Foundry JSON</legend>
+                        <p class="description-text">Paste a previously exported Foundry VTT character JSON below to
+                            generate a printable sheet without filling in the form — includes weapons, gear, armour, and
+                            bonds.</p>
                         <textarea id="json-import-area"
                             placeholder="Paste exported Foundry VTT character JSON here..."></textarea>
                         <div class="section-buttons">
-                            <button type="button" id="json-to-printable-button"
-                                onclick="exportPrintableFromJSON()">Export Printable from JSON</button>
+                            <button type="button" id="json-to-printable-button" onclick="exportPrintableFromJSON()"
+                                title="Generates a printable HTML character sheet directly from the pasted Foundry VTT JSON — no need to fill in the form manually.">Generate
+                                Printable Sheet</button>
                         </div>
                     </fieldset>
                 </div>
@@ -348,6 +388,10 @@
         <script src="bio.js"></script>
         <script src="scripts.js"></script>
         <script src="printable-sheet.js"></script>
+        <script src="save-load.js"></script>
+        <script src="dice-roller.js"></script>
+        <script src="equipment-data.js"></script>
+        <script src="equipment-picker.js"></script>
 </body>
 
 </html>
