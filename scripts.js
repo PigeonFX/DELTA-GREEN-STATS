@@ -47,7 +47,6 @@ const CONFIG = {
     DICE_COUNT: 4,
     DICE_SIDES: 6,
     DICE_KEEP: 3,
-    BOND_DELIMITER: ' ^ ^ ',
     TYPING_SPEED_MS: 10,          // ms per character in the bond text typing effect
 
     // Default skills with base values [key, label, defaultValue, hasSpecialty?]
@@ -765,8 +764,6 @@ function calculateAttributes() {
 
     return [hp, wp, san, bp];
 }
-
-
 
 /**
  * Returns a descriptive phrase for an ability score
@@ -2287,8 +2284,6 @@ function importFoundryJSONToEditor() {
     }, 0);
 }
 
-
-
 // Keep the character sheet form in sync when stats change
 let _populatePending = false;
 const observer = new MutationObserver(() => {
@@ -3567,11 +3562,10 @@ window.addEventListener('load', function () {
     window.addEventListener('resize', () => { panel.style.display = 'none'; });
 });
 
-
 /**
  * Generates a random bond from selected categories with typing effect.
  * Stores the result in appState.currentBond for later addition to sheet
- * Bond format from bonds.js: "Name ^ ^ Relationship ^ ^ Description"
+ * Bond data from bonds.js: { name, relationship, description }
  */
 function generateRandomBond() {
     const bondButton = document.getElementById('bonds-button');
@@ -3591,12 +3585,12 @@ function generateRandomBond() {
         // Store the original bond in appState for later parsing
         appState.currentBond = randomBond;
 
-        // Split on the ^ delimiter so each segment types as a text node, with <br> elements
-        // between them. Using createTextNode avoids the innerHTML re-parse/re-serialize cost
+        // Build display segments from bond object properties; wrap relationship in parens.
+        // Using createTextNode avoids the innerHTML re-parse/re-serialize cost
         // on every character, which was the main source of per-character jank on all themes.
-        const segments = randomBond.split(' ^ ^ ');
+        const relDisplay = randomBond.relationship ? '(' + randomBond.relationship + ')' : '';
+        const segments = [randomBond.name, relDisplay, randomBond.description].filter(Boolean);
 
-        // Build a flat list of {type, text} tokens: 'text' chars interleaved with 'br' breaks
         const tokens = [];
         segments.forEach((seg, idx) => {
             for (const ch of seg) tokens.push({ type: 'char', ch });
@@ -3685,7 +3679,7 @@ function addEmptyBond() {
 
 /**
  * Adds the currently generated bond to the character's bond sheet
- * Parses bond text using CONFIG.BOND_DELIMITER into name, relationship, and description
+ * Reads name, relationship, and description from the appState.currentBond object
  * Generates unique ID and renders the bond on the sheet
  */
 function addBondToSheet() {
@@ -3695,21 +3689,9 @@ function addBondToSheet() {
     }
 
     try {
-        // Parse bond text: "Name ^ ^ Relationship ^ ^ Description"
-        const parts = appState.currentBond.split(CONFIG.BOND_DELIMITER);
-        let bondName = '';
-        let bondRelationship = '';
-        let bondDescription = '';
-
-        if (parts.length === 3) {
-            bondName = parts[0].trim();
-            bondRelationship = parts[1].trim();
-            bondDescription = parts[2].trim();
-        } else {
-            // Fallback if format doesn't match
-            bondName = appState.currentBond.substring(0, 30) + (appState.currentBond.length > 30 ? '...' : '');
-            bondDescription = appState.currentBond;
-        }
+        const bondName = appState.currentBond.name;
+        const bondRelationship = appState.currentBond.relationship;
+        const bondDescription = appState.currentBond.description;
 
         // Validate bond data
         if (!bondName) {
