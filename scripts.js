@@ -48,6 +48,7 @@ const CONFIG = {
     DICE_SIDES: 6,
     DICE_KEEP: 3,
     BOND_DELIMITER: ' ^ ^ ',
+    TYPING_SPEED_MS: 10,          // ms per character in the bond text typing effect
 
     // Default skills with base values [key, label, defaultValue, hasSpecialty?]
     SKILLS: [
@@ -69,7 +70,7 @@ const CONFIG = {
         ["firearms", "Firearms", 20],
         ["first_aid", "First Aid", 10],
         ["forensics", "Forensics", 0],
-        ["heavy_machinery", "Heavy Machinery", 10],
+        ["heavy_machiner", "Heavy Machinery", 10],
         ["heavy_weapons", "Heavy Weapons", 0],
         ["history", "History", 10],
         ["humint", "HUMINT", 10],
@@ -101,10 +102,505 @@ const CONFIG = {
     }
 };
 
+/**
+ * Shared specialty option lists, keyed by CONFIG.SKILLS key.
+ * Military Science entries are already in "Skill (X)" format; all others are
+ * bare specialty names that should be combined with the base skill label.
+ */
+const SPECIALTY_OPTIONS = {
+    // Suggestions drawn from official rule descriptions. Each list is offered as a convenience
+    // dropdown; players can always type a custom specialty instead.
+    art: [
+        "Acting", "Creative Writing", "Dance", "Flute", "Forgery", "Guitar",
+        "Journalism", "Painting", "Photography", "Poetry", "Scriptwriting",
+        "Sculpture", "Singing", "Violin", "Illustration"
+    ],
+    craft: [
+        "Architect", "Carpenter", "Electrician", "Gunsmith", "Locksmith",
+        "Mechanic", "Microelectronics", "Plumber", "Machinist", "Welder", "Blacksmith"
+    ],
+    // Foreign Language has no fixed list — common examples offered, free text always available.
+    foreign_language: [
+        "Arabic", "Chinese (Mandarin)", "French", "German", "Greek", "Hebrew",
+        "Hindi", "Indonesian", "Italian", "Japanese", "Korean", "Persian/Farsi",
+        "Portuguese", "Russian", "Spanish", "Swahili", "Turkish", "Vietnamese"
+    ],
+    // Military Science specialty is just the domain (Land / Air / Sea). DisplayName is built
+    // as "Military Science (Land)" etc. by getCompletedSkills().
+    military_science: ["Land", "Air", "Sea", "Special Operations"],
+    pilot: [
+        "Airplane", "Drone", "Helicopter", "Small Boat", "Ship",
+        "Space Shuttle", "Jet Aircraft"
+    ],
+    science: [
+        "Astronomy", "Biology", "Botany", "Chemistry", "Engineering",
+        "Genetics", "Geology", "Mathematics", "Meteorology", "Physics",
+        "Planetology", "Zoology"
+    ]
+};
+
+/** Set of CONFIG.SKILLS keys that require a specialty sub-option and are stored as instances. */
+const SPECIALTY_SKILL_KEYS = new Set(Object.keys(SPECIALTY_OPTIONS));
+
+/**
+ * Hover tooltip text shown on the ⓘ icon next to each specialty skill type label.
+ * Drawn verbatim from the Delta Green rulebook.
+ */
+const SKILL_TOOLTIPS = {
+    // ── Base skills ──────────────────────────────────────────────────────────
+    accounting:
+        `Accounting — Base: 10%
+The study of finance and business. Use it to sift through financial records for anomalies, such as a hidden bank account or money laundering.`,
+    alertness:
+        `Alertness — Base: 20%
+Detects danger. Use it to hear a safety being switched off, to understand the mumbling on the other side of a wall, to spot the bulge of a pistol hidden under a jacket, or to catch someone who is trying to escape notice using Stealth.`,
+    anthropology:
+        `Anthropology — Base: 0%
+The study of living human cultures. Use it to understand morals, religious beliefs, customs, and mores, and to identify (but not translate) obscure languages.
+
+Where History is about the distant past and Archeology studies physical remains, Anthropology is about the behaviours of living cultures, how they relate to each other and the past, and how to navigate them safely.`,
+    archeology:
+        `Archeology — Base: 0%
+The study of the physical remains of human cultures. Use it to analyse the way of life of a people from ruins, to determine the age of an artifact, to tell a genuine artifact from a fake, and to identify (but not translate) human languages.
+
+Where Anthropology is about living cultures and History is a broad study of the past, Archeology discerns meaning from the physical remains of peoples long dead.`,
+    artillery:
+        `Artillery — Base: 0%
+Safe and accurate use of mortars, missiles, howitzers, tank cannons, and other heavy gunnery. Use it to destroy troops or a hard target in battle.`,
+    athletics:
+        `Athletics — Base: 30%
+Your Agent trains to get the most out of his or her strength and agility. Strength and Dexterity cover raw physical power and manual dexterity; Athletics represents long practice doing things like running, jumping, climbing, and throwing.
+
+Use Athletics to: outrun someone; jump an intimidating gap; climb in a crisis; land safely in a fall of up to three metres; hit a target with a thrown weapon; or catch something without warning.`,
+    bureaucracy:
+        `Bureaucracy — Base: 10%
+Manipulating the rules and personalities that govern an organisation. Use it to locate and borrow supplies, convince an official to provide information or resources, gain credentials for access to a restricted area, or keep the hospital from delving too deeply into the source of your injuries.`,
+    computer_science:
+        `Computer Science — Base: 0%
+Deep knowledge of computers, computer systems, and the programs that run them. Use it to recover erased or encrypted data, protect documents from easy access, implant software to hijack a computer system, clone a phone's SIM card, identify flaws in a security system, impersonate users, or falsify data.
+
+Often complemented by SIGINT and Craft skills like Electrician and Microelectronics.`,
+    criminology:
+        `Criminology — Base: 10%
+Knowledge of criminal and conspiratorial behaviour. Use it to identify and predict criminal behaviour, deduce relationships between members of a conspiracy, analyse criminal activity, examine witness statements, or know whom to talk to in the criminal underground.`,
+    demolitions:
+        `Demolitions — Base: 0%
+Safe handling of explosives in a crisis. Use it to disarm a bomb, set a charge to destroy a target remotely, jury-rig an explosive from hardware-store supplies, or analyse a blast to determine exactly what caused it.
+
+Failure when handling a bomb means your Agent needs more time. In a crisis, a fumble means accidental explosion.`,
+    disguise:
+        `Disguise — Base: 10%
+Alter your Agent's appearance, voice, posture, body language, and mannerisms to avoid recognition without drawing attention.`,
+    dodge:
+        `Dodge — Base: 30%
+Evading danger and attacks through instinct and reflexes. Against firearms and explosives, Dodge can get an Agent to cover before bullets and shrapnel fly.`,
+    drive:
+        `Drive — Base: 20%
+Handling an automobile or a motorcycle safely in a crisis. Every Agent can drive in normal conditions. Use this skill to keep a vehicle safe in a high-speed pursuit or on dangerous terrain.`,
+    firearms:
+        `Firearms — Base: 20%
+Safe and accurate shooting with small arms in combat. Use it to hit a target despite the adrenaline, panic, and shock of violence interfering with hand-eye coordination.`,
+    first_aid:
+        `First Aid — Base: 10%
+The initial treatment and stabilisation of injuries. Use it to help a character recover lost Hit Points.
+
+By comparison, Surgery corrects a severe wound and Medicine ensures long-term recovery.`,
+    forensics:
+        `Forensics — Base: 0%
+Gathering detailed information and evidence using forensic equipment. Use it to record biometric data, determine details about a weapon or accelerant, discern crucial clues an ordinary searcher wouldn't recognise, clean a scene of incriminating evidence, or collect, analyse, and compare fingerprints and DNA samples.`,
+    heavy_machiner:
+        `Heavy Machinery — Base: 10%
+Safe operation of a tractor, crane, bulldozer, tank, heavy truck, or other big machine in a crisis.`,
+    heavy_weapons:
+        `Heavy Weapons — Base: 0%
+Safe and accurate use of man-portable heavy ordnance such as machine guns and rocket launchers. Use it to suppress enemies, or destroy a vehicle in combat.`,
+    history:
+        `History — Base: 10%
+Uncovering facts and theories about the human past. Use it to remember or find a key fact about the distant past, recognise an obscure reference, or comb a database or library for information that needs deep education.
+
+Where Anthropology is about living cultures and Archeology studies ancient relics, History is a broad study of humanity.`,
+    humint:
+        `HUMINT — Base: 10%
+Human intelligence. Obtains information about a subject — especially information the subject would rather conceal — through observation, conversation, or examining patterns of behaviour.
+
+Use it to recognise dishonesty, gauge attitude and intentions, cultivate sources, determine what it would take to get cooperation, or recognise clues of what a subject wants to conceal. HUMINT can notice signs of mental illness, but Psychotherapy would be needed to diagnose and treat a specific malady.`,
+    law:
+        `Law — Base: 0%
+Using laws and courts to your Agent's advantage. Use it to get your way in court, determine correct procedures for handling evidence (and how to undermine them), bullshit your way out of legal trouble, or minimise legal risks.
+
+The Law skill applies to your Agent's native country; using it with another country's laws requires special training.`,
+    medicine:
+        `Medicine — Base: 0%
+The study and treatment of injury and illness. Use it to diagnose the cause of an injury, disease, or poisoning; identify abnormalities such as toxins; identify the cause and approximate time of death; identify the type of weapon used to kill a victim; or prescribe proper long-term care.
+
+By comparison, First Aid keeps a patient alive until surgery is possible and Surgery corrects a severe wound.`,
+    melee_weapons:
+        `Melee Weapons — Base: 30%
+Lethal use of melee weapons in combat. Use it to hurt or kill an opponent with a knife, axe, club, or other weapon.`,
+    navigate:
+        `Navigate — Base: 10%
+Finding your way quickly with maps, charts and tables, orienteering, instruments, or dead reckoning.`,
+    occult:
+        `Occult — Base: 10%
+The study of the supernatural as understood by human traditions, including conspiracy theories, traditional occultism, fringe science, and cryptozoology. Use it to examine and deduce the intent of a ritual or to identify occult traditions, groups, grimoires, tools, symbols, or legends.
+
+Occult can never tell the genuinely unnatural from superstition or mythology — that is the province of the Unnatural skill.`,
+    persuade:
+        `Persuade — Base: 20%
+Changing another's deeply-held decision or desire. Use it when the subject is so stubborn, what your Agent wants is so valuable, or the deception is so flagrant that Charisma isn't enough.
+
+Use it to convince a witness that what she saw was innocuous, talk a detective into helping cover up evidence, or draw useful intelligence out of an unwilling subject. Also allows your Agent to resist persuasion and interrogation in opposed Persuade rolls.`,
+    pharmacy:
+        `Pharmacy — Base: 0%
+Knowledge of drugs: their ingredients, creation, effects, uses, and misuses. Use it to identify and produce medicines and antidotes — as well as poisons.
+
+Identifying a drug requires at least 20% skill. Preparing a powerful drug safely (e.g. psychoactive effects) requires at least 40% skill or a successful roll. Misusing Pharmacy is a quick way to kill a patient.`,
+    psychotherapy:
+        `Psychotherapy — Base: 10%
+The diagnosis and treatment of mental illness. Use it to identify a mental disorder, help a patient recover, talk someone down when a disorder begins to take over, and treat mental illness in the long term.
+
+You cannot use Psychotherapy on yourself. Using it to aid someone exposed to Unnatural forces might cost the therapist SAN.`,
+    ride:
+        `Ride — Base: 10%
+Handling, training, and riding horses, donkeys, camels, and other beasts. Exotic mounts may need special training. Use it to stay on a mount in a crisis and to keep animals calm and healthy.`,
+    search:
+        `Search — Base: 20%
+Finding things that are concealed or obscured from plain sight. Searching a scene may not require the Search skill, only time and effort, or a sufficiently high INT.
+
+Use Search to find an object hidden with the Stealth skill, or otherwise so well hidden it needs an expert. The Handler may roll the Search attempt so you don't know whether your Agent succeeded or failed.`,
+    sigint:
+        `SIGINT — Base: 0%
+Signals intelligence. Encompasses encryption, communications intelligence, electronic intelligence, electronic security systems, and surveillance of radio and digital communications.
+
+Use it to install bugs and wiretaps (or find and disable them), communicate in Morse code, operate surveillance equipment, and make and break codes.`,
+    stealth:
+        `Stealth — Base: 10%
+Concealing your presence or activities. Use it to hide a pistol, camouflage a position, conceal a microphone, leave an envelope at a dead drop unobserved, pick a pocket, move silently, follow without being seen, or blend into a crowd.
+
+An Agent attempting Stealth can be detected only by an opposing Alertness or Search skill.`,
+    surgery:
+        `Surgery — Base: 0%
+The treatment of an injury or abnormality by invasive means.
+
+By comparison, First Aid keeps a patient alive until surgery is possible and Medicine ensures long-term recovery.`,
+    survival:
+        `Survival — Base: 10%
+Knowledge of the natural world. Use it to find tracks and trails, plan an expedition, predict weather, recognise when fauna or flora are unusual, use the environment to gather information, or find food, water, and shelter.`,
+    swim:
+        `Swim — Base: 20%
+Most Agents can swim for leisure. Use the Swim skill in a dangerous crisis: going a long distance in choppy water, keeping a friend from drowning, or getting to a boat before the tentacled thing below grabs you.`,
+    unarmed_combat:
+        `Unarmed Combat — Base: 40%
+Self-defence. A fight between untrained combatants often involves more shoving and shouting than real violence. Use it to hurt or kill an opponent with your Agent's bare hands (or feet, elbows, teeth, or head).`,
+    unnatural:
+        `Unnatural — Base: 0%
+Knowledge of the fundamental, mind-rending secrets of the universe. Use it to remember, recognise, or research facts about the things humans consider unnatural — going far beyond the occult into things that are real.
+
+Your Agent's SAN can never be higher than 99 minus their Unnatural skill rating.`,
+
+    // ── Specialty skills ─────────────────────────────────────────────────────
+    art:
+        `Art (Type) — Base: 0%
+Expertise at creating or performing a work that sways emotions and opinions. It also encompasses knowledge of techniques and trends in your field, and the ability to tell a particular creator's real work from a fake. Anyone can draw a rough sketch; the Art skill reflects knowledge, practice, and talent.
+
+Each type of Art is a separate skill: Acting, Creative Writing, Dance, Flute, Forgery, Guitar, Painting, Photography, Poetry, Scriptwriting, Sculpture, Singing, Violin, etc.`,
+    craft:
+        `Craft (Type) — Base: 0%
+Making and repairing sophisticated tools and structures. A job that most people could figure out does not require the Craft skill, only an INT or DEX test. Use Craft for specialised work that needs training: Craft (Electrician) to rewire a house or tap a data line; Craft (Mechanic) to jury-rig a machine or sabotage one beyond repair; Craft (Locksmith) to open a lock without a key; Craft (Gunsmith) to repair a broken firearm.
+
+Each Craft type is a separate skill: Architect, Carpenter, Electrician, Gunsmith, Locksmith, Mechanic, Microelectronics, Plumber, etc.`,
+    foreign_language:
+        `Foreign Language (Type) — Base: 0%
+Fluency in another language. Each foreign language is a distinct skill. Having 20% allows halting conversations; at 50% your Agent speaks and reads like a native. The greater the skill, the greater the complexity of the information your Agent comprehends and the less time it takes.
+
+You don't need to roll unless the Handler says the situation is exceptionally difficult. At the Handler's discretion, special training may allow use of the same skill with a closely related language.`,
+    military_science:
+        `Military Science (Type) — Base: 0%
+Knowledge of military culture, techniques, and regulations. Use it to identify threats on a battlefield, find accurate ranges, recognise weaknesses in a fortification, deduce the training level of a soldier or unit, reconstruct the events of a battle, or deploy forces advantageously in combat.
+
+Each type of Military Science is its own skill. The usual types are Land, Air, and Sea.`,
+    pilot:
+        `Pilot (Type) — Base: 0%
+Piloting, navigating, and captaining waterborne, airborne, or aerospace vehicles. Use it to keep a vessel safe in a crisis, such as through a storm or in a dangerous pursuit.
+
+Each vessel type is a separate skill: Airplane, Drone, Helicopter, Small Boat, Ship, Space Shuttle, etc. At the Handler's discretion, skill with one craft may allow piloting a related kind of craft.`,
+    science:
+        `Science (Type) — Base: 0%
+The deep study of the processes of the world. This is more than common schooling; anyone can attempt an INT test to remember something from a high-school science class. Science is used to find a key insight about the way the universe works — or at least, the way it's supposed to work.
+
+Each Science is a separate skill: Astronomy, Biology, Botany, Chemistry, Engineering, Genetics, Geology, Mathematics, Meteorology, Physics, Planetology, Zoology, etc.`,
+
+    sanity_adaptations: `Adaptation to violence or helplessness occurs after your Agent has lost SAN from that kind of trauma three times in a row without going temporarily insane or hitting the Breaking Point. Mark a box each time violence or helplessness reduces your Agent's SAN by 1 or more. If your Agent suffers insanity before all three boxes are marked, erase those boxes and start again. Fill in all three to become adapted.
+
+ADAPTING TO VIOLENCE: Your Agent's empathy suffers — permanently lose 1D6 CHA and the same amount from each Bond.
+
+ADAPTING TO HELPLESSNESS: Your Agent's personal drive suffers — permanently lose 1D6 POW.
+
+ADAPTING TO THE UNNATURAL: There is no adapting to the Unnatural. Every encounter is a fresh shock. The only way to reach equilibrium is 0 SAN, whereupon the horrors make perfect sense and no longer inflict mental damage.`
+};
+/** Backwards-compat alias used by renderSpecialtySkills */
+const SPECIALTY_TOOLTIPS = SKILL_TOOLTIPS;
+
+/** Generates a unique ID for a specialty skill instance. */
+function _genInstId() {
+    return 'inst-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+}
+
+/**
+ * Adds a specialty skill instance to appState and returns it.
+ * @param {string} key       - CONFIG.SKILLS key (e.g. 'craft')
+ * @param {string|null} specialty - pre-selected specialty string, or null if user must pick
+ * @param {number} value     - proficiency value
+ * @param {string} source    - 'profession' | 'bonus' | 'manual'
+ */
+function _addSpecialtyInstance(key, specialty, value, source) {
+    const inst = { id: _genInstId(), key, specialty: specialty || null, value, source };
+    appState.specialtyInstances.push(inst);
+    return inst;
+}
+
+/**
+ * Re-renders the #cs-specialty-skills container from appState.specialtyInstances.
+ * Called after any change to the instance list.
+ */
+function renderSpecialtySkills() {
+    const container = document.getElementById('cs-specialty-skills');
+    if (!container) return;
+    container.innerHTML = '';
+    if (appState.specialtyInstances.length === 0) return;
+
+    const CUSTOM_SENTINEL = '__custom__';
+
+    appState.specialtyInstances.forEach(inst => {
+        // Resolve a human-readable label for this skill type
+        const baseLabel = inst.key
+            ? (CONFIG.SKILLS.find(([k]) => k === inst.key)?.[1]
+                || inst.key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()))
+            : null;
+
+        const row = document.createElement('div');
+        row.className = 'specialty-skill-row';
+        row.dataset.instId = inst.id;
+
+        // -- Name / label --
+        const controlsDiv = document.createElement('div');
+        controlsDiv.className = 'specialty-controls';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'cs-skill-name specialty-skill-name';
+        nameSpan.textContent = baseLabel ? baseLabel + ':' : 'New Specialty:';
+        if (inst.key && SKILL_TOOLTIPS[inst.key]) {
+            nameSpan.dataset.tooltipKey = inst.key;
+        }
+
+        const lpCb = document.createElement('input');
+        lpCb.type = 'checkbox';
+        lpCb.className = 'lp-skill-check lp-only';
+        lpCb.id = `lp-ck-spec-${inst.id}`;
+        lpCb.title = 'Mark skill attempted this session';
+        nameSpan.appendChild(lpCb);
+        controlsDiv.appendChild(nameSpan);
+
+        if (!inst.key) {
+            // -- Type selector: user must choose which broad skill this is --
+            const typeSelect = document.createElement('select');
+            typeSelect.className = 'cs-skill-specialty specialty-type-select';
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = '';
+            defaultOpt.textContent = '\u2014 pick type \u2014';
+            typeSelect.appendChild(defaultOpt);
+            // Sort by display label for a consistent alphabetical list
+            [...SPECIALTY_SKILL_KEYS].sort().forEach(k => {
+                const lbl = CONFIG.SKILLS.find(([sk]) => sk === k)?.[1]
+                    || k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const opt = document.createElement('option');
+                opt.value = k;
+                opt.textContent = lbl;
+                typeSelect.appendChild(opt);
+            });
+            const homebrewOpt = document.createElement('option');
+            homebrewOpt.value = 'homebrew';
+            homebrewOpt.textContent = '\u2014 homebrew \u2014';
+            typeSelect.appendChild(homebrewOpt);
+            typeSelect.classList.add('highlight-empty-input');
+            typeSelect.style.color = '#fe640b';
+            typeSelect.style.fontWeight = 'bold';
+            typeSelect.addEventListener('change', () => {
+                inst.key = typeSelect.value || null;
+                renderSpecialtySkills();
+                window.dgSaveLoad?.save?.();
+            });
+            controlsDiv.appendChild(typeSelect);
+        } else if (inst.key === 'homebrew') {
+            // -- Homebrew: fully custom skill, just a free-text name --
+            const homebrewInput = document.createElement('input');
+            homebrewInput.type = 'text';
+            homebrewInput.className = 'specialty-custom-text cs-skill-specialty';
+            homebrewInput.placeholder = 'skill name\u2026';
+            homebrewInput.value = inst.specialty || '';
+            if (!inst.specialty) homebrewInput.classList.add('highlight-empty-input');
+            homebrewInput.addEventListener('input', () => {
+                inst.specialty = homebrewInput.value.trim() || null;
+                if (inst.specialty) homebrewInput.classList.remove('highlight-empty-input');
+                else homebrewInput.classList.add('highlight-empty-input');
+                window.dgSaveLoad?.save?.();
+            });
+            controlsDiv.appendChild(homebrewInput);
+        } else {
+            // -- Specialty selector: suggested options + free-text custom entry --
+            const suggestions = SPECIALTY_OPTIONS[inst.key] || [];
+            // A value is "custom" when it exists but isn't in the suggestions list
+            const isCustomValue = inst.specialty !== null && !suggestions.includes(inst.specialty);
+
+            const specSelect = document.createElement('select');
+            specSelect.className = 'cs-skill-specialty';
+            specSelect.id = `specialty-inst-${inst.id}`;
+
+            const pickOpt = document.createElement('option');
+            pickOpt.value = '';
+            pickOpt.textContent = '\u2014 pick \u2014';
+            specSelect.appendChild(pickOpt);
+
+            suggestions.forEach(sub => {
+                const opt = document.createElement('option');
+                opt.value = sub;
+                opt.textContent = sub;
+                if (sub === inst.specialty) opt.selected = true;
+                specSelect.appendChild(opt);
+            });
+
+            // "\u2014 custom \u2014" lets the player name their own specialty
+            const customOpt = document.createElement('option');
+            customOpt.value = CUSTOM_SENTINEL;
+            customOpt.textContent = '\u2014 custom \u2014';
+            if (isCustomValue) customOpt.selected = true;
+            specSelect.appendChild(customOpt);
+
+            if (!inst.specialty) {
+                specSelect.classList.add('highlight-empty-input');
+                specSelect.style.color = '#fe640b';
+                specSelect.style.fontWeight = 'bold';
+            }
+            controlsDiv.appendChild(specSelect);
+
+            // Free-text input — visible only when "\u2014 custom \u2014" is active
+            const customText = document.createElement('input');
+            customText.type = 'text';
+            customText.className = 'specialty-custom-text';
+            customText.placeholder = 'type specialty name\u2026';
+            customText.value = isCustomValue ? (inst.specialty || '') : '';
+            customText.style.display = isCustomValue ? '' : 'none';
+            if (isCustomValue && !customText.value) {
+                customText.classList.add('highlight-empty-input');
+            }
+            customText.addEventListener('input', () => {
+                inst.specialty = customText.value.trim() || null;
+                if (inst.specialty) customText.classList.remove('highlight-empty-input');
+                else customText.classList.add('highlight-empty-input');
+                window.dgSaveLoad?.save?.();
+            });
+            controlsDiv.appendChild(customText);
+
+            specSelect.addEventListener('change', () => {
+                if (specSelect.value === CUSTOM_SENTINEL) {
+                    customText.style.display = '';
+                    customText.focus();
+                    inst.specialty = customText.value.trim() || null;
+                    if (!inst.specialty) customText.classList.add('highlight-empty-input');
+                    specSelect.classList.remove('highlight-empty-input');
+                    specSelect.style.color = '';
+                    specSelect.style.fontWeight = '';
+                } else if (specSelect.value) {
+                    customText.style.display = 'none';
+                    inst.specialty = specSelect.value;
+                    specSelect.classList.remove('highlight-empty-input');
+                    specSelect.style.color = '';
+                    specSelect.style.fontWeight = '';
+                } else {
+                    customText.style.display = 'none';
+                    inst.specialty = null;
+                    specSelect.classList.add('highlight-empty-input');
+                    specSelect.style.color = '#fe640b';
+                    specSelect.style.fontWeight = 'bold';
+                }
+                window.dgSaveLoad?.save?.();
+            });
+        }
+
+        // -- Remove button (inside controls so grid stays 2-column) --
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'specialty-remove-btn';
+        removeBtn.textContent = '\u00d7';
+        removeBtn.title = 'Remove this specialty skill';
+        removeBtn.setAttribute('aria-label', 'Remove specialty skill');
+        removeBtn.addEventListener('click', () => {
+            appState.specialtyInstances = appState.specialtyInstances.filter(i => i.id !== inst.id);
+            renderSpecialtySkills();
+            window.dgSaveLoad?.save?.();
+        });
+        controlsDiv.appendChild(removeBtn);
+
+        row.appendChild(controlsDiv);
+
+        // -- Value input --
+        const valueInput = document.createElement('input');
+        valueInput.type = 'number';
+        valueInput.className = 'cs-skill-input';
+        valueInput.id = `specialty-inst-val-${inst.id}`;
+        valueInput.value = inst.value;
+        valueInput.min = 0;
+        valueInput.max = 100;
+        valueInput.addEventListener('input', () => {
+            inst.value = parseInt(valueInput.value) || 0;
+            window.dgSaveLoad?.save?.();
+        });
+        row.appendChild(valueInput);
+
+        container.appendChild(row);
+    });
+}
+
+/**
+ * Returns the canonical, fully-resolved skill list for this character.
+ * This is the single authoritative source consumed by print, live play, and Foundry export.
+ * @returns {Array<{key, label, specialty, displayName, value}>}
+ */
+function getCompletedSkills() {
+    const result = [];
+    CONFIG.SKILLS.forEach(([key, label, def]) => {
+        if (SPECIALTY_SKILL_KEYS.has(key)) return; // specialty skills come from instances
+        const el = document.getElementById(`cs-skill-${key}`);
+        result.push({ key, label, specialty: null, displayName: label, value: parseInt(el?.value) || def || 0 });
+    });
+    appState.specialtyInstances.forEach(inst => {
+        const label = inst.key === 'homebrew'
+            ? (inst.specialty || 'Homebrew Skill')
+            : (CONFIG.SKILLS.find(([k]) => k === inst.key)?.[1]
+                || (inst.key || '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+        const displayName = inst.key === 'homebrew'
+            ? label
+            : (inst.specialty ? `${label} (${inst.specialty})` : label);
+        result.push({ key: inst.key, label, specialty: inst.specialty, displayName, value: inst.value });
+    });
+    return result;
+}
+
+/**
+ * Adds a blank manual specialty skill instance so the user can pick type + specialty freely.
+ */
+function addManualSpecialtySkill() {
+    appState.specialtyInstances.push({ id: _genInstId(), key: null, specialty: null, value: 0, source: 'manual' });
+    renderSpecialtySkills();
+    window.dgSaveLoad?.save?.();
+}
+
 // Application state
 const appState = {
     currentBond: null,
     agentStats: {},
+    appliedBonuses: {}, // { displayName: totalPointsAdded } — used for reset
+    specialtyInstances: [], // { id, key, specialty, value, source }
 };
 
 const stats = CONFIG.STATS;
@@ -163,32 +659,55 @@ function generateRandomBio() {
     const combinedPhysical = str + con;
 
     // Determine build tier from STR+CON total (typical range 20–40)
-    let buildLabel, featurePool;
+    let buildTier, featurePool;
     if (combinedPhysical >= 36) {
-        buildLabel = 'Heavily built';
+        buildTier = 'high';
         featurePool = bioData.notableFeatures.high_str_con;
     } else if (combinedPhysical >= 28) {
-        buildLabel = 'Athletic';
+        buildTier = 'athletic';
         featurePool = bioData.notableFeatures.neutral;
     } else if (combinedPhysical >= 22) {
-        buildLabel = 'Average build';
+        buildTier = 'average';
         featurePool = bioData.notableFeatures.neutral;
     } else {
-        buildLabel = 'Lean';
+        buildTier = 'low';
         featurePool = bioData.notableFeatures.low_str_con;
     }
 
     // Height tendency: higher STR nudges tall, lower nudges short
-    let heightLabel;
-    if (str >= 16) heightLabel = 'tall';
-    else if (str >= 12) heightLabel = 'average height';
-    else heightLabel = 'compact';
+    let heightTier;
+    if (str >= 16) heightTier = 'tall';
+    else if (str >= 12) heightTier = 'average';
+    else heightTier = 'short';
 
+    const buildStr = getRandomItem(bioData.buildDescriptors[buildTier]);
+    const heightStr = getRandomItem(bioData.heightDescriptors[heightTier]);
     const hair = getRandomItem(bioData.hairColors);
+    const hairStyle = getRandomItem(bioData.hairStyles);
     const eyes = getRandomItem(bioData.eyeColors);
     const feature = getRandomItem(featurePool);
-    document.getElementById('cs-physical-desc').value =
-        `${buildLabel}, ${heightLabel}. ${hair.charAt(0).toUpperCase() + hair.slice(1)} hair, ${eyes} eyes. Notable: ${feature}.`;
+    const skin = Math.random() < 0.45 ? getRandomItem(bioData.skinTones) : null;
+
+    const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+    const hairDesc = `${hair} ${hairStyle} hair`;
+
+    // Multiple sentence templates for variety — one is picked at random each time
+    const descTemplates = [
+        () => `${cap(buildStr)}, ${heightStr}. ${cap(hairDesc)}, ${eyes} eyes. ${feature}.`,
+        () => `${cap(heightStr)}. ${cap(buildStr)}. ${cap(hairDesc)}, ${eyes} eyes. ${feature}.`,
+        () => `${feature}. ${cap(buildStr)}, ${heightStr}, with ${hairDesc} and ${eyes} eyes.`,
+        () => `${cap(buildStr)} with ${hairDesc} and ${eyes} eyes. ${cap(heightStr)}. ${feature}.`,
+        () => `${cap(heightStr)}, ${buildStr}. ${cap(eyes)} eyes, ${hairDesc}. ${feature}.`,
+        () => `${feature}. ${cap(hairDesc)}, ${eyes} eyes — ${buildStr}, ${heightStr}.`,
+    ];
+    if (skin) {
+        descTemplates.push(
+            () => `${cap(buildStr)}, ${heightStr}. ${cap(skin)} complexion, ${hairDesc}, ${eyes} eyes. ${feature}.`,
+            () => `${feature}. ${cap(buildStr)}, ${heightStr}. ${cap(hair)} hair, ${eyes} eyes, ${skin} complexion.`,
+        );
+    }
+
+    document.getElementById('cs-physical-desc').value = getRandomItem(descTemplates)();
 
     // --- Age ---
     const randomAge = Math.floor(Math.random() * (65 - 25 + 1)) + 25;
@@ -277,14 +796,22 @@ function getDescriptor(stat, value) {
  */
 function generateStatContainers() {
     const container = document.getElementById('stats');
-    const plusSymbol = document.body.classList.contains('theme-son-of-sam') ? '⛤' : '+';
+    const plusSymbol = '+';
+    const statTooltips = {
+        STR: 'Strength — Physical power, size, and musculature. Drag a witness to safety. Break down a locked door. Hold a struggling victim down. Contributes to Hit Points: HP = ⌈(STR + CON) / 2⌉',
+        DEX: 'Dexterity — Agility, coordination, and nimbleness. Keep balance. React quickly.',
+        CON: 'Constitution — Health and physical resilience. Resist illness, exhaustion, or pain. Hold your breath a long time. Keep running longer than everyone else. Contributes to Hit Points: HP = ⌈(STR + CON) / 2⌉',
+        INT: 'Intelligence — How well an Agent notices, remembers, and connects things. Along with profession, it indicates education and overall brilliance. Recall a detail. Piece together disparate data.',
+        POW: 'Power — Force of personality, motivation, and psychic resilience. Keep your head in a crisis. Stand up to pressure. Sets WP (= POW), SAN (= POW × 5), and BP (= SAN − POW).',
+        CHA: 'Charisma — Charm, leadership, and personal appeal. May indicate physical attractiveness. Make a good impression. Talk your way into a private club. Look like you belong.'
+    };
     const parts = stats.map(stat => `
-                    <div class="stat-container">
+                    <div class="stat-container" title="${statTooltips[stat]}">
                         <span class="stat-label">${stat}</span>
                         <span class="stat-value" id="${stat}-value">3</span>
                         <div class="stat-controls">
-                            <button onclick="adjustStat('${stat}', -1)" class="adjust-button">−</button>
-                            <button onclick="adjustStat('${stat}', 1)" class="adjust-button">${plusSymbol}</button>
+                            <button onclick="adjustStat('${stat}', -1)" class="adjust-button" title="Reduce ${stat} by 1 (refunds 1 point in Point Buy mode)">−</button>
+                            <button onclick="adjustStat('${stat}', 1)" class="adjust-button stat-inc-btn" title="Increase ${stat} by 1 (costs 1 point in Point Buy mode)">${plusSymbol}</button>
                         </div>
                         <span class="x5-value" id="${stat}-x5-value">15</span>
                         <span class="descriptor" id="${stat}-descriptor">${getDescriptor(stat, 3)}</span>
@@ -292,6 +819,35 @@ function generateStatContainers() {
                 `);
     container.innerHTML = parts.join('');
     updateTotalPoints();
+}
+
+/**
+ * Reads current stat value directly from the visible display span.
+ * @param {string} stat - e.g. 'STR'
+ */
+function getStatValue(stat) {
+    const el = document.getElementById(`${stat}-value`);
+    return el ? (parseInt(el.innerText) || 3) : 3;
+}
+
+/**
+ * Recomputes HP, WP, SAN, BP from current stat spans and writes them
+ * into the derived-attribute display inputs.
+ */
+function updateDerivedAttributes() {
+    const STRv = getStatValue('STR');
+    const CONv = getStatValue('CON');
+    const POWv = getStatValue('POW');
+    const hp = Math.ceil((STRv + CONv) / 2);
+    const wp = POWv;
+    const san = POWv * 5;
+    const bp = san - POWv;
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+    set('cs-hp', hp);
+    set('cs-wp', wp);
+    set('cs-sanity-value', san);
+    set('cs-breaking-point', bp);
+    if (typeof lpSyncBar === 'function') lpSyncBar();
 }
 
 /**
@@ -308,6 +864,7 @@ function adjustStat(stat, adjustment) {
     document.getElementById(`${stat}-x5-value`).innerText = currentValue * 5;
     document.getElementById(`${stat}-descriptor`).innerText = getDescriptor(stat, currentValue);
     updateTotalPoints();
+    updateDerivedAttributes();
 }
 
 /**
@@ -388,6 +945,12 @@ function populateCharacterSheetForm() {
     const csDerivedDiv = document.getElementById('cs-derived-attributes');
     if (csDerivedDiv) {
         csDerivedDiv.innerHTML = '';
+        const derivedTooltips = {
+            HP: 'Hit Points = ⌈(STR + CON) / 2⌉. At 2 HP or fewer the agent falls unconscious. At 0 HP the agent is dying.',
+            WP: 'Willpower Points = POW. Spent to boost skill rolls or resist supernatural effects. Recovers with rest.',
+            SAN: 'Sanity = POW × 5. Lost when encountering the unnatural. Reaching 0 means permanent madness.',
+            BP: 'Breaking Point = SAN − POW. If SAN drops below this in a single session the agent suffers temporary insanity.'
+        };
         const derivedList = [
             ['HP', 'cs-hp', 0],
             ['WP', 'cs-wp', 0],
@@ -397,109 +960,67 @@ function populateCharacterSheetForm() {
         derivedList.forEach(([label, id, defaultVal]) => {
             const existingEl = document.getElementById(id);
             const currentVal = existingEl ? existingEl.value : defaultVal;
-            csDerivedDiv.innerHTML += `<div class="stat-container"><span class="stat-label">${label}</span><input type="number" id="${id}" value="${currentVal}" min="0" class="stat-input"></div>`;
+            csDerivedDiv.innerHTML += `<div class="stat-container" title="${derivedTooltips[label]}"><span class="stat-label">${label}</span><input type="number" id="${id}" value="${currentVal}" min="0" class="stat-input derived-readonly" readonly></div>`;
         });
     }
 
     // populate skills
     const skillsContainer = document.getElementById('cs-skills');
     const skillsList = CONFIG.SKILLS;
+    // Capture existing values so a grid rebuild (e.g. triggered by the stats MutationObserver)
+    // does NOT reset profession- or bonus-applied skill values back to their defaults.
+    const existingSkillValues = {};
+    skillsContainer.querySelectorAll('input[id^="cs-skill-"]').forEach(el => {
+        existingSkillValues[el.id.replace('cs-skill-', '')] = parseInt(el.value);
+    });
     skillsContainer.innerHTML = '';
-    // We'll render skills into a 6-column grid (label + input for each of 3 columns)
-    skillsList.forEach(([key, label, def], idx) => {
-        const colPair = idx % 3; // which of the three columns (0..2)
-        const row = Math.floor(idx / 3) + 1; // grid row (1-based)
+    // Base skills only — specialty skills (Art, Craft, Science, Pilot, Military Science) are
+    // rendered separately via renderSpecialtySkills() using appState.specialtyInstances.
+    let gridIdx = 0;
+    skillsList.forEach(([key, label, def]) => {
+        if (SPECIALTY_SKILL_KEYS.has(key)) return; // handled as specialty instances
+        const colPair = gridIdx % 3;
+        const gridRow = Math.floor(gridIdx / 3) + 1;
+        gridIdx++;
+
+        const pairDiv = document.createElement('div');
+        pairDiv.className = 'cs-skill-pair';
+        pairDiv.style.gridColumn = colPair + 1;
+        pairDiv.style.gridRow = gridRow;
 
         const nameSpan = document.createElement('span');
         nameSpan.className = 'cs-skill-name';
-        nameSpan.style.gridColumn = (colPair * 2) + 1;
-        nameSpan.style.gridRow = row;
-        // if specialty flag is true (4th element), render a specialty select with canonical options
-        if (Array.isArray(skillsList[idx]) && skillsList[idx][3]) {
-            const specId = `cs-skill-${key}-spec`;
-            // specialty option sets
-            const specialtyOptions = {
-                art: ["Creative Writing", "Journalism", "Painting", "Photography", "Sculpture", "Music", "Acting", "Film / Scriptwriting", "Illustration"],
-                craft: ["Electrician", "Mechanic", "Locksmithing", "Carpentry", "Plumbing", "Welding", "Microelectronics", "Machinist", "Blacksmith", "Explosives (non-military fabrication)"],
-                science: ["Biology", "Chemistry", "Physics", "Mathematics", "Geology", "Astronomy", "Meteorology", "Genetics", "Engineering", "Environmental Science"],
-                pilot: ["Fixed-Wing Aircraft", "Helicopter", "Jet Aircraft", "Drone / UAV", "Spacecraft (Handler approval)"],
-                military_science: ["Military Science (Land)", "Military Science (Air)", "Military Science (Naval)", "Military Science (Special Operations)"]
-            };
-            const opts = specialtyOptions[key] || [];
-            let optsHtml = '<option value="">Pick</option>' + opts.map(o => `<option value="${o}">${o}</option>`).join('');
-            nameSpan.innerHTML = `${label}: <select id="${specId}" class="cs-skill-specialty" style="margin-left:8px;padding:2px 6px;min-width:8ch;">${optsHtml}</select>`;
-        } else {
-            nameSpan.textContent = label + ':';
+        nameSpan.textContent = label + ':';
+        if (SKILL_TOOLTIPS[key]) {
+            nameSpan.dataset.tooltipKey = key;
         }
+
         const inputEl = document.createElement('input');
         inputEl.type = 'number';
         inputEl.id = `cs-skill-${key}`;
-        inputEl.value = def;
+        // Prefer any previously-set value so re-renders don't clobber applied profession/bonus values.
+        inputEl.value = (key in existingSkillValues) ? existingSkillValues[key] : def;
         inputEl.min = 0;
         inputEl.max = 100;
         inputEl.className = 'cs-skill-input';
-        inputEl.style.gridColumn = (colPair * 2) + 2;
-        inputEl.style.gridRow = row;
-        skillsContainer.appendChild(nameSpan);
-        skillsContainer.appendChild(inputEl);
-        // If a specialty select was created, wire tooltip/title and keep the title updated
-        if (Array.isArray(skillsList[idx]) && skillsList[idx][3]) {
-            const specId = `cs-skill-${key}-spec`;
-            const specEl = document.getElementById(specId);
-            if (specEl) {
-                const updateTitle = () => { specEl.title = (specEl.options[specEl.selectedIndex] && specEl.options[specEl.selectedIndex].text) ? specEl.options[specEl.selectedIndex].text : 'Pick'; };
-                specEl.addEventListener('change', updateTitle);
-                specEl.addEventListener('mouseover', updateTitle);
-                updateTitle();
-            }
-        }
+
+        const lpCb = document.createElement('input');
+        lpCb.type = 'checkbox';
+        lpCb.className = 'lp-skill-check lp-only';
+        lpCb.id = `lp-ck-${key}`;
+        lpCb.title = 'Mark skill attempted this session';
+        nameSpan.appendChild(lpCb);
+
+        pairDiv.appendChild(nameSpan);
+        pairDiv.appendChild(inputEl);
+        skillsContainer.appendChild(pairDiv);
     });
+    // Re-render any specialty instances that survive stat syncs (persisted in appState)
+    renderSpecialtySkills();
 
     // populate other simple fields
-    // compute derived attributes from stats (HP, WP, SAN, BP)
-    const s = (id) => {
-        const el = document.getElementById(`cs-${id}`);
-        if (el && el.value) return parseInt(el.value) || 3;
-        const disp = document.getElementById(`${id}-value`);
-        if (disp && disp.innerText) return parseInt(disp.innerText) || 3;
-        return 3;
-    };
-    const STRv = s('STR');
-    const CONv = s('CON');
-    const POWv = s('POW');
-    const hp = Math.ceil((STRv + CONv) / 2);
-    const wp = POWv;
-    const san = POWv * 5;
-    const bp = san - POWv;
-    const csSanEl = document.getElementById('cs-sanity-value');
-    const csBpEl = document.getElementById('cs-breaking-point');
-    const csHpEl = document.getElementById('cs-hp');
-    const csWpEl = document.getElementById('cs-wp');
-    // fill derived fields (refresh from stats overwrites values)
-    if (csHpEl) csHpEl.value = hp;
-    if (csWpEl) csWpEl.value = wp;
-    if (csSanEl) csSanEl.value = san;
-    if (csBpEl) csBpEl.value = bp;
-    // add listeners on cs-stat inputs to auto-update derived when user edits stats in sheet
-    stats.forEach(stat => {
-        const inEl = document.getElementById(`cs-${stat}`);
-        if (inEl && !inEl._ds_listened) {
-            inEl.addEventListener('input', () => {
-                const STRn = parseInt(document.getElementById('cs-STR').value) || 3;
-                const CONn = parseInt(document.getElementById('cs-CON').value) || 3;
-                const POWn = parseInt(document.getElementById('cs-POW').value) || 3;
-                const hpn = Math.ceil((STRn + CONn) / 2);
-                const wpn = POWn;
-                const sann = POWn * 5;
-                const bpn = sann - POWn;
-                if (csHpEl) csHpEl.value = hpn;
-                if (csWpEl) csWpEl.value = wpn;
-                if (csSanEl) csSanEl.value = sann;
-                if (csBpEl) csBpEl.value = bpn;
-            });
-            inEl._ds_listened = true;
-        }
-    });
+    // Compute and display derived attributes (HP, WP, SAN, BP) from stat spans
+    updateDerivedAttributes();
 
     // populate biography fields
     const setIfEmpty = (id, def = '') => { const el = document.getElementById(id); if (!el) return; if (!el.value) el.value = def; };
@@ -520,58 +1041,35 @@ function addCustomSkill() {
 
     const skillRow = document.createElement('div');
     skillRow.className = 'custom-skill-row';
-    skillRow.style.display = 'flex';
-    skillRow.style.gap = '8px';
-    skillRow.style.marginTop = '8px';
-    skillRow.style.alignItems = 'center';
+
+    const _uid = `cskill-${Date.now()}-${Math.floor(Math.random() * 9999)}`;
 
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
+    nameInput.id = `${_uid}-name`;
+    nameInput.name = `${_uid}-name`;
+    nameInput.autocomplete = 'off';
     nameInput.placeholder = 'Skill Name';
     nameInput.className = 'custom-skill-name';
-    nameInput.style.flex = '1';
-    nameInput.style.padding = '4px 8px';
-    nameInput.style.borderRadius = '4px';
-    nameInput.style.border = '1px solid rgba(255,255,255,0.2)';
-    nameInput.style.backgroundColor = 'transparent';
-    nameInput.style.color = 'inherit';
 
     const valueInput = document.createElement('input');
     valueInput.type = 'number';
+    valueInput.id = `${_uid}-val`;
+    valueInput.name = `${_uid}-val`;
+    valueInput.autocomplete = 'off';
     valueInput.placeholder = '0';
     valueInput.className = 'custom-skill-value';
     valueInput.min = '0';
     valueInput.value = '0';
-    valueInput.style.width = '7ch';
-    valueInput.style.padding = '4px 8px';
-    valueInput.style.borderRadius = '4px';
-    valueInput.style.border = '1px solid rgba(255,255,255,0.2)';
-    valueInput.style.textAlign = 'center';
 
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.textContent = 'Remove';
-    removeBtn.style.padding = '4px 8px';
-    removeBtn.style.width = 'auto';
     removeBtn.onclick = () => skillRow.remove();
 
     // Add event listeners to highlight empty skill names
     const updateEmptyState = () => {
-        if (nameInput.value.trim() === '') {
-            nameInput.classList.add('empty-reminder');
-            // Also apply inline styles to ensure visibility
-            nameInput.style.borderColor = '#ff6b6b';
-            nameInput.style.borderWidth = '3px';
-            nameInput.style.backgroundColor = 'rgba(255, 107, 107, 0.15)';
-            nameInput.style.boxShadow = '0 0 10px rgba(255, 107, 107, 0.5)';
-        } else {
-            nameInput.classList.remove('empty-reminder');
-            // Reset inline styles
-            nameInput.style.borderColor = '';
-            nameInput.style.borderWidth = '';
-            nameInput.style.backgroundColor = '';
-            nameInput.style.boxShadow = '';
-        }
+        nameInput.classList.toggle('empty-reminder', nameInput.value.trim() === '');
     };
 
     nameInput.addEventListener('input', updateEmptyState);
@@ -642,32 +1140,69 @@ function selectProfession(professionKey) {
             .trim();
     }
 
-    // Add BONDS at the top
-    displayText = `BONDS: ${bondCount}\n\n${displayText}`;
-
-    infoDiv.textContent = displayText;
+    // Build collapsible info block — collapsed by default so the form stays clean
+    const profName = profession.title || professionKey;
+    // Strip the BONDS line from body text since it's shown in the summary
+    const bodyText = displayText.replace(/^BONDS:\s*\d+\n\n/, '');
+    infoDiv.innerHTML = `<details class="profession-details">
+      <summary class="profession-details-summary">
+        <span class="prof-name-pill">${profName}</span><span class="prof-bonds-pill">BONDS: ${bondCount}</span><span class="prof-expand-hint">▼ Click for full profession description &amp; skills</span>
+      </summary>
+      <pre class="profession-details-text">${bodyText}</pre>
+    </details>`;
 
     // Display optional skills with checkboxes
     if (profession.optionalSkills && profession.optionalSkills.length > 0 && chooseText) {
-        let html = `<div style="margin-top:12px; padding:8px; background:rgba(0,0,0,0.2); border-radius:4px;">
-            <div style="margin-bottom:8px; font-weight:normal; white-space:pre-wrap;">${chooseText}</div>
-            <div style="margin-top:8px;">`;
+        // Parse the limit from "Choose any two", "Choose any 3", "Choose one" etc.
+        const wordNums = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8 };
+        const limitMatch = chooseText.match(/choose\s+(?:any\s+)?(\w+)/i);
+        const limitRaw = limitMatch ? limitMatch[1].toLowerCase() : '1';
+        const limit = wordNums[limitRaw] || parseInt(limitRaw) || 1;
+
+        let html = `<div class="optional-skills-container" data-max="${limit}">
+            <div class="optional-skill-choose-text">${chooseText}</div>
+            <div class="optional-skill-counter"><span class="optional-skill-count">0</span> / ${limit} chosen</div>
+            <div>`;
 
         profession.optionalSkills.forEach((skill, idx) => {
             const checkboxId = `profession-optional-skill-${idx}`;
-            html += `<div style="margin:6px 0; display:flex; align-items:center; gap:6px;">
-                <input type="checkbox" id="${checkboxId}" class="profession-optional-skill" data-skill-name="${skill.name}" data-skill-value="${skill.value}" data-limit="${skill.limit}" style="flex-shrink:0; cursor:pointer;">
-                <label for="${checkboxId}" style="cursor:pointer; flex:1; margin:0;">» ${skill.name} ${skill.value}%</label>
+            html += `<div class="optional-skill-item">
+                <input type="checkbox" id="${checkboxId}" class="profession-optional-skill optional-skill-check" data-skill-name="${skill.name}" data-skill-value="${skill.value}" data-limit="${skill.limit}">
+                <label for="${checkboxId}" class="optional-skill-label">» ${skill.name} ${skill.value}%</label>
             </div>`;
         });
         html += '</div></div>';
         optionalDiv.innerHTML = html;
+
+        // Enforce the limit: disable unchecked boxes once limit is reached
+        optionalDiv.querySelectorAll('.optional-skill-check').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const container = optionalDiv.querySelector('.optional-skills-container');
+                const all = optionalDiv.querySelectorAll('.optional-skill-check');
+                const checked = [...all].filter(c => c.checked);
+                const countEl = optionalDiv.querySelector('.optional-skill-count');
+                if (countEl) countEl.textContent = checked.length;
+                const atLimit = checked.length >= limit;
+                all.forEach(c => {
+                    if (!c.checked) {
+                        c.disabled = atLimit;
+                        c.closest('.optional-skill-item').style.opacity = atLimit ? '0.4' : '';
+                    } else {
+                        c.disabled = false;
+                        c.closest('.optional-skill-item').style.opacity = '';
+                    }
+                });
+            });
+        });
     } else {
         optionalDiv.innerHTML = '';
     }
 
-    if (applyRow) applyRow.style.display = profession.requiredSkills.length > 0 ? 'block' : 'none';
-    if (applyBtn) applyBtn.style.display = profession.requiredSkills.length > 0 ? 'inline-block' : 'none';
+    if (applyRow) applyRow.style.display = profession.requiredSkills.length > 0 ? 'flex' : 'none';
+    // Reset button/reminder state for the newly selected profession
+    if (applyBtn) applyBtn.classList.remove('apply-profession-done');
+    const reminder = document.getElementById('reminder-apply-profession');
+    if (reminder) reminder.style.display = '';
 }
 
 /**
@@ -675,36 +1210,21 @@ function selectProfession(professionKey) {
  * Removes all custom skill rows and resets predefined skill values to 0
  */
 function clearProfessionSkills() {
-    // Reset all predefined skills to their default values from CONFIG.SKILLS
-    const skillsMap = {};
-    CONFIG.SKILLS.forEach(([key, label, defaultValue]) => {
-        skillsMap[key] = defaultValue;
+    // Reset base skill values to defaults (specialty skills are managed as instances)
+    CONFIG.SKILLS.forEach(([key, , defaultValue]) => {
+        if (SPECIALTY_SKILL_KEYS.has(key)) return;
+        const input = document.getElementById(`cs-skill-${key}`);
+        if (input) input.value = defaultValue;
     });
 
-    CONFIG.SKILL_KEYS().forEach(skillKey => {
-        const input = document.getElementById(`cs-skill-${skillKey}`);
-        if (input) {
-            // Reset to default value from CONFIG.SKILLS
-            input.value = skillsMap[skillKey] || '0';
-        }
+    // Remove all profession-sourced specialty instances and re-render
+    appState.specialtyInstances = appState.specialtyInstances.filter(i => i.source !== 'profession');
+    renderSpecialtySkills();
 
-        // Reset specialty selections
-        const specSelect = document.getElementById(`cs-skill-${skillKey}-spec`);
-        if (specSelect) {
-            specSelect.value = '';
-            specSelect.style.borderColor = '';
-            specSelect.style.borderWidth = '';
-            specSelect.style.backgroundColor = '';
-            specSelect.style.color = '';
-            specSelect.style.fontWeight = '';
-        }
-    });
-
-    // Remove all custom skill rows
+    // Remove Foreign Language and other custom rows added during profession application
     const customSkillsDiv = document.getElementById('cs-custom-skills');
     if (customSkillsDiv) {
-        const customSkillRows = customSkillsDiv.querySelectorAll('.custom-skill-row');
-        customSkillRows.forEach(row => row.remove());
+        customSkillsDiv.querySelectorAll('.custom-skill-row').forEach(row => row.remove());
     }
 }
 
@@ -724,150 +1244,64 @@ function applyProfessionSkills() {
     const profession = professions[professionKey];
     let appliedCount = 0;
 
-    // Predefined skills - these are the base skill keys
-    const predefinedSkills = CONFIG.SKILL_KEYS();
-
-    // Function to extract base skill and specialty from a skill name
-    // E.g., "Craft (Electrician)" -> { base: "craft", specialty: "Electrician" }
-    // E.g., "Science (choose one)" -> { base: "science", specialty: null, isChoice: true }
+    /**
+     * Parses "Skill Name (Specialty)" into base key + specialty.
+     * Treats "choose one / choose another" as specialty=null (user must pick).
+     */
     function parseSkillName(skillName) {
         const match = skillName.match(/^([^(]+)(?:\s*\(([^)]+)\))?$/);
-        if (!match) return { base: skillName.toLowerCase().replace(/\s+/g, '_'), specialty: null, isChoice: false };
-
+        if (!match) return { base: skillName.toLowerCase().replace(/\s+/g, '_'), specialty: null };
         const basePart = match[1].trim().toLowerCase().replace(/\s+/g, '_');
-        const specialty = match[2] ? match[2].trim() : null;
-        const isChoice = specialty && (specialty.includes("choose") || specialty === "choose one" || specialty === "choose another");
-
-        return {
-            base: basePart,
-            specialty: isChoice ? null : specialty,
-            isChoice: isChoice
-        };
+        const specialtyRaw = match[2] ? match[2].trim() : null;
+        const isChoice = specialtyRaw && specialtyRaw.toLowerCase().includes('choose');
+        return { base: basePart, specialty: isChoice ? null : specialtyRaw };
     }
 
-    // Track which base skills have been applied (for handling multiple "choose" skills)
-    const appliedBaseSkills = {};
-
-    // Helper function to highlight select elements that need a specialty picked
-    function highlightSelectForProfessionSkill(selectElement) {
-        if (selectElement) {
-            selectElement.classList.add('highlight-empty-input');
-            selectElement.style.color = '#fe640b';
-            selectElement.style.fontWeight = 'bold';
-        }
-    }
-
-    // Function to apply a skill
     function applySkill(skillName, skillValue) {
         const parsed = parseSkillName(skillName);
-        const inputId = `cs-skill-${parsed.base}`;
-        const input = document.getElementById(inputId);
 
+        // Specialty skills (Art, Craft, Foreign Language, Military Science, Pilot, Science)
+        // always become instances — never predefined slots or custom DOM rows.
+        if (SPECIALTY_SKILL_KEYS.has(parsed.base)) {
+            _addSpecialtyInstance(parsed.base, parsed.specialty, skillValue, 'profession');
+            appliedCount++;
+            return;
+        }
+
+        // Base skill — set the predefined input
+        const input = document.getElementById(`cs-skill-${parsed.base}`);
         if (input) {
-            // For both choice and non-choice skills, track occurrences to handle multiples
-
-            if (!appliedBaseSkills[parsed.base]) {
-                // First occurrence: set the predefined skill
-                appliedBaseSkills[parsed.base] = 1;
-                input.value = skillValue;
-
-                // Check if this skill has a specialty dropdown (skills with specialties: art, craft, science, pilot, military_science)
-                const skillsWithSpecialties = ['art', 'craft', 'science', 'pilot', 'military_science'];
-                if (skillsWithSpecialties.includes(parsed.base)) {
-                    const specId = `cs-skill-${parsed.base}-spec`;
-                    const specSelect = document.getElementById(specId);
-                    if (specSelect) {
-                        // Highlight the select element to remind user to select a specialty
-                        highlightSelectForProfessionSkill(specSelect);
-
-                        // If a specific specialty was provided, select it
-                        if (parsed.specialty) {
-                            let found = false;
-                            // For military_science, options include "Military Science (X)" format
-                            // For other skills, options are just the specialty name like "Electrician"
-                            let specialtyToMatch = parsed.specialty;
-                            if (parsed.base === 'military_science') {
-                                specialtyToMatch = `Military Science (${parsed.specialty})`;
-                            }
-
-                            for (let option of specSelect.options) {
-                                if (option.text === specialtyToMatch) {
-                                    option.selected = true;
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (!found) {
-                                for (let option of specSelect.options) {
-                                    if (option.text.toLowerCase() === specialtyToMatch.toLowerCase()) {
-                                        option.selected = true;
-                                        found = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (found) {
-                                specSelect.classList.remove('highlight-empty-input');
-                                specSelect.style.backgroundColor = '';
-                                specSelect.style.borderColor = '';
-                                specSelect.style.borderWidth = '';
-                                specSelect.style.color = '';
-                                specSelect.style.fontWeight = '';
-                            }
-                        }
-                        const event = new Event('change', { bubbles: true });
-                        specSelect.dispatchEvent(event);
-                    }
-                }
-                appliedCount++;
-            } else {
-                // Skill already has a value or this is a subsequent occurrence: create custom skill entry
-                appliedBaseSkills[parsed.base] = (appliedBaseSkills[parsed.base] || 1) + 1;
-
-                // Format the skill name for custom entry
-                let customName;
-                if (parsed.isChoice) {
-                    // Remove "(choose one)" or "(choose another)" text for choice skills
-                    customName = skillName.replace(/\s*\([^)]*choose[^)]*\)/i, '').trim();
-                    customName = `${customName} (Choice ${appliedBaseSkills[parsed.base]})`;
-                } else {
-                    // For non-choice skills with specialty, use the full skill name
-                    customName = skillName;
-                }
-
-                if (addCustomSkillFromProfession(customName, skillValue)) {
-                    appliedCount++;
-                }
-            }
-        } else if (!predefinedSkills.includes(parsed.base)) {
-            // Add as custom skill if not predefined
-            if (addCustomSkillFromProfession(skillName, skillValue)) {
-                appliedCount++;
-            }
+            input.value = skillValue;
+            appliedCount++;
+        } else {
+            // Unknown skill: add as a custom row
+            if (addCustomSkillFromProfession(skillName, skillValue)) appliedCount++;
         }
     }
 
     // Apply required skills
-    profession.requiredSkills.forEach(skill => {
-        applySkill(skill.name, skill.value);
-    });
+    profession.requiredSkills.forEach(skill => applySkill(skill.name, skill.value));
 
     // Apply selected optional skills
-    const optionalCheckboxes = document.querySelectorAll('.profession-optional-skill:checked');
-    optionalCheckboxes.forEach(checkbox => {
+    document.querySelectorAll('.profession-optional-skill:checked').forEach(checkbox => {
         const skillName = checkbox.getAttribute('data-skill-name');
         const skillValue = parseInt(checkbox.getAttribute('data-skill-value'));
         applySkill(skillName, skillValue);
     });
 
+    // Re-render the specialty section once all instances have been created
+    renderSpecialtySkills();
+
     if (appliedCount > 0) {
-        alert(`Applied ${appliedCount} professional skill(s)! Check the Skills section to see the changes.`);
-        // Remove reminder after button is pressed
         const reminder = document.getElementById('reminder-apply-profession');
         if (reminder) reminder.style.display = 'none';
+        const btn = document.getElementById('apply-profession-button');
+        if (btn) btn.classList.add('apply-profession-done');
     } else {
         alert('No skills were applied. Make sure the skills exist in the character sheet.');
     }
+    if (typeof syncLpFromForm === 'function') syncLpFromForm();
+    window.dgSaveLoad?.save?.();
 }
 
 /**
@@ -928,128 +1362,74 @@ function getCustomSkills() {
 }
 
 function prepareBonusSkills() {
-    // Get all specialty select elements from the skills section
-    const specialtySelects = document.querySelectorAll('.cs-skill-specialty');
-    const selectedSpecialties = [];
-
-    specialtySelects.forEach(select => {
-        if (select.value && select.value !== 'Pick') {
-            const skillName = select.getAttribute('id');
-
-            // Try to extract base skill from ID
-            if (!skillName) {
-                return; // Skip this one
-            }
-
-            const baseSkillMatch = skillName.match(/cs-skill-(\w+)-spec/);
-            if (baseSkillMatch) {
-                const baseSkill = baseSkillMatch[1];
-                const specialty = select.value;
-                // Format as "Science (Chemistry)"
-                const skillLabel = baseSkill.charAt(0).toUpperCase() +
-                    baseSkill.slice(1).replace(/_/g, ' ') +
-                    ' (' + specialty + ')';
-                selectedSpecialties.push(skillLabel);
-            }
-        }
-    });
-
-    // Show the bonus fieldset
+    // Show the bonus fieldset and populate the dropdowns.
+    // Specialty skills are tracked in appState.specialtyInstances;
+    // the dropdown expands all SPECIALTY_OPTIONS sub-options so the user can
+    // boost an existing specialty instance or create a new one.
     const bonusSection = document.getElementById('bonus-skills-section');
-    if (bonusSection) {
-        bonusSection.style.display = 'block';
-    }
+    if (bonusSection) bonusSection.style.display = 'block';
 
-    // Populate the bonus skills dropdowns
     populateBonusSkillDropdowns();
 
-    if (selectedSpecialties.length > 0) {
-        alert(`Found ${selectedSpecialties.length} specialty skill(s). Bonus skills ready!`);
-    } else {
-        alert('Bonus skills updated! You can boost base skills or custom skills you added.');
-    }
-
-    // Remove reminder after button is pressed
+    const btn = document.getElementById('prepare-bonus-button');
+    if (btn) btn.classList.add('prepare-bonus-done');
     const reminder = document.getElementById('reminder-prepare-bonus');
     if (reminder) reminder.style.display = 'none';
 }
 
 /**
- * Populate the 8 bonus skill dropdown selectors with all available skills
+ * Populate the 8 bonus skill dropdown selectors with all available skills.
+ * Specialty skills (Art, Craft, Science, Pilot, Military Science) are expanded
+ * to show every sub-option (e.g. "Craft (Mechanic)") matching the Pick dropdowns.
  */
 function populateBonusSkillDropdowns() {
     const bonusSkillsDiv = document.getElementById('bonus-dropdowns');
     bonusSkillsDiv.innerHTML = '';
 
-    // Get all available skills: base skills + custom/typed skills
-    // Derived from CONFIG.SKILLS to keep a single source of truth
-    const baseSkillsList = CONFIG.SKILLS.map(s => [s[0], s[1]]);
+    const allSkillOptions = []; // [ [value, displayText], ... ]
 
-    // Get custom/typed skills
-    const customSkills = getCustomSkills();
-
-    // Get selected specialties from Skills section
-    const specialtySelects = document.querySelectorAll('.cs-skill-specialty');
-    const selectedSpecialties = [];
-    specialtySelects.forEach(select => {
-        const skillName = select.getAttribute('id');
-        // Skip if no ID or if value is "Pick" (placeholder)
-        if (!skillName || !select.value || select.value === 'Pick') return;
-
-        const baseSkillMatch = skillName.match(/cs-skill-(\w+)-spec/);
-        if (baseSkillMatch) {
-            const baseSkill = baseSkillMatch[1];
-            const specialty = select.value;
-            // Format: "Science (Chemistry)"
-            const skillLabel = baseSkill.charAt(0).toUpperCase() +
-                baseSkill.slice(1).replace(/_/g, ' ') +
-                ' (' + specialty + ')';
-            selectedSpecialties.push([skillLabel, skillLabel]);
-        }
-    });
-
-    // Check which base skills have specialty variants in custom skills or selected specialties
-    const skillsWithSpecialties = new Set();
-    customSkills.forEach(skill => {
-        const match = skill.name.match(/^(.+?)\s*\((.+?)\)$/);
-        if (match) {
-            const baseSkill = match[1].trim().toLowerCase().replace(/\s+/g, '_');
-            skillsWithSpecialties.add(baseSkill);
-        }
-    });
-    selectedSpecialties.forEach(([, label]) => {
-        const match = label.match(/^(.+?)\s*\((.+?)\)$/);
-        if (match) {
-            const baseSkill = match[1].trim().toLowerCase().replace(/\s+/g, '_');
-            skillsWithSpecialties.add(baseSkill);
-        }
-    });
-
-    // Build options: base skills (excluding those with specialties), plus selected specialties, plus all other custom skills
-    const allSkillOptions = [];
-
-    baseSkillsList.forEach(([key, label]) => {
-        if (!skillsWithSpecialties.has(key)) {
+    // Expand CONFIG.SKILLS: specialty skills become individual sub-option entries;
+    // plain skills are added as-is.
+    CONFIG.SKILLS.forEach(([key, label]) => {
+        const subs = SPECIALTY_OPTIONS[key];
+        if (subs) {
+            subs.forEach(sub => {
+                const value = `${label} (${sub})`;
+                allSkillOptions.push([value, value]);
+            });
+            // Custom entry so the user can boost a specialty they named themselves
+            allSkillOptions.push([`${label} (custom)`, `${label} (custom\u2026)`]);
+        } else {
             allSkillOptions.push([key, label]);
         }
     });
 
-    // Add selected specialties first
-    selectedSpecialties.forEach(option => allSkillOptions.push(option));
+    // Specialty-only skills NOT in CONFIG.SKILLS (Foreign Language)
+    Object.entries(SPECIALTY_OPTIONS).forEach(([key, subs]) => {
+        if (CONFIG.SKILLS.some(([k]) => k === key)) return; // already handled above
+        const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        subs.forEach(sub => {
+            const value = `${label} (${sub})`;
+            allSkillOptions.push([value, value]);
+        });
+        allSkillOptions.push([`${label} (custom)`, `${label} (custom\u2026)`]);
+    });
 
-    // Add remaining custom skills
-    customSkills.forEach(skill => {
-        allSkillOptions.push([skill.name, skill.name]);
+    // User-defined custom rows (plain free-text skills the player added manually)
+    getCustomSkills().forEach(skill => {
+        const alreadyListed = allSkillOptions.some(([v]) => v === skill.name);
+        if (!alreadyListed) allSkillOptions.push([skill.name, skill.name]);
     });
 
     // Create 8 dropdown selectors
     for (let i = 0; i < 8; i++) {
-        const label = document.createElement('label');
-        label.style.display = 'flex';
-        label.style.flexDirection = 'column';
-        label.style.gap = '4px';
-        label.style.color = 'inherit';
-        label.textContent = `Boost ${i + 1}:`;
+        const wrapper = document.createElement('label');
+        wrapper.style.display = 'flex';
+        wrapper.style.flexDirection = 'column';
+        wrapper.style.gap = '4px';
+        wrapper.style.color = 'inherit';
+        wrapper.style.alignItems = 'center';
+        wrapper.textContent = `Boost ${i + 1}`;
 
         const select = document.createElement('select');
         select.id = `cs-bonus-skill-${i}`;
@@ -1060,15 +1440,15 @@ function populateBonusSkillDropdowns() {
         emptyOption.textContent = '-- Select Skill --';
         select.appendChild(emptyOption);
 
-        allSkillOptions.forEach(([key, label]) => {
+        allSkillOptions.forEach(([val, text]) => {
             const option = document.createElement('option');
-            option.value = key;
-            option.textContent = label;
+            option.value = val;
+            option.textContent = text;
             select.appendChild(option);
         });
 
-        label.appendChild(select);
-        bonusSkillsDiv.appendChild(label);
+        wrapper.appendChild(select);
+        bonusSkillsDiv.appendChild(wrapper);
     }
 }
 
@@ -1092,98 +1472,155 @@ function applyBonusSkills() {
     let appliedCount = 0;
 
     selectedSkills.forEach(skillKey => {
-        // Check if it's a specialty skill like "Science (Biology)" or "Science (Chemistry)"
         const specialtyMatch = skillKey.match(/^(.+?)\s*\((.+?)\)$/);
 
         if (specialtyMatch) {
-            // It's a specialty format - extract base skill and specialty
             const baseSkillLabel = specialtyMatch[1].trim();
             const specialty = specialtyMatch[2].trim();
             const baseSkillKey = baseSkillLabel.toLowerCase().replace(/\s+/g, '_');
 
-            // First try to find it in custom skills with matching specialty
-            const customSkillRows = document.querySelectorAll('.custom-skill-row');
-            let found = false;
-
-            customSkillRows.forEach((row, idx) => {
-                const nameInput = row.querySelector('.custom-skill-name');
-                const valueInput = row.querySelector('.custom-skill-value');
-                const specSelect = row.querySelector('select');
-                const label = row.querySelector('label');
-
-                // Get skill name from label or nameInput
-                let rowSkillName = '';
-                if (specSelect) {
-                    // Skill with specialty - name is in label
-                    if (label) {
-                        rowSkillName = label.textContent.replace(':', '').trim();
-                    }
-                } else if (nameInput) {
-                    rowSkillName = nameInput.value;
+            if (SPECIALTY_SKILL_KEYS.has(baseSkillKey)) {
+                // 'custom…' sentinel means create a blank instance for the player to name
+                const resolvedSpecialty = specialty === 'custom\u2026' ? null : specialty;
+                // Boost an existing specialty instance, or create a new one
+                const existing = appState.specialtyInstances.find(
+                    i => i.key === baseSkillKey && i.specialty === resolvedSpecialty
+                );
+                if (existing) {
+                    existing.value = Math.min(existing.value + CONFIG.BONUS_SKILL_POINTS, CONFIG.MAX_SKILL_VALUE);
+                } else {
+                    _addSpecialtyInstance(baseSkillKey, resolvedSpecialty, CONFIG.BONUS_SKILL_POINTS, 'bonus');
                 }
-
-                // Match both name and specialty if it's a specialty skill
-                if (specSelect && specSelect.value) {
-                    const rowSpecialty = specSelect.value;
-                    if (rowSkillName.toLowerCase() === baseSkillLabel.toLowerCase() &&
-                        rowSpecialty.toLowerCase() === specialty.toLowerCase()) {
-                        const currentValue = parseInt(valueInput.value) || 0;
-                        const newValue = Math.min(currentValue + CONFIG.BONUS_SKILL_POINTS, CONFIG.MAX_SKILL_VALUE);
-                        valueInput.value = newValue;
-                        found = true;
-                    }
-                }
-            });
-
-            if (!found) {
-                // If not found in custom skills, try profession skill input
-                const skillInput = document.getElementById(`cs-skill-${baseSkillKey}`);
-
-                if (skillInput) {
-                    const currentValue = parseInt(skillInput.value) || 0;
-                    const newValue = Math.min(currentValue + CONFIG.BONUS_SKILL_POINTS, CONFIG.MAX_SKILL_VALUE);
-                    skillInput.value = newValue;
-                    found = true;
-                }
-            }
-
-            if (found) appliedCount++;
-        } else {
-            // Check if it's a base skill
-            const skillInput = document.getElementById(`cs-skill-${skillKey}`);
-
-            if (skillInput) {
-                const currentValue = parseInt(skillInput.value) || 0;
-                const newValue = Math.min(currentValue + CONFIG.BONUS_SKILL_POINTS, CONFIG.MAX_SKILL_VALUE);
-                skillInput.value = newValue;
                 appliedCount++;
             } else {
-                // Check if it's a custom skill - we need to find it by name
-                const customSkillRows = document.querySelectorAll('.custom-skill-row');
-                let found = false;
-                customSkillRows.forEach((row, idx) => {
+                // Parenthetical but not a specialty group — treat as a plain base skill
+                const skillInput = document.getElementById(`cs-skill-${baseSkillKey}`);
+                if (skillInput) {
+                    skillInput.value = Math.min((parseInt(skillInput.value) || 0) + CONFIG.BONUS_SKILL_POINTS, CONFIG.MAX_SKILL_VALUE);
+                    appliedCount++;
+                }
+            }
+        } else {
+            // Plain base skill
+            const skillInput = document.getElementById(`cs-skill-${skillKey}`);
+            if (skillInput) {
+                skillInput.value = Math.min((parseInt(skillInput.value) || 0) + CONFIG.BONUS_SKILL_POINTS, CONFIG.MAX_SKILL_VALUE);
+                appliedCount++;
+            } else {
+                // Custom skill (Foreign Language etc.) — find by exact name
+                document.querySelectorAll('.custom-skill-row').forEach(row => {
                     const nameInput = row.querySelector('.custom-skill-name');
                     const valueInput = row.querySelector('.custom-skill-value');
-
-                    if (nameInput && nameInput.value === skillKey) {
-                        const currentValue = parseInt(valueInput.value) || 0;
-                        const newValue = Math.min(currentValue + CONFIG.BONUS_SKILL_POINTS, CONFIG.MAX_SKILL_VALUE);
-                        valueInput.value = newValue;
-                        found = true;
+                    if (nameInput && nameInput.value === skillKey && valueInput) {
+                        valueInput.value = Math.min((parseInt(valueInput.value) || 0) + CONFIG.BONUS_SKILL_POINTS, CONFIG.MAX_SKILL_VALUE);
+                        appliedCount++;
                     }
                 });
-                if (found) appliedCount++;
             }
         }
     });
     if (appliedCount > 0) {
+        // Re-render specialty section to reflect boosted/new instances
+        renderSpecialtySkills();
+        // Record what was applied so resetBonusSkills() can reverse it
+        selectedSkills.forEach(skillKey => {
+            appState.appliedBonuses[skillKey] = (appState.appliedBonuses[skillKey] || 0) + CONFIG.BONUS_SKILL_POINTS;
+        });
         alert(`Applied +${CONFIG.BONUS_SKILL_POINTS} bonus to ${appliedCount} skill(s)!`);
-        // Remove reminder after button is pressed
+        // Turn button green and hide reminder
+        const btn = document.getElementById('apply-bonus-button');
+        if (btn) btn.classList.add('apply-bonus-done');
         const reminder = document.getElementById('reminder-apply-bonus');
         if (reminder) reminder.style.display = 'none';
+        const resetBtn = document.getElementById('reset-bonus-button');
+        if (resetBtn) resetBtn.style.display = 'inline-block';
     } else {
         alert('Could not find selected skills to boost.');
     }
+    // Push updated values to LP sheet and persist to storage
+    if (typeof syncLpFromForm === 'function') syncLpFromForm();
+    window.dgSaveLoad?.save?.();
+}
+
+/**
+ * Reverse all bonus points that were applied via applyBonusSkills().
+ * Uses appState.appliedBonuses to know exactly what to subtract.
+ */
+function resetBonusSkills() {
+    const applied = appState.appliedBonuses;
+    if (Object.keys(applied).length === 0) {
+        alert('No bonus skills have been applied yet.');
+        return;
+    }
+
+    Object.entries(applied).forEach(([skillKey, totalAdded]) => {
+        const specialtyMatch = skillKey.match(/^(.+?)\s*\((.+?)\)$/);
+
+        if (specialtyMatch) {
+            const baseSkillLabel = specialtyMatch[1].trim();
+            const specialty = specialtyMatch[2].trim();
+            const baseSkillKey = baseSkillLabel.toLowerCase().replace(/\s+/g, '_');
+
+            if (SPECIALTY_SKILL_KEYS.has(baseSkillKey)) {
+                // Find the matching specialty instance and reverse the bonus
+                const inst = appState.specialtyInstances.find(
+                    i => i.key === baseSkillKey && i.specialty === specialty
+                );
+                if (inst) {
+                    inst.value = Math.max(0, inst.value - totalAdded);
+                    // Remove the instance if it was created purely by the bonus step
+                    if (inst.value <= 0 && inst.source === 'bonus') {
+                        appState.specialtyInstances = appState.specialtyInstances.filter(i => i !== inst);
+                    }
+                }
+            } else {
+                // Non-specialty parenthetical — reverse on the base skill input
+                const input = document.getElementById(`cs-skill-${baseSkillKey}`);
+                if (input) input.value = Math.max(0, (parseInt(input.value) || 0) - totalAdded);
+            }
+        } else {
+            // Plain base skill
+            const skillInput = document.getElementById(`cs-skill-${skillKey}`);
+            if (skillInput) {
+                skillInput.value = Math.max(0, (parseInt(skillInput.value) || 0) - totalAdded);
+            } else {
+                // Custom skill (Foreign Language etc.)
+                document.querySelectorAll('.custom-skill-row').forEach(row => {
+                    const nameInput = row.querySelector('.custom-skill-name');
+                    const valueInput = row.querySelector('.custom-skill-value');
+                    if (nameInput && nameInput.value === skillKey && valueInput) {
+                        valueInput.value = Math.max(0, (parseInt(valueInput.value) || 0) - totalAdded);
+                    }
+                });
+            }
+        }
+    });
+
+    appState.appliedBonuses = {};
+    renderSpecialtySkills();
+
+    const btn = document.getElementById('apply-bonus-button');
+    if (btn) btn.classList.remove('apply-bonus-done');
+    const reminder = document.getElementById('reminder-apply-bonus');
+    if (reminder) reminder.style.display = '';
+    const resetBtn = document.getElementById('reset-bonus-button');
+    if (resetBtn) resetBtn.style.display = 'none';
+
+    if (typeof syncLpFromForm === 'function') syncLpFromForm();
+    window.dgSaveLoad?.save?.();
+}
+
+/**
+ * Resets profession-applied skills back to defaults and un-marks the Apply button.
+ */
+function resetProfessionSkills() {
+    clearProfessionSkills();
+    const btn = document.getElementById('apply-profession-button');
+    if (btn) btn.classList.remove('apply-profession-done');
+    const reminder = document.getElementById('reminder-apply-profession');
+    if (reminder) reminder.style.display = '';
+    if (typeof syncLpFromForm === 'function') syncLpFromForm();
+    window.dgSaveLoad?.save?.();
 }
 
 /**
@@ -1204,21 +1641,16 @@ function addCustomSkillFromProfession(skillName, skillValue) {
     const skillMatch = skillName.match(/^([^(]+)(?:\s*\(([^)]+)\))?/);
     const skillBase = skillMatch ? skillMatch[1].trim().toLowerCase().replace(/\s+/g, '_') : '';
     const specialty = skillMatch && skillMatch[2] ? skillMatch[2].trim() : null;
+    const _uid = `cskill-${Date.now()}-${Math.floor(Math.random() * 9999)}`;
 
-    // Define specialty options for skills that have them (excluding Foreign Language which is user-editable)
-    const specialtyOptions = {
-        art: ["Creative Writing", "Journalism", "Painting", "Photography", "Sculpture", "Music", "Acting", "Film / Scriptwriting", "Illustration"],
-        craft: ["Electrician", "Mechanic", "Locksmithing", "Carpentry", "Plumbing", "Welding", "Microelectronics", "Machinist", "Blacksmith", "Explosives (non-military fabrication)"],
-        science: ["Biology", "Chemistry", "Physics", "Mathematics", "Geology", "Astronomy", "Meteorology", "Genetics", "Engineering", "Environmental Science"],
-        pilot: ["Fixed-Wing Aircraft", "Helicopter", "Jet Aircraft", "Drone / UAV", "Spacecraft (Handler approval)"],
-        military_science: ["Military Science (Land)", "Military Science (Air)", "Military Science (Naval)", "Military Science (Special Operations)"]
-    };
+    // Specialty options come from the shared SPECIALTY_OPTIONS constant
 
     // Create name input or label based on specialty
     if (skillBase === 'foreign_language') {
         // Foreign Language is user-editable
         const nameLabel = document.createElement('label');
         nameLabel.textContent = 'Foreign Language:';
+        nameLabel.htmlFor = `${_uid}-name`;
         nameLabel.style.flex = '0 0 auto';
         nameLabel.style.minWidth = '120px';
         skillRow.appendChild(nameLabel);
@@ -1226,6 +1658,9 @@ function addCustomSkillFromProfession(skillName, skillValue) {
         // Create editable text input for language name
         const langInput = document.createElement('input');
         langInput.type = 'text';
+        langInput.id = `${_uid}-name`;
+        langInput.name = `${_uid}-name`;
+        langInput.autocomplete = 'off';
         langInput.placeholder = 'e.g., French, Spanish, Mandarin';
         langInput.className = 'custom-skill-name';
         langInput.style.flex = '1';
@@ -1245,22 +1680,31 @@ function addCustomSkillFromProfession(skillName, skillValue) {
             }
         };
 
+        // Pre-fill the language name if restoring from saved state
+        if (specialty) {
+            langInput.value = specialty;
+        }
+
         langInput.addEventListener('input', updateLangInputHighlight);
         langInput.addEventListener('blur', updateLangInputHighlight);
         langInput.addEventListener('focus', updateLangInputHighlight);
-        updateLangInputHighlight(); // Initial check
+        updateLangInputHighlight(); // Initial check (respects pre-filled value)
 
         skillRow.appendChild(langInput);
-    } else if (specialtyOptions[skillBase]) {
+    } else if (SPECIALTY_OPTIONS[skillBase]) {
         // Skill has specialty dropdown
         const nameLabel = document.createElement('label');
         nameLabel.textContent = skillBase.charAt(0).toUpperCase() + skillBase.slice(1) + ':';
+        nameLabel.htmlFor = `${_uid}-spec`;
         nameLabel.style.flex = '0 0 auto';
         nameLabel.style.minWidth = '100px';
         skillRow.appendChild(nameLabel);
 
         // Create specialty dropdown
         const specSelect = document.createElement('select');
+        specSelect.id = `${_uid}-spec`;
+        specSelect.name = `${_uid}-spec`;
+        specSelect.autocomplete = 'off';
         specSelect.className = 'cs-skill-specialty';
         specSelect.style.padding = '4px 6px';
         specSelect.style.borderRadius = '4px';
@@ -1275,7 +1719,7 @@ function addCustomSkillFromProfession(skillName, skillValue) {
         pickOption.textContent = 'Pick';
         specSelect.appendChild(pickOption);
 
-        specialtyOptions[skillBase].forEach(option => {
+        SPECIALTY_OPTIONS[skillBase].forEach(option => {
             const opt = document.createElement('option');
             opt.value = option;
             opt.textContent = option;
@@ -1332,6 +1776,9 @@ function addCustomSkillFromProfession(skillName, skillValue) {
         // Regular skill without specialty
         const nameInput = document.createElement('input');
         nameInput.type = 'text';
+        nameInput.id = `${_uid}-name`;
+        nameInput.name = `${_uid}-name`;
+        nameInput.autocomplete = 'off';
         nameInput.value = skillName;
         nameInput.className = 'custom-skill-name';
         nameInput.style.flex = '1';
@@ -1344,6 +1791,9 @@ function addCustomSkillFromProfession(skillName, skillValue) {
 
     const valueInput = document.createElement('input');
     valueInput.type = 'number';
+    valueInput.id = `${_uid}-val`;
+    valueInput.name = `${_uid}-val`;
+    valueInput.autocomplete = 'off';
     valueInput.value = skillValue;
     valueInput.className = 'custom-skill-value';
     valueInput.min = '0';
@@ -1398,6 +1848,7 @@ function buildFoundryJSON() {
         const sanityValue = (document.getElementById('cs-sanity-value') && parseInt(document.getElementById('cs-sanity-value').value)) ? parseInt(document.getElementById('cs-sanity-value').value) : (statsObj.pow.value * 5);
         const breakingPoint = (document.getElementById('cs-breaking-point') && parseInt(document.getElementById('cs-breaking-point').value)) ? parseInt(document.getElementById('cs-breaking-point').value) : (sanityValue - statsObj.pow.value);
         const physicalDesc = (document.getElementById('cs-physical-desc') && document.getElementById('cs-physical-desc').value) ? document.getElementById('cs-physical-desc').value : '';
+        const motivations = document.getElementById('cs-motivations')?.value || '';
         // Derive profession title from the dropdown's selected option (single source of truth)
         const profSelect = document.getElementById('cs-profession-select');
         const bioProfession = profSelect && profSelect.selectedIndex > 0
@@ -1410,35 +1861,29 @@ function buildFoundryJSON() {
         const bioEducation = document.getElementById('cs-bio-education')?.value || '';
         const corruptionValue = 0;
 
-        // Skills
-        const skillsKeys = CONFIG.SKILL_KEYS();
+        // Skills — use getCompletedSkills() as the single authoritative source
         const skillsObj = {};
         const typedSkillsObj = {};
         const specialtyGroupMap = { art: 'Art', craft: 'Craft', science: 'Science', pilot: 'Pilot', military_science: 'Military Science' };
 
-        skillsKeys.forEach(key => {
-            const el = document.getElementById(`cs-skill-${key}`);
-            const prof = el ? parseInt(el.value) || 0 : 0;
-            // check for specialty input and include it in the label if present
-            const specEl = document.getElementById(`cs-skill-${key}-spec`);
-            let label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            if (specEl && specEl.value && specEl.value.trim().length > 0 && specEl.value !== 'Pick') {
-                const specialty = specEl.value.trim();
-                label = `${label} (${specialty})`;
-                // Add to typedSkills with a generated ID (timestamp-based)
+        getCompletedSkills().forEach(skill => {
+            if (skill.specialty !== null) {
+                // Specialty skill instance → goes into Foundry's typedSkills
                 const typedSkillId = Date.now().toString() + Math.random().toString(36).substring(2, 11);
-                const group = specialtyGroupMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                typedSkillsObj[typedSkillId] = { label: specialty, group: group, proficiency: prof, failure: false };
+                const group = specialtyGroupMap[skill.key] || skill.label;
+                typedSkillsObj[typedSkillId] = { label: skill.specialty || skill.displayName, group, proficiency: skill.value, failure: false };
+            } else {
+                // Base skill → goes into Foundry's skills
+                skillsObj[skill.key] = { label: skill.label, proficiency: skill.value, failure: false };
             }
-            skillsObj[key] = { label: label, proficiency: prof, failure: false };
         });
 
-        // Add custom skills (only to typedSkills, not to regular skills to avoid duplication)
+        // Add custom skills (Foreign Language etc.) to typedSkills
         const customSkills = getCustomSkills();
         customSkills.forEach(customSkill => {
             const customSkillId = Date.now().toString() + Math.random().toString(36).substring(2, 11);
-            // Only add to typedSkills with the 'Custom' group flag
-            typedSkillsObj[customSkillId] = { label: customSkill.name, group: 'Custom', proficiency: customSkill.value, failure: false };
+            // Use 'Other' — valid group key in Foundry DG system (DG.TypeSkills.Other is defined)
+            typedSkillsObj[customSkillId] = { label: customSkill.name, group: 'Other', proficiency: customSkill.value, failure: false };
         });
 
         // Prototype token and items JSON (allow raw editing)
@@ -1463,7 +1908,7 @@ function buildFoundryJSON() {
                     name: '',
                     description: '<p>' + bond.description.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</p>',
                     score: bond.score,
-                    relationship: bond.relationship || '',
+                    relationship: bond.relationship || '?',
                     hasBeenDamagedSinceLastHomeScene: false
                 }
             };
@@ -1577,9 +2022,11 @@ function buildFoundryJSON() {
                 specialTraining: [],
                 settings: { sorting: { weaponSortAlphabetical: false, armorSortAlphabetical: false, gearSortAlphabetical: false, tomeSortAlphabetical: false, ritualSortAlphabetical: false }, rolling: { defaultPercentileModifier: 20 } },
                 schemaVersion: 1,
+                // physicalDescription is the top-level field the agent sheet reads/writes
+                physicalDescription: physicalDesc,
                 sanity: { value: sanityValue, currentBreakingPoint: breakingPoint, adaptations: { violence: violenceAdaptations, helplessness: helplessnessAdaptations } },
                 physical: { description: physicalDesc, wounds: "", firstAidAttempted: false, exhausted: false, exhaustedPenalty: -20 },
-                biography: { profession: bioProfession, employer: bioEmployer, nationality: bioNationality, sex: bioSex, age: bioAge, education: bioEducation },
+                biography: { profession: bioProfession, employer: bioEmployer, nationality: bioNationality, sex: bioSex, age: bioAge, education: bioEducation, motivations: motivations },
                 corruption: { value: corruptionValue, haveSeenTheYellowSign: false, gift: "", insight: "" }
             },
             items: items,
@@ -1599,15 +2046,22 @@ function buildFoundryJSON() {
  * Populates the character sheet form and updates the JSON preview
  */
 function populateCharacterJSON() {
+    const jsonPreviewEl = document.getElementById('cs-json');
+    const btn = document.getElementById('preview-json');
+    if (!jsonPreviewEl) return;
+    // Toggle off if already visible
+    if (jsonPreviewEl.style.display === 'block') {
+        jsonPreviewEl.style.display = 'none';
+        if (btn) btn.textContent = 'Preview Foundry VTT .json';
+        return;
+    }
     try {
         populateCharacterSheetForm();
         const obj = buildFoundryJSON();
         const pretty = JSON.stringify(obj, null, 2);
-        const jsonPreviewEl = document.getElementById('cs-json');
-        if (jsonPreviewEl) {
-            jsonPreviewEl.innerText = pretty;
-            jsonPreviewEl.style.display = 'block';
-        }
+        jsonPreviewEl.innerText = pretty;
+        jsonPreviewEl.style.display = 'block';
+        if (btn) btn.textContent = 'Hide Foundry VTT .json';
     } catch (error) {
         console.error('Error populating JSON:', error);
         alert('Failed to generate JSON preview. Check console for details.');
@@ -1634,21 +2088,219 @@ function exportCharacterJSON() {
     }
 }
 
+/* ── JSON drop-zone helper ──────────────────────────────────────────── */
+window.jsonDropZone = {
+    over(e) {
+        e.preventDefault();
+        document.getElementById('json-drop-zone')?.classList.add('drag-over');
+    },
+    leave(e) {
+        document.getElementById('json-drop-zone')?.classList.remove('drag-over');
+    },
+    drop(e) {
+        e.preventDefault();
+        document.getElementById('json-drop-zone')?.classList.remove('drag-over');
+        const file = e.dataTransfer?.files?.[0];
+        if (file) this._read(file);
+    },
+    fileSelected(e) {
+        const file = e.target?.files?.[0];
+        if (file) this._read(file);
+        // Reset so same file can be re-selected
+        e.target.value = '';
+    },
+    _read(file) {
+        if (!file.name.endsWith('.json') && file.type !== 'application/json') {
+            alert('Please select a .json file.');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const textarea = document.getElementById('json-import-area');
+            if (textarea) textarea.value = ev.target.result;
+            // Update drop zone label to show loaded filename
+            const lbl = document.querySelector('.json-drop-label');
+            if (lbl) lbl.textContent = '\u2713 ' + file.name;
+        };
+        reader.readAsText(file);
+    }
+};
+
 /**
- * Detect if the user is on a mobile or tablet device
- * @returns {boolean} true if on mobile/tablet, false otherwise
+ * Imports a pasted Foundry VTT character JSON back into the web editor.
+ * Populates all stats, skills, typed/custom skills, bonds, equipment, and biography fields.
  */
-function isMobileDevice() {
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    // Check for mobile/tablet user agents and screen size
-    const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet|windows phone/i;
-    const isMobileUA = mobileRegex.test(userAgent.toLowerCase());
-    const isMobileScreen = window.innerWidth <= 768;
-    return isMobileUA || isMobileScreen;
+function importFoundryJSONToEditor() {
+    const textarea = document.getElementById('json-import-area');
+    if (!textarea || !textarea.value.trim()) {
+        alert('Please paste a Foundry VTT character JSON first.');
+        return;
+    }
+    let data;
+    try {
+        data = JSON.parse(textarea.value.trim());
+    } catch (e) {
+        alert('Invalid JSON — please check the pasted content and try again.');
+        return;
+    }
+
+    // Pause the MutationObserver so writing to stat spans doesn't re-trigger
+    // populateCharacterSheetForm() mid-import and reset skill values to defaults.
+    observer.disconnect();
+
+    try {
+        const sys = data.system || {};
+        const setInput = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+
+        // Name
+        setInput('cs-name', data.name || '');
+
+        // Core stats — write to display spans
+        const statistics = sys.statistics || {};
+        CONFIG.STATS.forEach(stat => {
+            const key = stat.toLowerCase();
+            const raw = statistics[key]?.value;
+            if (raw === undefined) return;
+            const val = Math.max(3, Math.min(18, parseInt(raw) || 3));
+            const spanEl = document.getElementById(`${stat}-value`);
+            if (spanEl) {
+                spanEl.innerText = val;
+                const x5El = document.getElementById(`${stat}-x5-value`);
+                if (x5El) x5El.innerText = val * 5;
+                const descEl = document.getElementById(`${stat}-descriptor`);
+                if (descEl) descEl.innerText = getDescriptor(stat, val);
+            }
+        });
+        updateTotalPoints();
+
+        // Rebuild the character sheet form with the new stat values
+        // (creates cs-STR, cs-skill-* inputs etc.)
+        populateCharacterSheetForm();
+
+        // Set stat inputs explicitly (populateCharacterSheetForm already reads spans correctly,
+        // this is a belt-and-suspenders pass)
+        CONFIG.STATS.forEach(stat => {
+            const key = stat.toLowerCase();
+            const raw = statistics[key]?.value;
+            if (raw !== undefined) setInput(`cs-${stat}`, Math.max(3, Math.min(18, parseInt(raw) || 3)));
+        });
+
+        // Derived: hp, wp, sanity, breaking point (overwrite the auto-calculated values)
+        setInput('cs-hp', sys.health?.max ?? sys.health?.value ?? 0);
+        setInput('cs-wp', sys.wp?.max ?? sys.wp?.value ?? 0);
+        setInput('cs-sanity-value', sys.sanity?.value ?? 0);
+        setInput('cs-breaking-point', sys.sanity?.currentBreakingPoint ?? 0);
+
+        // Predefined skill values — handle both this app's 'proficiency' key and
+        // real Foundry VTT exports that use 'value'
+        const skills = sys.skills || {};
+        Object.entries(skills).forEach(([key, skillData]) => {
+            const prof = skillData.proficiency ?? skillData.value ?? 0;
+            setInput(`cs-skill-${key}`, prof);
+        });
+
+        // Biography
+        const bio = sys.biography || {};
+        setInput('cs-bio-employer', bio.employer || '');
+        setInput('cs-bio-nationality', bio.nationality || '');
+        setInput('cs-bio-sex', bio.sex || '');
+        setInput('cs-bio-age', bio.age || '');
+        setInput('cs-bio-education', bio.education || '');
+
+        // Physical description
+        const physDescEl = document.getElementById('cs-physical-desc');
+        if (physDescEl) physDescEl.value = sys.physicalDescription || sys.physical?.description || '';
+        const motivationsEl = document.getElementById('cs-motivations');
+        if (motivationsEl) motivationsEl.value = sys.biography?.motivations || '';
+
+        // Sanity adaptation checkboxes
+        const adaptations = sys.sanity?.adaptations || {};
+        ['violence', 'helplessness'].forEach(type => {
+            [1, 2, 3].forEach(i => {
+                const cb = document.getElementById(`cs-${type}-incident${i}`);
+                if (cb) cb.checked = !!(adaptations[type]?.[`incident${i}`]);
+            });
+        });
+
+        // Typed / custom skills — clear existing rows first
+        const customSkillsDiv = document.getElementById('cs-custom-skills');
+        if (customSkillsDiv) customSkillsDiv.querySelectorAll('.custom-skill-row').forEach(r => r.remove());
+        const typedSkills = sys.typedSkills || {};
+        Object.values(typedSkills).forEach(ts => {
+            const label = (ts.group && ts.group !== 'Other')
+                ? `${ts.group} (${ts.label})`
+                : ts.label;
+            const prof = ts.proficiency ?? ts.value ?? 0;
+            addCustomSkillFromProfession(label, prof);
+        });
+
+        // Bonds — clear sheet bonds and re-import from items
+        window.bondsOnSheet = [];
+        (data.items || [])
+            .filter(item => item.type === 'bond')
+            .forEach(item => {
+                const s = item.system || {};
+                const rawDesc = (s.description || '').replace(/<[^>]+>/g, '').trim();
+                window.bondsOnSheet.push({
+                    id: 'bond-' + Date.now() + Math.random().toString(36).substring(2, 11),
+                    name: item.name || '',
+                    relationship: s.relationship || '',
+                    description: rawDesc,
+                    score: s.score ?? 10
+                });
+            });
+        renderBondsOnSheet();
+
+        // Equipment loadout — clear existing and re-add by catalog name
+        if (typeof window.dgEquipment?.clear === 'function') {
+            window.dgEquipment.clear();
+            const equipTypes = new Set(['weapon', 'armor', 'gear', 'item']);
+            (data.items || [])
+                .filter(item => item.type !== 'bond' && (equipTypes.has(item.type) || !item.type))
+                .forEach(item => {
+                    if (item.name) window.dgEquipment.add(item.name);
+                });
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        alert(`"${data.name || 'Character'}" loaded into the editor!`);
+    } finally {
+        // Always re-attach the observer
+        const statsEl = document.getElementById('stats');
+        if (statsEl) observer.observe(statsEl, { childList: true, subtree: true, characterData: true });
+    }
+
+    // Apply button states after the observer is back and any pending repaints have settled.
+    setTimeout(() => {
+        const prepBtn = document.getElementById('prepare-bonus-button');
+        if (prepBtn) prepBtn.classList.add('prepare-bonus-done');
+        const prepReminder = document.getElementById('reminder-prepare-bonus');
+        if (prepReminder) prepReminder.style.display = 'none';
+        const bonusSection = document.getElementById('bonus-skills-section');
+        if (bonusSection) bonusSection.style.display = 'block';
+        populateBonusSkillDropdowns();
+
+        const applyBonusBtn = document.getElementById('apply-bonus-button');
+        if (applyBonusBtn) applyBonusBtn.classList.add('apply-bonus-done');
+        const applyBonusReminder = document.getElementById('reminder-apply-bonus');
+        if (applyBonusReminder) applyBonusReminder.style.display = 'none';
+    }, 0);
 }
 
+
+
 // Keep the character sheet form in sync when stats change
-const observer = new MutationObserver(() => { try { populateCharacterSheetForm(); } catch (e) { } });
+let _populatePending = false;
+const observer = new MutationObserver(() => {
+    if (_populatePending) return;
+    _populatePending = true;
+    requestAnimationFrame(() => {
+        try { populateCharacterSheetForm(); } catch (e) { }
+        _populatePending = false;
+    });
+});
+// Expose so save-load.js can pause the observer during state restore
+window._dgStatsObserver = observer;
 
 window.onload = function () {
     generateStatContainers();
@@ -1664,17 +2316,34 @@ window.onload = function () {
 
     observer.observe(document.getElementById('stats'), { childList: true, subtree: true, characterData: true });
 
+    // Bond container event delegation — handles all bond field changes and removals
+    const bondsEl = document.getElementById('cs-bonds');
+    if (bondsEl) {
+        bondsEl.addEventListener('change', (e) => {
+            const entry = e.target.closest('.bond-entry');
+            if (!entry) return;
+            const bondId = entry.dataset.bondId;
+            if (!bondId) return;
+            const field = e.target.dataset.field;
+            if (field === 'name') updateBondName(bondId, e.target.value);
+            else if (field === 'relationship') updateBondRelationship(bondId, e.target.value);
+            else if (field === 'description') updateBondDescription(bondId, e.target.value);
+            else if (field === 'score') updateBondScore(bondId, e.target.value);
+        });
+        bondsEl.addEventListener('click', (e) => {
+            const btn = e.target.closest('.bond-remove-button');
+            if (!btn) return;
+            const entry = btn.closest('.bond-entry');
+            if (entry?.dataset.bondId) removeBondFromSheet(entry.dataset.bondId);
+        });
+    }
+
     // initialize theme from storage and wire selector
     try {
-        // Determine default theme: use mobile theme for mobile devices, xfiles for desktop
-        const defaultTheme = isMobileDevice() ? 'mobile' : 'xfiles';
-        const stored = localStorage.getItem('dg_theme') || defaultTheme;
-        setTheme(stored);
+        const savedTheme = localStorage.getItem('dg_theme') || 'xfiles';
+        setTheme(savedTheme);
         const sel = document.getElementById('cs-theme-select');
-        if (sel) {
-            sel.value = stored;
-            sel.addEventListener('change', (e) => setTheme(e.target.value));
-        }
+        if (sel) sel.addEventListener('change', (e) => setTheme(e.target.value));
     } catch (e) { }
 
     initBondPyramid();
@@ -1702,6 +2371,9 @@ function initBondPyramid() {
 
     let ay = 0;
     const ax = 0.38; // fixed forward tilt so the base square is always visible
+    const ctx = canvas.getContext('2d'); // cached once — avoids repeated internal lookups
+    const FRAME_MS = 1000 / 24;         // cap to ~24 fps
+    let lastFrameTime = 0;
 
     function rotY(v, a) {
         return [v[0] * Math.cos(a) + v[2] * Math.sin(a), v[1], -v[0] * Math.sin(a) + v[2] * Math.cos(a)];
@@ -1715,79 +2387,1189 @@ function initBondPyramid() {
         return [cx + v[0] * s, cy + v[1] * s];
     }
 
-    function draw() {
+    function draw(now) {
+        // Skip all canvas work when pyramid is not visible or page is hidden — keep looping
+        if (!window._pyramidVisible || document.hidden) {
+            requestAnimationFrame(draw);
+            return;
+        }
+        // When paused, stop the loop entirely — canvas._resume() will restart it
+        if (window._pyramidPaused) return;
+        // FPS cap — bail early if not enough time has elapsed
+        if (now - lastFrameTime < FRAME_MS) {
+            requestAnimationFrame(draw);
+            return;
+        }
+        const elapsed = now - lastFrameTime;
+        lastFrameTime = now;
+
         const W = container.offsetWidth || 300;
         const H = container.offsetHeight || 150;
         if (canvas.width !== W) canvas.width = W;
         if (canvas.height !== H) canvas.height = H;
 
-        const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, W, H);
 
         const scale = Math.min(W, H) * 0.26;
         const pts = verts.map(v => project(rotX(rotY(v, ay), ax), W / 2, H / 2, scale));
 
-        // Wide dim glow pass
-        ctx.strokeStyle = 'rgba(0, 255, 50, 0.14)';
+        // Wide dim glow pass — all 8 edges in one batched path (replaces 8 separate strokes)
+        ctx.strokeStyle = 'rgba(0, 180, 30, 0.10)';
         ctx.lineWidth = 8;
-        ctx.shadowColor = 'transparent';
+        ctx.beginPath();
         edges.forEach(([a, b]) => {
-            ctx.beginPath();
             ctx.moveTo(pts[a][0], pts[a][1]);
             ctx.lineTo(pts[b][0], pts[b][1]);
-            ctx.stroke();
         });
+        ctx.stroke();
 
-        // Core phosphor line pass
-        ctx.strokeStyle = 'rgba(0, 195, 40, 0.95)';
+        // Core phosphor line pass — batched, no shadowBlur (glow pass above handles the bloom)
+        ctx.strokeStyle = 'rgba(0, 130, 25, 0.70)';
         ctx.lineWidth = 1.2;
-        ctx.shadowColor = 'rgba(0, 255, 60, 0.85)';
-        ctx.shadowBlur = 10;
+        ctx.beginPath();
         edges.forEach(([a, b]) => {
-            ctx.beginPath();
             ctx.moveTo(pts[a][0], pts[a][1]);
             ctx.lineTo(pts[b][0], pts[b][1]);
-            ctx.stroke();
         });
-        ctx.shadowBlur = 0;
+        ctx.stroke();
 
-        ay += 0.006;
+        // Time-normalised rotation so speed is consistent regardless of FPS or monitor refresh rate
+        ay += 0.00036 * elapsed; // 0.006 rad per 16.67 ms ≈ 0.36 rad/sec
         requestAnimationFrame(draw);
     }
 
-    draw();
+    // Expose a handle so setTheme can gate drawing to xfiles-only.
+    // Only initialise to false if setTheme hasn't already set it (i.e. initBondPyramid
+    // runs after setTheme in window.onload, so we must not clobber the value).
+    if (window._pyramidVisible === undefined) window._pyramidVisible = false;
+    canvas._draw = draw;
+    canvas._resume = () => requestAnimationFrame(draw); // called after typing to restart the loop
+
+    requestAnimationFrame(draw);
 }
 
 /**
- * Theme Management: Switch between X-Files, Modern, Morris, and Son of Sam themes
- * Persists theme selection to localStorage for consistency across sessions
- * @param {string} theme - 'xfiles', 'modern', 'morris', or 'son-of-sam'
+ * Returns a runic/occult placeholder string when Son of Sam theme is active,
+ * otherwise returns the original placeholder text unchanged.
+ * @param {string} text - The original placeholder text
+ * @returns {string}
+ */
+function sosPlaceholder(text) {
+    if (!document.body.classList.contains('theme-son-of-sam')) return text;
+    const map = {
+        'Bond Name': 'ᚱᚢᚾᛖ ᚾᚨᛗᛖ',
+        'Bond Description/Text': 'ᛞᛖᛋᚲᚱᛁᛈᛏᛁᛟᚾ',
+        'Edit relationship...': 'ᚱᛖᛚᚨᛏᛁᛟᚾᛋᚺᛁᛈ',
+        'Skill Name': 'ᛋᚲᛁᛚᛚ',
+    };
+    return map[text] ?? text;
+}
+
+/**
+ * Theme Management: Always applies X-Files theme
+ * Theme parameter retained for localStorage persistence only
  */
 function setTheme(theme) {
     try {
-        const body = document.body;
-        body.classList.remove('theme-xfiles', 'theme-modern', 'theme-morris', 'theme-son-of-sam', 'theme-mobile');
-
-        if (theme === 'xfiles') {
-            body.classList.add('theme-xfiles');
-        } else if (theme === 'modern') {
-            body.classList.add('theme-modern');
-        } else if (theme === 'morris') {
-            body.classList.add('theme-morris');
-        } else if (theme === 'son-of-sam') {
-            body.classList.add('theme-son-of-sam');
-        } else if (theme === 'mobile') {
-            body.classList.add('theme-mobile');
+        // Flush any LP skill % values the user edited back to the underlying form
+        // inputs before saving — but ONLY when we are leaving the LP theme.
+        // Running this flush when switching TO the LP theme would overwrite
+        // fresher form values with the stale values last shown in the LP grid.
+        const currentTheme = document.getElementById('cs-theme-select')?.value
+            || (document.body.classList.contains('theme-field-doc') ? 'field-doc' : '');
+        if (currentTheme === 'field-doc' && theme !== 'field-doc') {
+            document.querySelectorAll('#lp-sheet .lp-skill-val[data-skill-src]').forEach(inp => {
+                const raw = parseInt(inp.value);
+                if (!isNaN(raw)) {
+                    const srcEl = document.getElementById(inp.dataset.skillSrc);
+                    if (srcEl) srcEl.value = raw;
+                }
+            });
         }
 
+        // Save current state synchronously before switching so no form values are
+        // lost through the debounce window.
+        window.dgSaveLoad?.save?.();
+
+        const body = document.body;
+        body.classList.remove('theme-xfiles', 'theme-modern', 'theme-son-of-sam', 'theme-field-doc');
+        body.classList.add('theme-' + theme);
         localStorage.setItem('dg_theme', theme);
         const sel = document.getElementById('cs-theme-select');
         if (sel) sel.value = theme;
+        // Son of Sam: swap all stat increment buttons between + and ⛧
+        const plusSymbol = theme === 'son-of-sam' ? '\u26E7' : '+';
+        document.querySelectorAll('.stat-inc-btn').forEach(btn => {
+            btn.textContent = plusSymbol;
+        });
+        // Gate pyramid RAF loop — only do real drawing work on xfiles
+        window._pyramidVisible = (theme === 'xfiles');
+        // Refresh bond entries so their placeholders update immediately
+        if (typeof renderBondsOnSheet === 'function' && window.bondsOnSheet && window.bondsOnSheet.length > 0) {
+            renderBondsOnSheet();
+        }
+        // Show download/upload buttons only in field-doc; show copy/clear in all other themes
+        const dlBtn = document.getElementById('download-sheet-btn');
+        const ulBtn = document.getElementById('upload-sheet-btn');
+        const clearLpBtn = document.getElementById('clear-sheet-lp-btn');
+        const copyBtn = document.getElementById('copy-link-btn');
+        const clearBtn = document.getElementById('clear-save-btn');
+        const isLivePlay = theme === 'field-doc';
+        if (dlBtn) dlBtn.style.display = isLivePlay ? 'inline-block' : 'none';
+        if (ulBtn) ulBtn.style.display = isLivePlay ? 'inline-block' : 'none';
+        if (clearLpBtn) clearLpBtn.style.display = isLivePlay ? 'inline-block' : 'none';
+        if (copyBtn) copyBtn.style.display = isLivePlay ? 'none' : 'inline-block';
+        if (clearBtn) clearBtn.style.display = isLivePlay ? 'none' : 'inline-block';
+        const lpIoGroup = document.getElementById('lp-sheet-io-group');
+        if (lpIoGroup) lpIoGroup.style.display = isLivePlay ? 'none' : '';
+        // Field Document (Live Play): build/sync LP sheet, sync tracker bar, auto-expand dice roller
+        if (theme === 'field-doc') {
+            // Only do a full build if the LP sheet hasn't been built yet.
+            // Skipping the rebuild on subsequent theme switches preserves any
+            // notes, wounds, session remarks and manually-added weapon rows
+            // the player entered while on the field-doc theme.
+            if (!document.getElementById('lp-weapons-tbody')) {
+                buildLpSheet();
+            } else {
+                syncLpFromForm();
+                _populateLpGear();
+                lpSyncBar();
+                if (typeof renderLpBonds === 'function') renderLpBonds();
+            }
+            // Expand the dice roller if it is currently collapsed
+            const drPanel = document.getElementById('dr-panel');
+            if (drPanel && drPanel.classList.contains('dr-collapsed')) {
+                window.dgDice?._toggle?.();
+            }
+        }
     } catch (e) { }
 }
 
+/* ============================================================
+   LIVE PLAY FUNCTIONS
+   ============================================================ */
+
 /**
- * Generates a random bond from selected categories with typing effect
+ * Adjust a derived-attribute tracker value (+/- from the live play bar).
+ * Writes directly to the underlying hidden input so save-load picks it up.
+ */
+function lpAdjust(inputId, delta) {
+    const el = document.getElementById(inputId);
+    if (!el) return;
+    const newVal = Math.max(0, (parseInt(el.value) || 0) + delta);
+    el.value = newVal;
+    el.dispatchEvent(new Event('input', { bubbles: true })); // trigger auto-save
+    lpSyncBar();
+}
+
+/**
+ * Sync the live play tracker bar display with the underlying form values.
+ * Also syncs max-value cells in the LP sheet.
+ * Safe to call even when the tracker bar is not visible.
+ */
+function lpSyncBar() {
+    const getVal = id => parseInt(document.getElementById(id)?.value) || 0;
+    // Use textContent (not innerText) so stat spans work even when display:none
+    const getStat = st => parseInt(document.getElementById(`${st}-value`)?.textContent) || 0;
+    const setText = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+    const toggle = (id, cls, on) => { const e = document.getElementById(id); if (e) e.classList.toggle(cls, on); };
+
+    const hp = getVal('cs-hp');
+    const wp = getVal('cs-wp');
+    const san = getVal('cs-sanity-value');
+    const bp = getVal('cs-breaking-point');
+
+    // Compute max values from underlying stat spans
+    const str = getStat('STR'), con = getStat('CON'), pow = getStat('POW');
+    const maxHp = (str || con) ? Math.ceil((str + con) / 2) : hp;
+    const maxWp = pow || wp;
+    const maxSan = pow ? pow * 5 : san;
+    const maxBp = pow ? pow * 4 : bp;
+
+    // ── Tracker bar: current values ────────────────────────────────
+    setText('lp-cur-hp', hp);
+    setText('lp-cur-wp', wp);
+    setText('lp-cur-san', san);
+    setText('lp-cur-bp', bp);
+
+    // ── Tracker bar: max values ────────────────────────────────────
+    setText('lp-bar-max-hp', maxHp);
+    setText('lp-bar-max-wp', maxWp);
+    setText('lp-bar-max-san', maxSan);
+
+    // ── Tracker bar: HP status ─────────────────────────────────────
+    setText('lp-bar-sta-hp', hp === 0 ? 'DYING' : hp <= 2 ? 'UNCONSCIOUS' : '');
+    toggle('lp-track-hp', 'lp-dying', hp === 0);
+    toggle('lp-track-hp', 'lp-critical', hp > 0 && hp <= 2);
+
+    // ── Tracker bar: SAN status ────────────────────────────────────
+    const sanCritical = san === 0;
+    const sanWarning = !sanCritical && san <= bp;
+    setText('lp-bar-sta-san', sanCritical ? 'PERM. MADNESS' : sanWarning ? 'BREAKING PT' : '');
+    toggle('lp-track-san', 'lp-critical', sanCritical);
+    toggle('lp-track-san', 'lp-warning', sanWarning);
+
+    // ── LP sheet: max cells (if sheet is built) ────────────────────
+    setText('lp-max-HP', maxHp);
+    setText('lp-max-WP', maxWp);
+    setText('lp-max-SAN', maxSan);
+    setText('lp-max-BP', maxBp);
+
+    // ── LP sheet: sync proxy current inputs (skip focused element) ─
+    [['lp-inp-hp', 'cs-hp'], ['lp-inp-wp', 'cs-wp'],
+    ['lp-inp-san', 'cs-sanity-value'], ['lp-inp-bp', 'cs-breaking-point']
+    ].forEach(([proxyId, srcId]) => {
+        const el = document.getElementById(proxyId);
+        if (el && el !== document.activeElement) el.value = getVal(srcId);
+    });
+}
+
+/**
+ * Reduce a bond's score by 1 from the live play −1 DMG button.
+ */
+function lpDamageBond(btn) {
+    const entry = btn.closest('.bond-entry');
+    if (!entry) return;
+    const scoreInput = entry.querySelector('input[data-field="score"]');
+    if (!scoreInput) return;
+    const current = parseInt(scoreInput.value) || 0;
+    if (current > 0) {
+        scoreInput.value = current - 1;
+        scoreInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+}
+
+/**
+ * Quick D% roll from the live play tracker bar.
+ * Uses the existing dice roller module if available, or falls back to plain random.
+ */
+function lpQuickRoll() {
+    const resultEl = document.getElementById('lp-dice-result');
+    const roll = Math.floor(Math.random() * 100) + 1;
+    const display = roll === 100 ? '00' : String(roll).padStart(2, '0');
+    if (resultEl) {
+        resultEl.textContent = display;
+        resultEl.style.color = roll === 100 ? '#ff4444' : roll === 1 ? '#f5c542' : '#a89878';
+    }
+    // Also forward to dice roller so it shows the full animated result
+    if (window.dgDice?.roll) window.dgDice.roll(0, 'Quick Roll');
+}
+
+/* ============================================================
+   LIVE PLAY SHEET — DD FORM 315 interactive view
+   ============================================================ */
+
+/**
+ * Rebuild only the skills grid inside the LP sheet from the current form state.
+ * Handles CONFIG.SKILLS (with specialty labels), form-level custom skills (.custom-skill-row),
+ * and preserves LP-only skill rows (added via addLpSkill) and all checkbox states.
+ * Called from syncLpFromForm() on every form change and from buildLpSheet() after initial render.
+ */
+function _buildLpSkillsGrid() {
+    const lp = document.getElementById('lp-sheet');
+    if (!lp) return;
+    const grid = lp.querySelector('.lp-skills-grid');
+    if (!grid) return;
+
+    // Skip rebuild while the user is actively typing inside the skills grid
+    // (every form change fires this; we must not destroy a live input mid-keystroke)
+    if (grid.contains(document.activeElement)) return;
+
+    const esc = s => String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+    // ── Save state before rebuild ──────────────────────────────────────
+    const checkedSkillKeys = new Set();   // CONFIG.SKILLS (by key)
+    const checkedCustomNames = new Set(); // form-custom skills (by raw decoded name)
+    const lpOnlySkills = [];              // LP-only rows (editable name inputs via addLpSkill)
+
+    grid.querySelectorAll('.lp-skill-table tbody tr').forEach(tr => {
+        const nameInp = tr.querySelector('.lp-skill-name-inp');
+        if (nameInp) {
+            // LP-only row — preserve verbatim
+            lpOnlySkills.push({
+                name: nameInp.value,
+                val: tr.querySelector('.lp-skill-cust-val')?.value || '',
+                checked: tr.querySelector('.lp-skill-cb')?.checked || false,
+            });
+            return;
+        }
+        if (!tr.querySelector('.lp-skill-cb')?.checked) return;
+        const valInp = tr.querySelector('.lp-skill-val');
+        if (valInp?.dataset.skillSrc) {
+            checkedSkillKeys.add(valInp.dataset.skillSrc.replace('cs-skill-', ''));
+        } else {
+            const nameTd = tr.querySelector('td:nth-child(2)');
+            if (nameTd) checkedCustomNames.add(nameTd.textContent.trim());
+        }
+    });
+
+    // ── Build skillRows from current form state ────────────────────────
+    // Use getCompletedSkills() as the canonical source (base skills + specialty instances).
+    const skillRows = getCompletedSkills().map(skill => ({
+        key: skill.specialty === null ? skill.key : null,  // keyed only for base skills
+        display: esc(skill.displayName),
+        rawName: skill.displayName,
+        val: skill.value
+    }));
+    document.querySelectorAll('#cs-custom-skills .custom-skill-row').forEach(row => {
+        const valInput = row.querySelector('.custom-skill-value');
+        if (!valInput) return;
+        const specSelect = row.querySelector('select');        // any select in the row
+        const nameInput = row.querySelector('.custom-skill-name');
+        const baseLabel = row.querySelector('label')?.textContent.replace(/:$/, '').trim() || '';
+        let rawName = '';
+        if (specSelect) {
+            // Science / Art / Craft / Pilot / Military Science — label + dropdown
+            const specVal = specSelect.value;
+            if (!specVal) return; // "Pick" still selected — skip
+            // Use parentheses format to match collectState / addCustomSkillFromProfession
+            rawName = baseLabel ? `${baseLabel} (${specVal})` : specVal;
+        } else if (baseLabel && nameInput) {
+            // Foreign Language — label + editable text input
+            const spec = nameInput.value.trim();
+            rawName = spec ? `${baseLabel} (${spec})` : baseLabel;
+        } else if (nameInput) {
+            // Plain user-added custom skill (no label)
+            rawName = nameInput.value.trim();
+        }
+        if (rawName) skillRows.push({ key: null, display: esc(rawName), rawName, val: parseInt(valInput.value) || 0 });
+    });
+
+    // ── Build column HTML ──────────────────────────────────────────────
+    // Balanced 3-way split: columns differ by at most 1 row (remainder front-to-back)
+    const n = skillRows.length;
+    const base = Math.floor(n / 3);
+    const r = n % 3;
+    const c1End = base + (r > 0 ? 1 : 0);
+    const c2End = c1End + base + (r > 1 ? 1 : 0);
+
+    // Tallest column determines target row count.
+    // LP-only rows are appended to col3 after the grid HTML is written, so
+    // they must be accounted for here so col1/col2 get the right pad count.
+    const maxColSize = Math.max(c1End, c2End - c1End, n - c2End + lpOnlySkills.length);
+
+    const blankRow = `<tr>
+                <td class="lp-tc lp-sk-cb-td"></td>
+                <td class="lp-tc lp-sk-name-td"></td>
+                <td class="lp-tc lp-sk-val-td"></td>
+            </tr>`;
+
+    const buildCol = (start, end, padCount) => {
+        const rows = skillRows.slice(start, end).map(sk => {
+            const cbId = sk.key ? ` id="lp-sk-cb-${sk.key}"` : '';
+            const pct = sk.val != null ? sk.val + '%' : '';
+            const skillSrc = sk.key ? ` data-skill-src="cs-skill-${sk.key}"` : '';
+            const isChecked = sk.key
+                ? checkedSkillKeys.has(sk.key)
+                : checkedCustomNames.has(sk.rawName || '');
+            const cbName = sk.key ? `lp-skill-cb-${sk.key}` : `lp-skill-cb-cust`;
+            const valName = sk.key ? `lp-skill-val-${sk.key}` : `lp-skill-val-cust`;
+            return `<tr>
+                <td class="lp-tc lp-sk-cb-td">
+                    <input type="checkbox" class="lp-skill-cb" name="${cbName}" autocomplete="off"${cbId}${isChecked ? ' checked' : ''}>
+                </td>
+                <td class="lp-tc lp-sk-name-td" title="${sk.display}">${sk.display}</td>
+                <td class="lp-tc lp-sk-val-td">
+                    <input type="text" inputmode="numeric" class="lp-skill-val" name="${valName}" autocomplete="off"${skillSrc} value="${pct}" style="width:100%;box-sizing:border-box;">
+                </td>
+            </tr>`;
+        }).join('');
+        const padding = Array(Math.max(0, padCount)).fill(blankRow).join('');
+        return `<table class="lp-skill-table"><thead><tr>
+            <th class="lp-tc lp-sk-cb-td"></th>
+            <th class="lp-tc lp-sk-name-td">SKILL</th>
+            <th class="lp-tc lp-sk-val-td">%</th>
+        </tr></thead><tbody>${rows}${padding}</tbody></table>`;
+    };
+
+    grid.innerHTML = `
+        ${buildCol(0, c1End, maxColSize - c1End)}
+        ${buildCol(c1End, c2End, maxColSize - (c2End - c1End))}
+        ${buildCol(c2End, n, maxColSize - (n - c2End) - lpOnlySkills.length)}
+    `;
+
+    // ── Re-append LP-only skill rows to last table's tbody ─────────────
+    if (lpOnlySkills.length) {
+        const tables = grid.querySelectorAll('table.lp-skill-table');
+        const lastTbody = tables[tables.length - 1]?.querySelector('tbody');
+        if (lastTbody) {
+            lpOnlySkills.forEach(sk => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="lp-tc lp-sk-cb-td">
+                        <input type="checkbox" class="lp-skill-cb" name="lp-skill-cb-extra" autocomplete="off"${sk.checked ? ' checked' : ''}>
+                    </td>
+                    <td class="lp-tc lp-sk-name-td">
+                        <input type="text" class="lp-skill-name-inp" name="lp-skill-name-extra" autocomplete="off" placeholder="Skill name" value="${esc(sk.name)}">
+                    </td>
+                    <td class="lp-tc lp-sk-val-td">
+                        <input type="text" inputmode="numeric" class="lp-skill-val lp-skill-cust-val" name="lp-skill-val-extra" autocomplete="off" value="${esc(sk.val)}" placeholder="%" style="width:100%;box-sizing:border-box;" title="Click to roll">
+                    </td>`;
+                lastTbody.appendChild(tr);
+            });
+        }
+    }
+}
+
+/**
+ * Build and inject the full DD Form 315-style LP sheet into #lp-sheet.
+ * Called once when the field-doc theme is selected.
+ * After injection: wires proxies, renders bonds, populates from form.
+ */
+function buildLpSheet() {
+    const container = document.getElementById('lp-sheet');
+    if (!container) return;
+
+    // ── Helpers ────────────────────────────────────────────────────
+    const proxy = (id, extraClass = '', extra = '') =>
+        `<input type="text" class="lp-proxy${extraClass ? ' ' + extraClass : ''}" name="${id}" data-src="${id}" autocomplete="off"${extra}>`;
+
+    const adjBtn = (srcId, delta, lbl) =>
+        `<button type="button" class="lp-adj-btn" onclick="lpAdjust('${srcId}',${delta})" title="${lbl}">${delta > 0 ? '+' : '−'}</button>`;
+
+    // ── Stat rows ──────────────────────────────────────────────────
+    const STAT_LABELS = {
+        STR: 'Strength (STR)', DEX: 'Dexterity (DEX)', CON: 'Constitution (CON)',
+        INT: 'Intelligence (INT)', POW: 'Power (POW)', CHA: 'Charisma (CHA)'
+    };
+    const statRowsHtml = CONFIG.STATS.map(st => `
+        <tr>
+            <td class="lp-tc" style="border-left:none;font-size:10pt;">${STAT_LABELS[st] || st}</td>
+            <td class="lp-tc" style="width:50px;min-width:50px;text-align:center;font-size:10pt;font-weight:bold;white-space:nowrap;">
+                <input type="text" inputmode="numeric" pattern="[0-9]*" id="lp-stat-${st}" name="lp-stat-${st}" class="lp-stat-inp" autocomplete="off" value="&mdash;">
+            </td>
+            <td class="lp-tc" style="width:50px;min-width:50px;text-align:center;font-size:10pt;white-space:nowrap;">
+                <span id="lp-stat-${st}-x5" style="font-family:Arial,Helvetica,sans-serif;font-size:10pt;">—</span>
+            </td>
+            <td class="lp-tc" style="border-right:none;font-size:10pt;">
+                <input type="text" id="lp-feat-${st}" name="lp-feat-${st}" class="lp-feat-inp" autocomplete="off" placeholder="">
+            </td>
+        </tr>`).join('');
+
+    // ── Derived attribute rows (HP/WP/SAN/BP) with +/- ─────────────
+    const ATTR_LABELS = {
+        HP: 'Hit Points (HP)', WP: 'Willpower (WP)',
+        SAN: 'Sanity (SAN)', BP: 'Breaking Point (BP)'
+    };
+    const ATTR_SRCS = { HP: 'cs-hp', WP: 'cs-wp', SAN: 'cs-sanity-value', BP: 'cs-breaking-point' };
+    const ATTR_IDS = { HP: 'lp-inp-hp', WP: 'lp-inp-wp', SAN: 'lp-inp-san', BP: 'lp-inp-bp' };
+    const attrRowsHtml = ['HP', 'WP', 'SAN', 'BP'].map(key => {
+        const hasBtns = key !== 'BP';
+        const srcId = ATTR_SRCS[key];
+        const inpId = ATTR_IDS[key];
+        const ctrl = hasBtns
+            ? `<div class="lp-attr-controls">
+                ${adjBtn(srcId, -1, `Reduce ${key}`)}
+                <input type="text" inputmode="numeric" pattern="[0-9]*" id="${inpId}" name="${inpId}" class="lp-proxy" data-src="${srcId}" autocomplete="off" value="0" style="width:50px;flex:0 0 50px;text-align:center;font-family:'Permanent Marker',cursive;font-size:12pt;border:1px solid #000;background:#fff;padding:1px 2px;box-sizing:border-box;">
+                ${adjBtn(srcId, +1, `Restore ${key}`)}
+               </div>`
+            : `<div class="lp-attr-controls">
+                <input type="text" inputmode="numeric" pattern="[0-9]*" id="${inpId}" name="${inpId}" class="lp-proxy" data-src="${srcId}" autocomplete="off" value="0" style="width:50px;flex:0 0 50px;text-align:center;font-family:'Permanent Marker',cursive;font-size:12pt;border:1px solid #000;background:#fff;padding:1px 2px;box-sizing:border-box;">
+               </div>`;
+        return `<tr>
+            <td class="lp-tc" style="border-left:none;font-size:10pt;">${ATTR_LABELS[key]}</td>
+            <td class="lp-tc" style="width:58px;min-width:58px;text-align:center;font-size:10pt;white-space:nowrap;">
+                <span id="lp-max-${key}" style="font-family:Arial,Helvetica,sans-serif;font-size:10pt;">—</span>
+            </td>
+            <td class="lp-tc" style="width:130px;min-width:130px;border-right:none;">${ctrl}</td>
+        </tr>`;
+    }).join('');
+
+    // ── Full HTML ──────────────────────────────────────────────────
+    container.innerHTML = `
+    <div class="lp-dg-title">DELTA GREEN</div>
+
+    <!-- ── Band 7: Personal Data ─────────────────────────────────── -->
+    <div class="lp-band">
+        <span class="lp-rot-label"></span>
+        <div style="flex:1;">
+            <div class="lp-sec-hd">PERSONAL DATA</div>
+            <table class="lp-full-table"><tr>
+                <td class="lp-cell" style="min-width:120px;border-right:1px solid #000;">
+                    <div class="lp-field-label">NAME</div>${proxy('cs-name', 'lp-name-input lp-handwritten')}
+                </td>
+                <td class="lp-cell" style="width:18%;border-right:1px solid #000;">
+                    <div class="lp-field-label">PROFESSION / BACKGROUND</div>
+                    <span id="lp-profession-display" class="lp-handwritten" style="display:block;"></span>
+                </td>
+                <td class="lp-cell" style="width:20%;border-right:1px solid #000;">
+                    <div class="lp-field-label">EMPLOYER</div>${proxy('cs-bio-employer', 'lp-handwritten')}
+                </td>
+                <td class="lp-cell" style="width:14%;border-right:1px solid #000;">
+                    <div class="lp-field-label">NATIONALITY</div>${proxy('cs-bio-nationality', 'lp-handwritten')}
+                </td>
+                <td class="lp-cell" style="width:7%;border-right:1px solid #000;">
+                    <div class="lp-field-label">SEX</div>${proxy('cs-bio-sex', 'lp-tiny lp-handwritten')}
+                </td>
+                <td class="lp-cell" style="width:5%;border-right:1px solid #000;">
+                    <div class="lp-field-label">AGE</div>${proxy('cs-bio-age', 'lp-tiny lp-handwritten')}
+                </td>
+                <td class="lp-cell" style="flex:1;">
+                    <div class="lp-field-label">EDUCATION / BACKGROUND</div>${proxy('cs-bio-education', 'lp-handwritten')}
+                </td>
+            </tr></table>
+        </div>
+    </div>
+
+    <!-- ── Bands 8–13: Stats + Psych Data side by side ────────────── -->
+    <div class="lp-band lp-stats-psych-row" style="align-items:stretch;">
+        <span class="lp-rot-label" style="writing-mode:vertical-rl;transform:rotate(180deg);background:#000;color:#fff;font-size:8pt;font-weight:bold;letter-spacing:1px;padding:5px 2px;width:14px;min-width:14px;text-align:center;"></span>
+
+        <div class="lp-sp-grid">
+            <!-- Row 1: STATISTICS (left) | BONDS (right) -->
+            <div class="lp-sp-row">
+                <div class="lp-sp-col-l">
+                    <div class="lp-sec-hd">STATISTICS</div>
+                    <table class="lp-full-table">
+                        <thead><tr>
+                            <th class="lp-tc" style="border-left:none;text-align:left;font-size:10pt;">STATISTIC</th>
+                            <th class="lp-tc" style="width:50px;min-width:50px;font-size:10pt;">SCORE</th>
+                            <th class="lp-tc" style="width:50px;min-width:50px;font-size:10pt;">×5</th>
+                            <th class="lp-tc" style="border-right:none;font-size:10pt;">DISTINGUISHING FEATURES</th>
+                        </tr></thead>
+                        <tbody>${statRowsHtml}</tbody>
+                    </table>
+                </div>
+                <div class="lp-sp-col-r">
+                    <div class="lp-sec-hd">BONDS</div>
+                    <table class="lp-full-table">
+                        <thead><tr>
+                            <th class="lp-tc" style="border-left:none;text-align:left;font-size:10pt;">NAME &amp; RELATIONSHIP</th>
+                            <th class="lp-tc" style="width:50px;font-size:10pt;text-align:center;">SCORE</th>
+                            <th class="lp-tc" style="width:52px;font-size:10pt;border-right:none;text-align:center;">DMG</th>
+                        </tr></thead>
+                        <tbody id="lp-bonds-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Row 2: DERIVED ATTRIBUTES (left) | MOTIVATIONS (right) -->
+            <div class="lp-sp-row">
+                <div class="lp-sp-col-l">
+                    <div class="lp-sec-hd">DERIVED ATTRIBUTES</div>
+                    <table class="lp-full-table">
+                        <thead><tr>
+                            <th class="lp-tc" style="border-left:none;text-align:left;font-size:10pt;">ATTRIBUTE</th>
+                            <th class="lp-tc" style="width:48px;font-size:10pt;text-align:center;">MAXIMUM</th>
+                            <th class="lp-tc" style="border-right:none;font-size:10pt;text-align:center;">CURRENT</th>
+                        </tr></thead>
+                        <tbody>${attrRowsHtml}</tbody>
+                    </table>
+                </div>
+                <div class="lp-sp-col-r">
+                    <div class="lp-sec-hd">MOTIVATIONS &amp; MENTAL DISORDERS</div>
+                    <div class="lp-section-block">
+                        <textarea class="lp-ta lp-proxy" name="cs-motivations" data-src="cs-motivations" autocomplete="off" style="min-height:28px;overflow:hidden;resize:none;"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 3: PHYSICAL DESCRIPTION (left) | INCIDENTS OF SAN LOSS (right) -->
+            <!-- Both cols share one flex row — headers guaranteed same y -->            
+            <div class="lp-sp-row lp-sp-last-row">
+                <div class="lp-sp-col-l">
+                    <div class="lp-sec-hd">PHYSICAL DESCRIPTION</div>
+                    <div class="lp-section-block">
+                        <textarea class="lp-ta lp-proxy" name="cs-physical-desc" data-src="cs-physical-desc" autocomplete="off" style="min-height:60px;"></textarea>
+                    </div>
+                </div>
+                <div class="lp-sp-col-r">
+                    <div class="lp-sec-hd">INCIDENTS OF SAN LOSS WITHOUT GOING INSANE</div>
+                    <div style="padding:2px 4px;border-top:1px solid #000;">
+                        <div class="lp-san-row">
+                            <strong style="font-size:10pt;min-width:90px;">Violence:</strong>
+                            <input type="checkbox" class="lp-skill-cb" id="lp-vi1" name="lp-vi1" autocomplete="off" data-san-src="cs-violence-incident1">
+                            <input type="checkbox" class="lp-skill-cb" id="lp-vi2" name="lp-vi2" autocomplete="off" data-san-src="cs-violence-incident2">
+                            <input type="checkbox" class="lp-skill-cb" id="lp-vi3" name="lp-vi3" autocomplete="off" data-san-src="cs-violence-incident3">
+                            <span style="font-size:8pt;opacity:0.7;margin-left:5px;">adapted if all 3 checked</span>
+                        </div>
+                        <div class="lp-san-row">
+                            <strong style="font-size:10pt;min-width:90px;">Helplessness:</strong>
+                            <input type="checkbox" class="lp-skill-cb" id="lp-hi1" name="lp-hi1" autocomplete="off" data-san-src="cs-helplessness-incident1">
+                            <input type="checkbox" class="lp-skill-cb" id="lp-hi2" name="lp-hi2" autocomplete="off" data-san-src="cs-helplessness-incident2">
+                            <input type="checkbox" class="lp-skill-cb" id="lp-hi3" name="lp-hi3" autocomplete="off" data-san-src="cs-helplessness-incident3">
+                            <span style="font-size:8pt;opacity:0.7;margin-left:5px;">adapted if all 3 checked</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Band 14: Applicable Skill Sets ─────────────────────────── -->
+    <div class="lp-band">
+        <span class="lp-rot-label"></span>
+        <div style="flex:1;">
+            <div class="lp-sec-hd">APPLICABLE SKILL SETS</div>
+            <div class="lp-skills-grid">
+            </div>
+            <div class="lp-skills-footer">
+                <span>Checkbox = Failed this session (mark after use)</span>
+                <div style="display:flex;gap:6px;">
+                    <button type="button" class="lp-btn-sm" onclick="addLpSkill()">+ ADD SKILL</button>
+                    <button type="button" class="lp-btn-sm" onclick="lpClearSkillChecks()">CLEAR SESSION MARKS</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Band 15: Wounds ────────────────────────────────────────── -->
+    <div class="lp-band">
+        <span class="lp-rot-label"></span>
+        <div style="flex:1;">
+            <div class="lp-sec-hd">WOUNDS &amp; INJURIES</div>
+            <textarea class="lp-ta" id="lp-wounds" name="lp-wounds" autocomplete="off" placeholder="Record wounds, injuries, and conditions here..." style="min-height:48px;overflow:hidden;resize:none;"></textarea>
+        </div>
+    </div>
+
+    <!-- ── Band 16a: Gear & Armor ─────────────────────────────────── -->
+    <div class="lp-band">
+        <span class="lp-rot-label"></span>
+        <div style="flex:1;">
+            <div class="lp-sec-hd">GEAR &amp; ARMOR</div>
+            <textarea id="lp-gear-content" name="lp-gear-content" class="lp-ta" autocomplete="off" style="min-height:48px;overflow:hidden;resize:none;" placeholder="List gear and armor items picked up..."></textarea>
+        </div>
+    </div>
+
+    <!-- ── Band 16b: Weapons ──────────────────────────────────────── -->
+    <div class="lp-band">
+        <span class="lp-rot-label"></span>
+        <div style="flex:1;">
+            <div class="lp-sec-hd">WEAPONS</div>
+            <div style="overflow-x:auto;">
+                <table class="lp-full-table lp-skill-table" id="lp-weapons-table">
+                    <thead><tr>
+                        <th class="lp-tc" style="text-align:left;font-size:9pt;">NAME</th>
+                        <th class="lp-tc" style="width:52px;font-size:9pt;">SKILL%</th>
+                        <th class="lp-tc" style="width:54px;font-size:9pt;">RANGE</th>
+                        <th class="lp-tc" style="width:54px;font-size:9pt;">DAMAGE</th>
+                        <th class="lp-tc" style="width:50px;font-size:9pt;">LETHALITY</th>
+                        <th class="lp-tc" style="width:40px;font-size:9pt;">AMMO</th>
+                        <th class="lp-tc" style="width:22px;border-right:none;"></th>
+                    </tr></thead>
+                    <tbody id="lp-weapons-tbody"><tr><td colspan="7" class="lp-tc" style="font-size:7.5pt;text-align:center;opacity:0.6;border-left:none;border-right:none;">(none — use ADD WEAPON to add)</td></tr></tbody>
+                </table>
+            </div>
+            <div style="padding:3px 4px;">
+                <button type="button" class="lp-btn-sm" onclick="addLpWeapon()">+ ADD WEAPON</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Band 17: Session Notes ─────────────────────────────────── -->
+    <div class="lp-band">
+        <span class="lp-rot-label"></span>
+        <div style="flex:1;">
+            <div class="lp-sec-hd">SESSION NOTES &amp; REMARKS</div>
+            <textarea class="lp-ta" id="lp-remarks" name="lp-remarks" autocomplete="off" placeholder="Session notes, clues, leads, contacts..." style="min-height:60px;overflow:hidden;resize:none;"></textarea>
+        </div>
+    </div>
+
+    <div class="lp-footnote">DELTA GREEN — Live Play (Field Notes) — Unclassified</div>
+    `;
+
+    // Wire, populate, render
+    _wireLpProxies();
+    // Wire stat score inputs → write back to main form spans + cascade
+    CONFIG.STATS.forEach(st => {
+        const inp = document.getElementById(`lp-stat-${st}`);
+        if (!inp) return;
+        inp.addEventListener('change', () => {
+            let val = parseInt(inp.value);
+            if (isNaN(val)) { inp.value = '—'; return; }
+            val = Math.max(3, Math.min(18, val));
+            inp.value = val;
+            const mainSpan = document.getElementById(`${st}-value`);
+            const mainX5 = document.getElementById(`${st}-x5-value`);
+            const mainDesc = document.getElementById(`${st}-descriptor`);
+            if (mainSpan) mainSpan.textContent = val;
+            if (mainX5) mainX5.textContent = val * 5;
+            if (mainDesc) mainDesc.textContent = getDescriptor(st, val) || '';
+            if (typeof updateTotalPoints === 'function') updateTotalPoints();
+            if (typeof updateDerivedAttributes === 'function') updateDerivedAttributes();
+            const x5Span = document.getElementById(`lp-stat-${st}-x5`);
+            if (x5Span) x5Span.textContent = val * 5;
+            lpSyncBar();
+        });
+    });
+    renderLpBonds();
+    syncLpFromForm();
+    _populateLpGear();
+    lpSyncBar();
+    requestAnimationFrame(lpAlignSections);
+}
+
+/**
+ * Populate all LP sheet fields from the current character form.
+ * Call after buildLpSheet() and after save-restore.
+ */
+function syncLpFromForm() {
+    const lp = document.getElementById('lp-sheet');
+    if (!lp) return;
+
+    // Helper: set proxy value without firing events (avoids write-back loop)
+    const syncProxy = (dataId, val) => {
+        const el = lp.querySelector(`.lp-proxy[data-src="${dataId}"]`);
+        if (el && el !== document.activeElement) {
+            if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') el.value = val;
+        }
+    };
+
+    // ── Bio fields ─────────────────────────────────────────────────
+    ['cs-name', 'cs-bio-employer', 'cs-bio-nationality', 'cs-bio-sex', 'cs-bio-age',
+        'cs-bio-education', 'cs-physical-desc', 'cs-motivations'].forEach(id => {
+            const src = document.getElementById(id);
+            if (src) syncProxy(id, src.value || '');
+        });
+
+    // ── Profession display (read-only span) ────────────────────────
+    const profKey = document.getElementById('cs-profession-select')?.value || '';
+    const profTitle = (profKey && professions?.[profKey]) ? professions[profKey].title : profKey || '';
+    const profSpan = document.getElementById('lp-profession-display');
+    if (profSpan) profSpan.textContent = profTitle;
+
+    // ── Stats: read using textContent (works even when section hidden) ─
+    CONFIG.STATS.forEach(st => {
+        const rawEl = document.getElementById(`${st}-value`);
+        const x5El = document.getElementById(`${st}-x5-value`);
+        const raw = parseInt(rawEl?.textContent) || 0;
+        const x5 = parseInt(x5El?.textContent) || raw * 5;
+        const inpRaw = document.getElementById(`lp-stat-${st}`);
+        const spanX5 = document.getElementById(`lp-stat-${st}-x5`);
+        const featInp = document.getElementById(`lp-feat-${st}`);
+        if (inpRaw && inpRaw !== document.activeElement) inpRaw.value = raw || '—';
+        if (spanX5) spanX5.textContent = x5 || '—';
+        // Only seed the feature descriptor if the field is still empty (user may override)
+        if (featInp && !featInp.value && raw) featInp.value = getDescriptor(st, raw) || '';
+    });
+
+    // ── Derived attrs and LP sheet max cells ───────────────────────
+    lpSyncBar(); // this fills lp-inp-* values and lp-max-* spans
+
+    // ── Skills grid: values, specialty labels, custom skills ────────
+    _buildLpSkillsGrid();
+
+    // ── SAN adaptation checkboxes ──────────────────────────────────
+    [['lp-vi1', 'cs-violence-incident1'], ['lp-vi2', 'cs-violence-incident2'],
+    ['lp-vi3', 'cs-violence-incident3'], ['lp-hi1', 'cs-helplessness-incident1'],
+    ['lp-hi2', 'cs-helplessness-incident2'], ['lp-hi3', 'cs-helplessness-incident3']
+    ].forEach(([lpId, srcId]) => {
+        const lpCb = document.getElementById(lpId);
+        const srcCb = document.getElementById(srcId);
+        if (lpCb && srcCb) lpCb.checked = srcCb.checked;
+    });
+    requestAnimationFrame(lpAlignSections);
+}
+
+/**
+ * Render the compact 8-row bonds table in the LP sheet.
+ * Reads from window.bondsOnSheet.
+ */
+function renderLpBonds() {
+    const tbody = document.getElementById('lp-bonds-tbody');
+    if (!tbody) return;
+
+    const bonds = (window.bondsOnSheet || []).filter(b => b && b.name);
+    let html = '';
+    if (bonds.length === 0) {
+        html = `<tr><td class="lp-tc" colspan="3" style="font-size:7pt;opacity:0.5;text-align:center;padding:3px;border-left:none;border-right:none;">(no bonds on sheet)</td></tr>`;
+    } else {
+        bonds.forEach((b, i) => {
+            const nameVal = escapeHtml(b.name + (b.relationship ? ' — ' + b.relationship : ''));
+            const scoreVal = parseInt(b.score) || 0;
+            const bondId = escapeHtml(b.id);
+            const descVal = escapeHtml((b.description || '').replace(/<[^>]+>/g, '').trim());
+            html += `<tr class="lp-bond-row" data-desc="${descVal}">
+                <td class="lp-tc" style="border-left:none;padding:1px 3px;">
+                    <input type="text" class="lp-bond-name-input" name="lp-bond-name" autocomplete="off" value="${nameVal}" data-bond-idx="${i}">
+                </td>
+                <td class="lp-tc" style="width:38px;padding:1px 2px;">
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" class="lp-bond-score-input" name="lp-bond-score" autocomplete="off" value="${scoreVal}" data-bond-idx="${i}">
+                </td>
+                <td class="lp-tc" style="width:52px;border-right:none;text-align:center;padding:1px 2px;">
+                    <button type="button" class="lp-bond-dmg-btn" data-bond-id="${bondId}" title="Bond damaged — reduce score by 1">−1 DMG</button>
+                </td>
+            </tr>`;
+        });
+    }
+    tbody.innerHTML = html;
+
+    // Wire bond name changes
+    tbody.querySelectorAll('.lp-bond-name-input').forEach(inp => {
+        inp.addEventListener('change', () => {
+            const idx = parseInt(inp.dataset.bondIdx);
+            const b = (window.bondsOnSheet || []).filter(b => b && b.name)[idx];
+            if (!b) return;
+            const parts = inp.value.split(' — ');
+            b.name = parts[0]?.trim() || b.name;
+            if (parts[1] !== undefined) b.relationship = parts[1]?.trim() || '';
+            _saveBonds();
+        });
+    });
+
+    // Wire bond score changes
+    tbody.querySelectorAll('.lp-bond-score-input').forEach(inp => {
+        inp.addEventListener('input', () => {
+            const idx = parseInt(inp.dataset.bondIdx);
+            const bonds = (window.bondsOnSheet || []).filter(b => b && b.name);
+            const b = bonds[idx];
+            if (!b) return;
+            b.score = Math.max(0, parseInt(inp.value) || 0);
+            inp.value = b.score;
+            _saveBonds();
+        });
+    });
+
+    // Wire −1 DMG buttons
+    tbody.querySelectorAll('.lp-bond-dmg-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const bondId = btn.dataset.bondId;
+            const b = (window.bondsOnSheet || []).find(x => x.id === bondId);
+            if (!b) return;
+            b.score = Math.max(0, (parseInt(b.score) || 0) - 1);
+            _saveBonds();
+            renderLpBonds();
+            requestAnimationFrame(lpAlignSections);
+            renderBondsOnSheet?.(); // keep main sheet in sync
+        });
+    });
+}
+
+/**
+ * Wire all .lp-proxy inputs: changes flow from LP sheet → underlying form inputs.
+ * Also wires SAN adaptation checkboxes in the LP sheet.
+ */
+function _wireLpProxies() {
+    const lp = document.getElementById('lp-sheet');
+    if (!lp) return;
+
+    // Skill % edits in LP grid → write back to the source form input so all
+    // other themes stay in sync. Delegated on the grid so it survives rebuilds.
+    const skillGrid = lp.querySelector('.lp-skills-grid');
+    if (skillGrid) {
+        // Write the value to the form input on every keystroke so it is always
+        // current — no matter when the user switches themes (even if blur hasn't fired).
+        skillGrid.addEventListener('input', e => {
+            const inp = e.target;
+            if (!inp.classList.contains('lp-skill-val')) return;
+            const srcId = inp.dataset.skillSrc;
+            if (!srcId) return;
+            const srcEl = document.getElementById(srcId);
+            if (!srcEl) return;
+            const raw = parseInt(inp.value.replace('%', ''));
+            if (!isNaN(raw)) srcEl.value = raw;
+        });
+
+        // On blur (change), normalise display and fire the full input chain so
+        // auto-save, stat recalcs and other themes all update correctly.
+        skillGrid.addEventListener('change', e => {
+            const inp = e.target;
+            if (!inp.classList.contains('lp-skill-val')) return;
+            const srcId = inp.dataset.skillSrc;
+            if (!srcId) return;
+            const srcEl = document.getElementById(srcId);
+            if (!srcEl) return;
+            const raw = parseInt(inp.value.replace('%', '')) || 0;
+            inp.value = raw + '%';
+            srcEl.value = raw;
+            srcEl.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+    }
+
+    // Text/number/textarea proxies → write to data-src input → fire input event → auto-save
+    lp.querySelectorAll('.lp-proxy[data-src]').forEach(proxy => {
+        const evtType = proxy.tagName === 'TEXTAREA' ? 'input' : 'input';
+        proxy.addEventListener(evtType, () => {
+            const srcEl = document.getElementById(proxy.dataset.src);
+            if (!srcEl || srcEl === proxy) return;
+            const numericSrcs = ['cs-hp', 'cs-wp', 'cs-sanity-value', 'cs-breaking-point'];
+            const isNumeric = proxy.type === 'number' || numericSrcs.includes(proxy.dataset.src);
+            const val = isNumeric ? (parseInt(proxy.value) || 0) : proxy.value;
+            srcEl.value = val;
+            srcEl.dispatchEvent(new Event('input', { bubbles: true }));
+            if (numericSrcs.includes(proxy.dataset.src)) {
+                lpSyncBar();
+            }
+        });
+    });
+
+    // SAN incident checkboxes in LP sheet → sync to underlying hidden checkboxes
+    lp.querySelectorAll('[data-san-src]').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const srcEl = document.getElementById(cb.dataset.sanSrc);
+            if (!srcEl) return;
+            srcEl.checked = cb.checked;
+            srcEl.dispatchEvent(new Event('change', { bubbles: true }));
+            if (typeof updateSanityAdaptations === 'function') updateSanityAdaptations();
+        });
+    });
+}
+
+/**
+ * Populate the gear and weapons sections in the LP sheet.
+ */
+function _populateLpGear() {
+    const gearTa = document.getElementById('lp-gear-content');
+    const weapTbody = document.getElementById('lp-weapons-tbody');
+    if (!weapTbody) return;
+
+    if (typeof window.dgEquipment?.getLoadout !== 'function') return;
+
+    const loadout = window.dgEquipment.getLoadout();
+    const weapons = [], gearLines = [];
+
+    loadout.forEach(item => {
+        if (!item) return;
+        const s = item.system || {};
+        if (item.type === 'weapon') {
+            const skillInput = document.getElementById(`cs-skill-${s.skill}`);
+            const skillPctNum = skillInput ? (parseInt(skillInput.value) || 0) : 0;
+            weapons.push({
+                name: item.name || '',
+                skillPct: skillPctNum ? String(skillPctNum) : '',
+                range: s.range || '',
+                damage: s.damage || '',
+                lethality: s.lethality ? String(s.lethality) : '',
+                ammo: s.ammo !== undefined ? String(s.ammo) : ''
+            });
+        } else {
+            const rawDesc = (s.description || '').replace(/<[^>]+>/g, '').trim();
+            gearLines.push(item.name + (rawDesc ? ': ' + rawDesc : ''));
+        }
+    });
+
+    // Only seed gear textarea if still empty (preserve user edits)
+    if (gearTa && !gearTa.value.trim() && gearLines.length) {
+        gearTa.value = gearLines.join('\n');
+        lpAutoExpand(gearTa);
+    }
+
+    // Remove rows previously seeded from equipment loadout, keeping user-added rows
+    weapTbody.querySelectorAll('tr.lp-weapon-equip').forEach(r => r.remove());
+
+    if (weapons.length) {
+        weapons.forEach(w => addLpWeapon(w, true));
+    } else if (!weapTbody.querySelector('tr')) {
+        weapTbody.innerHTML = `<tr><td colspan="7" class="lp-tc" style="font-size:7.5pt;text-align:center;opacity:0.6;border-left:none;border-right:none;">(none — use ADD WEAPON to add)</td></tr>`;
+    }
+}
+
+/**
+ * Append an editable weapon row to the LP weapons table.
+ * @param {Object}  w         - weapon data (all fields optional)
+ * @param {boolean} fromEquip - true = seeded from equipment loadout
+ */
+function addLpWeapon(w = {}, fromEquip = false) {
+    const tbody = document.getElementById('lp-weapons-tbody');
+    if (!tbody) return;
+    // Remove the placeholder row if present
+    const ph = tbody.querySelector('td[colspan]');
+    if (ph) ph.closest('tr').remove();
+
+    const H = escapeHtml;
+    const tr = document.createElement('tr');
+    if (fromEquip) tr.classList.add('lp-weapon-equip');
+    tr.innerHTML = `
+        <td class="lp-tc" style="border-left:none;padding:1px 2px;">
+            <input type="text" class="lp-weapon-name-inp" name="lp-weapon-name" autocomplete="off" value="${H(w.name || '')}" placeholder="Weapon name">
+        </td>
+        <td class="lp-tc" style="padding:1px 2px;text-align:center;">
+            <div style="position:relative;display:inline-block;width:calc(100% - 4px);">
+                <input type="text" inputmode="numeric" class="lp-weapon-skill-inp" name="lp-weapon-skill" autocomplete="off" value="${H(w.skillPct || '')}" placeholder="—" title="Click to roll, type to edit" style="width:100%;box-sizing:border-box;padding-right:12px;text-align:center;">
+                <span style="position:absolute;right:3px;top:50%;transform:translateY(-50%);font-size:8pt;opacity:0.8;pointer-events:none;">%</span>
+            </div>
+        </td>
+        <td class="lp-tc" style="padding:1px 2px;text-align:center;">
+            <input type="text" class="lp-weapon-range-inp" name="lp-weapon-range" autocomplete="off" value="${H(w.range || '')}" placeholder="—">
+        </td>
+        <td class="lp-tc" style="padding:1px 2px;text-align:center;">
+            <input type="text" class="lp-weapon-dmg-inp" name="lp-weapon-damage" autocomplete="off" value="${H(w.damage || '')}" placeholder="—">
+        </td>
+        <td class="lp-tc" style="padding:1px 2px;text-align:center;">
+            <div style="position:relative;display:inline-block;width:calc(100% - 4px);">
+                <input type="text" inputmode="numeric" class="lp-weapon-leth-inp" name="lp-weapon-lethality" autocomplete="off" value="${H(w.lethality || '')}" placeholder="—" style="width:100%;box-sizing:border-box;padding-right:${w.lethality ? '12' : '4'}px;text-align:center;">
+                <span class="lp-leth-pct" style="position:absolute;right:3px;top:50%;transform:translateY(-50%);font-size:8pt;opacity:0.8;pointer-events:none;${w.lethality ? '' : 'display:none;'}">%</span>
+            </div>
+        </td>
+        <td class="lp-tc" style="padding:1px 2px;text-align:center;">
+            <input type="text" inputmode="numeric" class="lp-weapon-ammo-inp" name="lp-weapon-ammo" autocomplete="off" value="${H(w.ammo || '')}" placeholder="—">
+        </td>
+        <td class="lp-tc" style="padding:1px;text-align:center;border-right:none;">
+            <button type="button" class="lp-weapon-del-btn" title="Remove">×</button>
+        </td>`;
+    tbody.appendChild(tr);
+    tr.querySelector('.lp-weapon-leth-inp').addEventListener('input', function () {
+        const pct = tr.querySelector('.lp-leth-pct');
+        if (this.value.trim()) {
+            pct.style.display = '';
+            this.style.paddingRight = '12px';
+        } else {
+            pct.style.display = 'none';
+            this.style.paddingRight = '4px';
+        }
+    });
+    tr.querySelector('.lp-weapon-del-btn').addEventListener('click', () => {
+        tr.remove();
+        if (!tbody.querySelector('tr')) {
+            tbody.innerHTML = `<tr><td colspan="7" class="lp-tc" style="font-size:7.5pt;text-align:center;opacity:0.6;border-left:none;border-right:none;">(none — use ADD WEAPON to add)</td></tr>`;
+        }
+    });
+}
+
+/**
+ * Measure and align PHYSICAL DESCRIPTION header with INCIDENTS OF SAN LOSS
+ * header by expanding the MOTIVATIONS textarea to fill the gap.
+ */
+function lpAlignSections() {
+    const sheet = document.getElementById('lp-sheet');
+    if (!sheet || sheet.style.display === 'none') return;
+
+    const motTa = sheet.querySelector('[data-src="cs-motivations"]');
+    if (!motTa) return;
+
+    // Reset height so we can measure naturally
+    motTa.style.minHeight = '28px';
+    motTa.style.height = 'auto';
+
+    const physHd = Array.from(sheet.querySelectorAll('.lp-sec-hd'))
+        .find(el => el.textContent.trim() === 'PHYSICAL DESCRIPTION');
+    const incHd = Array.from(sheet.querySelectorAll('.lp-sec-hd'))
+        .find(el => el.textContent.includes('INCIDENTS OF SAN LOSS'));
+    if (!physHd || !incHd) return;
+
+    const physTop = physHd.getBoundingClientRect().top;
+    const incTop = incHd.getBoundingClientRect().top;
+    const gap = physTop - incTop;
+
+    if (gap > 1) {
+        const taHeight = motTa.getBoundingClientRect().height;
+        motTa.style.minHeight = Math.ceil(taHeight + gap) + 'px';
+    }
+}
+
+/**
+ * Clear all session skill-use checkboxes in the LP sheet.
+ */
+function lpClearSkillChecks() {
+    document.querySelectorAll('#lp-sheet .lp-skill-cb').forEach(cb => { cb.checked = false; });
+}
+
+/**
+ * Append a blank, fully-editable custom skill row to the LP skills grid.
+ * Rows are appended to the third (right-most) skill column table.
+ */
+function addLpSkill() {
+    const grid = document.querySelector('#lp-sheet .lp-skills-grid');
+    if (!grid) return;
+    // Append to the last table in the grid
+    const tables = grid.querySelectorAll('table.lp-skill-table');
+    const target = tables[tables.length - 1];
+    if (!target) return;
+    const tbody = target.querySelector('tbody');
+    if (!tbody) return;
+    const idx = Date.now();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td class="lp-tc" style="width:20px;text-align:center;padding:1px;">
+            <input type="checkbox" class="lp-skill-cb" name="lp-skill-cb-extra" autocomplete="off">
+        </td>
+        <td class="lp-tc" style="font-size:12pt;padding:1px 3px;">
+            <input type="text" class="lp-skill-name-inp" name="lp-skill-name-extra" autocomplete="off" placeholder="Skill name" value="" style="width:100%;background:transparent;border:none;font-family:'Permanent Marker',cursive;font-size:11pt;padding:0;box-sizing:border-box;">
+        </td>
+        <td class="lp-tc" style="width:52px;text-align:center;padding:1px;">
+            <input type="text" inputmode="numeric" class="lp-skill-val lp-skill-cust-val" name="lp-skill-val-extra" autocomplete="off" value="" placeholder="%" style="width:100%;box-sizing:border-box;" title="Click to roll">
+        </td>`;
+    tbody.appendChild(tr);
+    tr.querySelector('.lp-skill-name-inp').focus();
+}
+
+/**
+ * Auto-expand a textarea to fit its content (no scroll).
+ */
+function lpAutoExpand(ta) {
+    ta.style.height = 'auto';
+    ta.style.height = ta.scrollHeight + 'px';
+}
+
+// Wire auto-expand on all lp-ta textareas after the LP sheet is shown
+document.addEventListener('input', e => {
+    if (e.target.matches('#lp-sheet .lp-ta[overflow-hidden], #lp-sheet textarea[style*="overflow:hidden"]')) {
+        lpAutoExpand(e.target);
+    }
+    if (e.target.matches('#lp-wounds, #lp-gear-content, #lp-remarks, #lp-sheet [data-src="cs-motivations"]')) {
+        lpAutoExpand(e.target);
+    }
+});
+
+/* ── Specialty skill ⓘ tooltip — fixed-position, never clipped ─────────── */
+window.addEventListener('load', function () {
+    // Create the panel if it wasn't in the HTML yet
+    let panel = document.getElementById('specialty-tooltip-panel');
+    if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'specialty-tooltip-panel';
+        panel.setAttribute('role', 'tooltip');
+        panel.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(panel);
+    }
+
+    let _hideTimer = null;
+
+    function showTip(icon) {
+        const key = icon.dataset.tooltipKey;
+        if (!key || !SPECIALTY_TOOLTIPS[key]) return;
+        clearTimeout(_hideTimer);
+        panel.textContent = SPECIALTY_TOOLTIPS[key];
+
+        // panel is position:fixed — use raw viewport (client) coordinates only, no scroll offset
+        panel.style.display = 'block';
+        panel.style.top = '0';
+        panel.style.left = '0';
+
+        const rect = icon.getBoundingClientRect();
+        const GAP = 8;
+        const pw = panel.offsetWidth;
+        const ph = panel.offsetHeight;
+
+        let top = rect.bottom + GAP;
+        let left = rect.left;
+
+        // Clamp right edge
+        const maxLeft = window.innerWidth - pw - 12;
+        left = Math.max(8, Math.min(left, maxLeft));
+
+        // Flip above if it would overflow the bottom
+        if (top + ph > window.innerHeight - 8) {
+            top = rect.top - ph - GAP;
+        }
+
+        panel.style.top = top + 'px';
+        panel.style.left = left + 'px';
+        panel.removeAttribute('aria-hidden');
+    }
+
+    function hideTip() {
+        _hideTimer = setTimeout(() => {
+            panel.style.display = 'none';
+            panel.setAttribute('aria-hidden', 'true');
+        }, 120);
+    }
+
+    document.addEventListener('mouseover', e => {
+        const icon = e.target.closest('[data-tooltip-key]');
+        if (icon) showTip(icon);
+    });
+    document.addEventListener('mouseout', e => {
+        if (e.target.closest('[data-tooltip-key]')) hideTip();
+    });
+    document.addEventListener('scroll', () => { panel.style.display = 'none'; }, true);
+    window.addEventListener('resize', () => { panel.style.display = 'none'; });
+});
+
+
+/**
+ * Generates a random bond from selected categories with typing effect.
  * Stores the result in appState.currentBond for later addition to sheet
  * Bond format from bonds.js: "Name ^ ^ Relationship ^ ^ Description"
  */
@@ -1802,52 +3584,46 @@ function generateRandomBond() {
     const bondContentEl = document.getElementById('bond-text-content');
     bondContentEl.innerHTML = ''; // Clear previous text — canvas is a sibling, not a child of this span
 
-    // Apply theme-appropriate styling to the container box
-    if (document.body.classList.contains('theme-modern')) {
-        bondTextElement.style.fontFamily = 'inherit';
-        bondTextElement.style.color = '#cdd6f4';
-        bondTextElement.style.borderColor = 'rgba(255, 255, 255, 0.02)';
-    } else if (document.body.classList.contains('theme-morris')) {
-        bondTextElement.style.fontFamily = 'inherit';
-        bondTextElement.style.color = '#8be9fd';
-        bondTextElement.style.borderColor = 'rgba(139, 233, 253, 0.15)';
-    } else if (document.body.classList.contains('theme-son-of-sam')) {
-        bondTextElement.style.fontFamily = "'Courier New', monospace";
-        bondTextElement.style.color = '#f5e6d3';
-        bondTextElement.style.borderColor = 'rgba(255, 0, 0, 0.2)';
-    } else if (document.body.classList.contains('theme-mobile')) {
-        bondTextElement.style.fontFamily = 'inherit';
-        bondTextElement.style.color = '#1a1a1a';
-        bondTextElement.style.borderColor = 'rgba(0, 0, 0, 0.1)';
-    } else {
-        // X-Files theme (default)
-        bondTextElement.style.fontFamily = "'Courier New', monospace";
-        bondTextElement.style.color = '#00b521';
-        bondTextElement.style.borderColor = '#00b521';
-    }
+    // Colour and border are handled by CSS var(--primary-color) — no inline override needed.
 
     if (availableBonds.length > 0) {
         const randomBond = availableBonds[Math.floor(Math.random() * availableBonds.length)];
         // Store the original bond in appState for later parsing
         appState.currentBond = randomBond;
 
-        // Replace ^ with <br> for typing effect
-        let displayBond = randomBond.replace(/\^/g, '<br>');
+        // Split on the ^ delimiter so each segment types as a text node, with <br> elements
+        // between them. Using createTextNode avoids the innerHTML re-parse/re-serialize cost
+        // on every character, which was the main source of per-character jank on all themes.
+        const segments = randomBond.split(' ^ ^ ');
+
+        // Build a flat list of {type, text} tokens: 'text' chars interleaved with 'br' breaks
+        const tokens = [];
+        segments.forEach((seg, idx) => {
+            for (const ch of seg) tokens.push({ type: 'char', ch });
+            if (idx < segments.length - 1) tokens.push({ type: 'br' });
+        });
 
         let i = 0;
+        window._pyramidPaused = true;
+        bondTextElement.classList.add('typing-active');
+        document.body.classList.add('bond-typing'); // freeze all X-Files page animations during typing
         function typeChar() {
-            if (displayBond.substring(i, i + 4) === '<br>') {
-                bondContentEl.innerHTML += '<br>';
-                i += 4; // Skip past the <br> tag
-            } else if (i < displayBond.length) {
-                bondContentEl.innerHTML += displayBond[i];
-                i++;
+            if (i >= tokens.length) {
+                bondTextElement.classList.remove('typing-active');
+                document.body.classList.remove('bond-typing');
+                window._pyramidPaused = false;
+                const pyramidCanvas = document.getElementById('bond-pyramid-canvas');
+                if (pyramidCanvas?._resume) pyramidCanvas._resume();
+                bondButton.disabled = false;
+                return;
             }
-            if (i < displayBond.length) {
-                setTimeout(typeChar, 25); // Adjust typing speed as needed
+            const tok = tokens[i++];
+            if (tok.type === 'br') {
+                bondContentEl.appendChild(document.createElement('br'));
             } else {
-                bondButton.disabled = false; // Re-enable the button after typing
+                bondContentEl.appendChild(document.createTextNode(tok.ch));
             }
+            setTimeout(typeChar, CONFIG.TYPING_SPEED_MS);
         }
         typeChar(); // Start typing effect
     } else {
@@ -1860,6 +3636,51 @@ function generateRandomBond() {
 // Track bonds added to sheet as array of objects
 if (!window.bondsOnSheet) {
     window.bondsOnSheet = [];
+}
+
+const BONDS_STORAGE_KEY = 'dg-bonds-sheet';
+
+function _saveBonds() {
+    try { localStorage.setItem(BONDS_STORAGE_KEY, JSON.stringify(window.bondsOnSheet)); } catch (e) { }
+}
+
+function _loadBonds() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(BONDS_STORAGE_KEY) || '[]');
+        if (Array.isArray(saved) && saved.length > 0) window.bondsOnSheet = saved;
+    } catch (e) { }
+}
+
+// Load persisted bonds as soon as the DOM is ready (mirrors equipment picker pattern)
+document.addEventListener('DOMContentLoaded', function () {
+    _loadBonds();
+    if (window.bondsOnSheet.length > 0) renderBondsOnSheet();
+});
+
+/**
+ * Adds a blank bond entry to the sheet for manual entry
+ */
+function addEmptyBond() {
+    const bondId = 'bond-' + Date.now() + Math.random().toString(36).substring(2, 11);
+    const chaEl = document.getElementById('CHA-value');
+    const defaultScore = chaEl ? (parseInt(chaEl.innerText) || 10) : 10;
+    window.bondsOnSheet.push({
+        id: bondId,
+        name: '',
+        relationship: '',
+        description: '',
+        score: defaultScore
+    });
+    _saveBonds();
+    renderBondsOnSheet();
+    if (typeof window.dgSaveLoad?.save === 'function') window.dgSaveLoad.save();
+    // Focus the name field of the new entry so user can start typing immediately
+    const entries = document.querySelectorAll('#cs-bonds .bond-entry');
+    const newEntry = entries[entries.length - 1];
+    if (newEntry) {
+        const nameInput = newEntry.querySelector('input[data-field="name"]');
+        if (nameInput) { nameInput.focus(); newEntry.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    }
 }
 
 /**
@@ -1899,16 +3720,49 @@ function addBondToSheet() {
         const bondId = 'bond-' + Date.now() + Math.random().toString(36).substring(2, 11);
 
         // Create bond object with parsed values
+        const chaEl = document.getElementById('CHA-value');
+        const defaultScore = chaEl ? (parseInt(chaEl.innerText) || 10) : 10;
         const bondObj = {
             id: bondId,
             name: bondName,
             relationship: bondRelationship,
             description: bondDescription,
-            score: 10
+            score: defaultScore
         };
 
         window.bondsOnSheet.push(bondObj);
+        _saveBonds();
         renderBondsOnSheet();
+        // Immediately flush to dg-agent-v1 so save-load.js restores bonds on refresh
+        // (the auto-save debounce is 1.5 s — too slow if user refreshes right away)
+        if (typeof window.dgSaveLoad?.save === 'function') window.dgSaveLoad.save();
+
+        // Son of Sam: bond entry carves itself into existence
+        if (document.body.classList.contains('theme-son-of-sam')) {
+            const entries = document.querySelectorAll('#cs-bonds .bond-entry');
+            const newEntry = entries[entries.length - 1];
+            if (newEntry) {
+                newEntry.classList.add('sos-carving');
+                newEntry.addEventListener('animationend', () => newEntry.classList.remove('sos-carving'), { once: true });
+                // Scramble the description text before it resolves
+                const descTA = newEntry.querySelector('textarea.bond-entry-field');
+                if (descTA && descTA.value) {
+                    const finalText = descTA.value;
+                    const runic = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ⸸⛧☽';
+                    let step = 0;
+                    const steps = 18;
+                    const timer = setInterval(() => {
+                        step++;
+                        if (step >= steps) { descTA.value = finalText; clearInterval(timer); return; }
+                        const revealed = Math.floor((step / steps) * finalText.length);
+                        descTA.value = Array.from(finalText).map((c, i) => {
+                            if (i < revealed || c === ' ' || c === '\n') return c;
+                            return runic[Math.floor(Math.random() * runic.length)];
+                        }).join('');
+                    }, Math.round(3500 / steps));
+                }
+            }
+        }
     } catch (error) {
         console.error('Error adding bond to sheet:', error);
         alert(`Failed to add bond: ${error.message}`);
@@ -1921,7 +3775,9 @@ function addBondToSheet() {
  */
 function removeBondFromSheet(bondId) {
     window.bondsOnSheet = window.bondsOnSheet.filter(b => b.id !== bondId);
+    _saveBonds();
     renderBondsOnSheet();
+    if (typeof window.dgSaveLoad?.save === 'function') window.dgSaveLoad.save();
 }
 
 /**
@@ -1933,6 +3789,20 @@ function updateBondName(bondId, newName) {
     const bond = window.bondsOnSheet.find(b => b.id === bondId);
     if (bond) {
         bond.name = newName;
+        _saveBonds();
+    }
+}
+
+/**
+ * Updates a bond's description field
+ * @param {string} bondId - Bond's unique identifier
+ * @param {string} newDescription - New description text
+ */
+function updateBondDescription(bondId, newDescription) {
+    const bond = window.bondsOnSheet.find(b => b.id === bondId);
+    if (bond) {
+        bond.description = newDescription;
+        _saveBonds();
     }
 }
 
@@ -1945,6 +3815,7 @@ function updateBondRelationship(bondId, newRelationship) {
     const bond = window.bondsOnSheet.find(b => b.id === bondId);
     if (bond) {
         bond.relationship = newRelationship;
+        _saveBonds();
     }
 }
 
@@ -1957,6 +3828,7 @@ function updateBondScore(bondId, newScore) {
     const bond = window.bondsOnSheet.find(b => b.id === bondId);
     if (bond) {
         bond.score = parseInt(newScore) || 10;
+        _saveBonds();
     }
 }
 
@@ -1966,10 +3838,11 @@ function updateBondScore(bondId, newScore) {
  * Also includes Foundry JSON preview for each bond
  */
 function renderBondsOnSheet() {
+    _saveBonds();
     const bondsContainer = document.getElementById('cs-bonds');
 
     if (window.bondsOnSheet.length === 0) {
-        bondsContainer.innerHTML = '<p style="opacity:0.8;margin:0;">(No bonds yet — add bonds using the BONDS button above.)</p>';
+        bondsContainer.innerHTML = '<p style="opacity:0.8;margin:0;text-align:center;width:100%;">(No bonds yet — add bonds using the BONDS button to the left.)</p>';
         return;
     }
 
@@ -1980,55 +3853,41 @@ function renderBondsOnSheet() {
         const safeRelationship = escapeHtml(bond.relationship);
         const safeDescription = escapeHtml(bond.description);
         const safeScore = escapeHtml(bond.score);
-        const jsonPreview = escapeHtml(JSON.stringify({
-            name: bond.name || 'New Bond',
-            type: bond.relationship || 'bond',
-            system: {
-                name: '',
-                description: '<p>' + bond.description.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</p>',
-                score: bond.score,
-                relationship: '',
-                hasBeenDamagedSinceLastHomeScene: false
-            }
-        }, null, 2));
         html += `
-            <div class="bond-entry">
+            <div class="bond-entry" data-bond-id="${safeId}">
                 <div style="display:flex;gap:8px;margin-bottom:6px;">
-                    <input type="text" class="bond-entry-field" placeholder="Bond Name" value="${safeName}" onchange="updateBondName('${safeId}', this.value)" style="flex:1;min-width:0;">
-                    <button type="button" class="bond-remove-button" onclick="removeBondFromSheet('${safeId}')">Remove</button>
+                    <input type="text" class="bond-entry-field" name="bond-name-${safeId}" autocomplete="off" placeholder="${sosPlaceholder('Bond Name')}" value="${safeName}" data-field="name" style="flex:1;min-width:0;">
+                    <button type="button" class="bond-remove-button" title="Permanently remove this bond from your character sheet.">Remove</button>
                 </div>
                 <div style="margin-bottom:6px;">
-                    <textarea class="bond-entry-field" placeholder="Bond Description/Text" readonly style="height:80px;resize:vertical;">${safeDescription}</textarea>
+                    <textarea class="bond-entry-field" name="bond-desc-${safeId}" autocomplete="off" placeholder="${sosPlaceholder('Bond Description/Text')}" data-field="description" style="height:80px;resize:vertical;">${safeDescription}</textarea>
                 </div>
                 <div style="display:flex;gap:8px;">
                     <div style="flex:1;">
-                        <label style="font-size:0.85em;opacity:0.8;">Relationship:</label>
-                        <input type="text" class="bond-entry-field" placeholder="Edit relationship..." value="${safeRelationship}" onchange="updateBondRelationship('${safeId}', this.value)">
+                        <label for="bond-rel-${safeId}" style="font-size:0.85em;opacity:0.8;">Relationship:</label>
+                        <input type="text" id="bond-rel-${safeId}" class="bond-entry-field" name="bond-rel-${safeId}" autocomplete="off" placeholder="${sosPlaceholder('Edit relationship...')}" value="${safeRelationship}" data-field="relationship">
                     </div>
                     <div style="flex:0 0 100px;">
-                        <label style="font-size:0.85em;opacity:0.8;">Score:</label>
-                        <input type="number" class="bond-entry-field" value="${safeScore}" min="0" max="20" onchange="updateBondScore('${safeId}', this.value)">
+                        <label for="bond-score-${safeId}" style="font-size:0.85em;opacity:0.8;">Score:</label>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <input type="number" id="bond-score-${safeId}" class="bond-entry-field" name="bond-score-${safeId}" autocomplete="off" value="${safeScore}" min="0" max="20" data-field="score">
+                            <button type="button" class="lp-bond-damage-btn lp-only" onclick="lpDamageBond(this)" title="Bond damaged — reduce score by 1">−1 DMG</button>
+                        </div>
                     </div>
                 </div>
-                <details style="margin-top:6px;font-size:0.85em;">
-                    <summary style="cursor:pointer;opacity:0.8;">JSON Code</summary>
-                    <pre><code>${jsonPreview}</code></pre>
-                </details>
             </div>
         `;
     });
 
     bondsContainer.innerHTML = html;
+    // Keep LP sheet bond table in sync
+    if (document.getElementById('lp-bonds-tbody') && typeof renderLpBonds === 'function') {
+        renderLpBonds();
+    }
 }
 
 /**
- * Generates a printable HTML version of the character sheet
- * Includes filled sections plus blank spaces for user to fill in
- * Can be saved, printed to PDF, or viewed in browser
- */
-
-/**
- * Updates the sanity adaptations based on checkbox states
+ * Updates the sanity adaptations based on checkbox states.
  * Stores the state in the form for JSON export
  */
 function updateSanityAdaptations() {

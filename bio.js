@@ -18,13 +18,13 @@ const bioData = {
             "Maria", "Sandra", "Ashley", "Deborah", "Stephanie", "Catherine", "Carolyn", "Rebecca",
             "Sharon", "Nancy", "Karen", "Diane", "Julie", "Joyce", "Evelyn", "Ann",
             "Kathleen", "Alice", "Joan", "Martha", "Gloria", "Sara", "Janice", "Jean",
-            "Abigail", "Alice", "Barbara", "Bethany", "Brenda", "Caroline", "Cheryl", "Christine"
+            "Abigail", "Patricia", "Barbara", "Bethany", "Brenda", "Caroline", "Cheryl", "Christine"
         ],
         "non-binary": [
             "Alex", "Jordan", "Casey", "Riley", "Morgan", "Parker", "Avery", "Quinn",
             "Reese", "Dakota", "Cameron", "Taylor", "Austin", "Blake", "Drew", "Jamie",
             "Skyler", "Rowan", "Shannon", "Sage", "Phoenix", "River", "Storm", "Winter",
-            "Kai", "Sam", "Kelly", "Bailey", "Rory", "Shea", "Finley", "Morgan"
+            "Kai", "Sam", "Kelly", "Bailey", "Rory", "Shea", "Finley", "Emery"
         ]
     },
     "lastNames": [
@@ -37,34 +37,114 @@ const bioData = {
         "Bell", "Rogers", "Gibbs", "Sawyer", "Sutton", "Richmond", "Pearson", "Blake"
     ],
     "nationalities": [
-        "American", "British", "Canadian", "Australian", "French", "German", "Italian",
-        "Spanish", "Dutch", "Swedish", "Norwegian", "Danish", "Irish", "Polish",
-        "Czech", "Hungarian", "Russian", "Greek", "Turkish", "Israeli", "Japanese",
-        "South Korean", "Chinese", "Indian", "Brazilian", "Mexican", "Argentine", "Chilean"
+        "American", "American", "American", "American", "American",
+        "American", "American", "American", "American", "American",
+        "American", "American",
+        "British", "British", "British", "British", "British", "British",
+        "Canadian", "Canadian", "Canadian", "Canadian",
+        "Irish", "Irish",
+        "Australian",
+        "French", "German", "Italian", "Spanish", "Dutch",
+        "Swedish", "Norwegian", "Danish", "Polish",
+        "Czech", "Hungarian", "Russian", "Greek", "Turkish",
+        "Israeli", "Japanese", "South Korean", "Chinese", "Indian",
+        "Brazilian", "Mexican", "Argentine", "Chilean"
     ],
 
     // -------------------------------------------------------------------------
     // Physical description component pools — assembled at runtime based on stats
     // -------------------------------------------------------------------------
-    "hairColors": ["black", "dark brown", "brown", "auburn", "chestnut", "dirty blonde",
-        "blonde", "sandy", "red", "grey", "silver", "salt-and-pepper", "close-cropped dark"],
-    "eyeColors": ["brown", "dark brown", "hazel", "green", "blue", "grey", "sharp brown",
-        "pale blue", "deep green", "amber"],
+    "hairColors": [
+        "black", "dark brown", "brown", "auburn", "chestnut", "dirty blonde",
+        "blonde", "sandy", "red", "grey", "silver", "salt-and-pepper",
+        "ash brown", "dark auburn", "light brown", "strawberry blonde"
+    ],
+    "hairStyles": [
+        "close-cropped", "cropped short", "worn short", "kept neat and short",
+        "unkempt", "curly", "wavy", "straight", "pulled back tight",
+        "tied back", "thinning", "shaved close", "grown out past the collar",
+        "swept back", "worn long", "buzzed", "cut military-short"
+    ],
+    "eyeColors": [
+        "brown", "dark brown", "hazel", "green", "blue", "grey",
+        "pale blue", "deep green", "amber", "steel grey", "dark hazel",
+        "ice blue", "warm brown", "olive green"
+    ],
+    "skinTones": [
+        "pale", "fair", "light", "light brown", "olive",
+        "sun-tanned", "weathered", "bronze", "brown", "dark brown", "deeply tanned"
+    ],
+    "buildDescriptors": {
+        "high": [
+            "heavily built", "powerfully built", "broad-shouldered and solid",
+            "thick-set", "stocky and strong", "imposing in frame",
+            "the kind of build that comes from years of hard physical work"
+        ],
+        "athletic": [
+            "athletic", "lean and muscular", "fit and rangy",
+            "well-conditioned", "physically capable without being ostentatious",
+            "carries themselves with easy physical confidence"
+        ],
+        "average": [
+            "average build", "unremarkable build", "medium build",
+            "neither large nor slight", "ordinary physique",
+            "the kind of build that disappears in a crowd"
+        ],
+        "low": [
+            "lean", "slight", "wiry", "thin but not fragile",
+            "spare in frame", "slender", "reed-thin"
+        ]
+    },
+    "heightDescriptors": {
+        "tall": [
+            "tall", "above average height", "notably tall",
+            "standing well above most in a room", "the kind of tall that draws a second look"
+        ],
+        "average": [
+            "average height", "of unremarkable height", "medium height",
+            "neither tall nor short", "easy to lose in a crowd height-wise"
+        ],
+        "short": [
+            "compact", "short", "below average height",
+            "slight of stature", "not particularly tall"
+        ]
+    },
     "notableFeatures": {
         "high_str_con": [
             "a weathered, hard-edged face", "a jaw set like granite", "calloused hands and a squared stance",
             "a thick neck and military bearing", "broad shoulders that fill a doorframe",
-            "forearms laced with old scars", "a nose that's been broken at least once"
+            "forearms laced with old scars", "a nose that's been broken at least once",
+            "the deliberate economy of movement of someone trained for it",
+            "old scar tissue along the knuckles", "a flat, watchful expression that rarely changes",
+            "the kind of stillness that comes from knowing how to handle a situation",
+            "a squared, no-nonsense posture", "boots that have seen real mileage",
+            "sun-darkened skin and the easy physicality of someone used to working outdoors",
+            "a grip like a vice and eyes that have seen worse"
         ],
         "low_str_con": [
             "wire-rimmed glasses", "ink-stained fingers", "a perpetually tired expression",
             "a bookish air and careful posture", "reading glasses perpetually pushed up",
-            "pale skin from long hours indoors", "precise, deliberate movements"
+            "pale skin from long hours indoors", "precise, deliberate movements",
+            "a distracted look that suggests their mind is elsewhere most of the time",
+            "neat, methodical hands and very organized pockets",
+            "a slight hunch from years hunched over a desk", "reading calluses on the fingertips",
+            "the kind of measured speech that comes from careful thinking",
+            "an almost nervous quality at odds with a sharp, penetrating gaze",
+            "a habit of cataloguing the room — not from fear, from habit",
+            "the look of someone who has spent more time with documents than people"
         ],
         "neutral": [
             "a steady, unreadable gaze", "a quiet, watchful manner", "unremarkable features that blend into a crowd",
             "a flat affect that gives little away", "quick eyes that miss nothing",
-            "a slight scar above one brow", "a tired but alert expression"
+            "a slight scar above one brow", "a tired but alert expression",
+            "the practiced blankness of someone used to keeping their own counsel",
+            "a habit of going very still when thinking",
+            "a low, considered way of speaking — they don't waste words",
+            "faint lines around the eyes from squinting into the sun",
+            "clean hands but worn clothes — cares about function, not appearance",
+            "a detached, professional manner that never quite turns off",
+            "the slight constant tension of someone who is never fully off duty",
+            "moves through a room like someone quietly running a threat assessment"
         ]
     },
 

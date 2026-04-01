@@ -10,6 +10,7 @@
     var _loadout = [];
     var _searchQuery = '';
     var _activeCategory = 'All';
+    var _catalogMap = null;
 
     var CATEGORIES = [
         'All', 'Firearms', 'Melee Weapons', 'Heavy Weapons', 'Artillery',
@@ -20,24 +21,15 @@
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 
-    var CAT_COLORS = {
-        'Firearms':          '#e74c3c',
-        'Melee Weapons':     '#e67e22',
-        'Heavy Weapons':     '#c0392b',
-        'Artillery':         '#c0392b',
-        'Demolitions':       '#c0392b',
-        'Less-Lethal':       '#f39c12',
-        'Armor':             '#2980b9',
-        'Restraints':        '#2980b9',
-        'Surveillance':      '#8e44ad',
-        'Comms & Tech':      '#16a085',
-        'Optics & Vision':   '#1abc9c',
-        'Weapon Accessories':'#e67e22',
-        'Entry Tools':       '#7f8c8d',
-        'Survival & Medical':'#27ae60'
-    };
-
-    function _catColor(cat) { return CAT_COLORS[cat] || '#888888'; }
+    function _getCatalogMap() {
+        if (!_catalogMap) {
+            _catalogMap = new Map();
+            (window.DG_EQUIPMENT_CATALOG || []).forEach(function (item) {
+                _catalogMap.set(item.name, item);
+            });
+        }
+        return _catalogMap;
+    }
 
     function _statSummary(item) {
         var s = item.system;
@@ -53,14 +45,10 @@
         return '';
     }
 
-    function _expenseColor(expense) {
-        var map = { Incidental: '#6abf6a', Standard: '#6abf6a', Unusual: '#d4a800', Major: '#d47800', Extreme: '#c0392b' };
-        return map[expense] || '#888';
-    }
-
     function _expenseBadge(expense) {
         if (!expense) return '';
-        return '<span class="eq-expense-badge" style="color:' + _expenseColor(expense) + '">' + _escHtml(expense) + '</span>';
+        var cls = 'eq-expense-' + expense.toLowerCase();
+        return '<span class="eq-expense-badge ' + cls + '">' + _escHtml(expense) + '</span>';
     }
 
     function _filtered() {
@@ -82,14 +70,20 @@
         return { groups: groups, order: order };
     }
 
+    function _escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
     // ── Render ─────────────────────────────────────────────────────────────────
 
-    function _catalogItemHTML(item) {
+    function _catalogItemHTML(item, isSoS) {
         var summary = _statSummary(item);
         var expense = item.system.expense || '';
-        var safeName = item.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-        var color = _catColor(item.category);
-        return '<div class="eq-catalog-item" style="--eq-cat-color:' + color + '">' +
+        return '<div class="eq-catalog-item">' +
             '<div class="eq-item-info">' +
             '<span class="eq-item-name">' + _escHtml(item.name) + '</span>' +
             '<span class="eq-item-meta">' +
@@ -98,7 +92,8 @@
             '</span>' +
             '</div>' +
             '<button type="button" class="eq-add-btn" title="Add to loadout" ' +
-            'onclick="dgEquipment.add(\'' + safeName + '\')">+</button>' +
+            'data-name="' + _escHtml(item.name) + '">' +
+            (isSoS ? '\u26E7' : '+') + '</button>' +
             '</div>';
     }
 
@@ -107,6 +102,7 @@
         var countEl = document.getElementById('eq-catalog-count');
         if (!list) return;
 
+        var isSoS = document.body.classList.contains('theme-son-of-sam');
         var items = _filtered();
         if (countEl) countEl.textContent = items.length;
 
@@ -117,7 +113,7 @@
 
         // Single-category filter: flat list, no group headers needed
         if (_activeCategory !== 'All') {
-            list.innerHTML = items.map(_catalogItemHTML).join('');
+            list.innerHTML = items.map(function (item) { return _catalogItemHTML(item, isSoS); }).join('');
             return;
         }
 
@@ -125,14 +121,12 @@
         var grouped = _groupByCategory(items);
         list.innerHTML = grouped.order.map(function (cat) {
             var catItems = grouped.groups[cat];
-            var color = _catColor(cat);
             return '<div class="eq-cat-group">' +
-                '<div class="eq-cat-group-header" style="--eq-cat-color:' + color + '">' +
+                '<div class="eq-cat-group-header">' +
                 '<span class="eq-cat-group-bar"></span>' +
                 '<span class="eq-cat-group-label">' + _escHtml(cat) + '</span>' +
-                '<span class="eq-cat-group-count">' + catItems.length + '</span>' +
                 '</div>' +
-                catItems.map(_catalogItemHTML).join('') +
+                catItems.map(function (item) { return _catalogItemHTML(item, isSoS); }).join('') +
                 '</div>';
         }).join('');
     }
@@ -151,7 +145,7 @@
             return;
         }
 
-        // Build index-aware list for grouped render (indices must match _loadout)
+        // Build index-aware groups (indices must stay in sync with _loadout)
         var groups = {}, order = [];
         _loadout.forEach(function (item, i) {
             if (!groups[item.category]) { groups[item.category] = []; order.push(item.category); }
@@ -160,23 +154,22 @@
 
         list.innerHTML = order.map(function (cat) {
             var entries = groups[cat];
-            var color = _catColor(cat);
             return '<div class="eq-loadout-section">' +
-                '<div class="eq-loadout-section-header" style="border-left-color:' + color + '">' +
+                '<div class="eq-loadout-section-header">' +
                 _escHtml(cat) +
                 '</div>' +
                 '<div class="eq-loadout-cards">' +
                 entries.map(function (e) {
                     var summary = _statSummary(e.item);
                     var expense = e.item.system.expense || '';
-                    return '<div class="eq-loadout-card" style="--eq-cat-color:' + color + '">' +
+                    return '<div class="eq-loadout-card">' +
                         '<button type="button" class="eq-remove-btn" title="Remove" ' +
-                        'onclick="dgEquipment.remove(' + e.index + ')">\u00d7</button>' +
+                        'data-index="' + e.index + '">\u00d7</button>' +
                         '<div class="eq-card-name">' + _escHtml(e.item.name) + '</div>' +
                         '<div class="eq-card-stats">' +
                         (summary ? _escHtml(summary) : '') +
                         (summary && expense ? ' \u00b7 ' : '') +
-                        (expense ? '<span style="color:' + _expenseColor(expense) + '">' + _escHtml(expense) + '</span>' : '') +
+                        (expense ? '<span class="eq-expense-badge eq-expense-' + expense.toLowerCase() + '">' + _escHtml(expense) + '</span>' : '') +
                         '</div>' +
                         '</div>';
                 }).join('') +
@@ -190,14 +183,6 @@
         _renderLoadout();
     }
 
-    function _escHtml(str) {
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
-    }
-
     // ── Persistence ────────────────────────────────────────────────────────────
 
     function _saveLoadout() {
@@ -209,12 +194,9 @@
     function _loadLoadout() {
         try {
             var names = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            var catalog = window.DG_EQUIPMENT_CATALOG || [];
+            var map = _getCatalogMap();
             _loadout = names.map(function (n) {
-                var found = null;
-                for (var i = 0; i < catalog.length; i++) {
-                    if (catalog[i].name === n) { found = catalog[i]; break; }
-                }
+                var found = map.get(n);
                 return found ? JSON.parse(JSON.stringify(found)) : null;
             }).filter(Boolean);
         } catch (e) {
@@ -225,11 +207,7 @@
     // ── Public API ─────────────────────────────────────────────────────────────
 
     function addItem(name) {
-        var catalog = window.DG_EQUIPMENT_CATALOG || [];
-        var item = null;
-        for (var i = 0; i < catalog.length; i++) {
-            if (catalog[i].name === name) { item = catalog[i]; break; }
-        }
+        var item = _getCatalogMap().get(name);
         if (!item) return;
         _loadout.push(JSON.parse(JSON.stringify(item)));
         _saveLoadout();
@@ -257,16 +235,6 @@
         });
     }
 
-    function _onSearch(val) {
-        _searchQuery = val;
-        _renderCatalog();
-    }
-
-    function _onCat(val) {
-        _activeCategory = val;
-        _renderCatalog();
-    }
-
     // ── UI Build ───────────────────────────────────────────────────────────────
 
     function buildUI() {
@@ -280,8 +248,8 @@
         container.innerHTML =
             '<div class="eq-controls">' +
             '<input type="text" id="eq-search" class="eq-search-input" placeholder="Search equipment\u2026"' +
-            ' oninput="dgEquipment._onSearch(this.value)" autocomplete="off" spellcheck="false" />' +
-            '<select id="eq-cat-select" class="eq-cat-select" onchange="dgEquipment._onCat(this.value)">' +
+            ' autocomplete="off" spellcheck="false" />' +
+            '<select id="eq-cat-select" class="eq-cat-select">' +
             catOptions +
             '</select>' +
             '</div>' +
@@ -295,12 +263,30 @@
             '<div class="eq-loadout-panel">' +
             '<div class="eq-panel-header">' +
             'LOADOUT' +
-            '<button type="button" class="eq-clear-btn" onclick="dgEquipment.clear()" title="Clear all items">CLEAR</button>' +
+            '<button type="button" id="eq-clear-btn" class="eq-clear-btn" title="Clear all items">CLEAR</button>' +
             '</div>' +
             '<div id="eq-loadout-list" class="eq-scrolllist"></div>' +
             '</div>' +
             '</div>' +
             '<p class="eq-hint">Items in the loadout are included when exporting to Foundry VTT.</p>';
+
+        document.getElementById('eq-search').addEventListener('input', function () {
+            _searchQuery = this.value;
+            _renderCatalog();
+        });
+        document.getElementById('eq-cat-select').addEventListener('change', function () {
+            _activeCategory = this.value;
+            _renderCatalog();
+        });
+        document.getElementById('eq-clear-btn').addEventListener('click', clearLoadout);
+        document.getElementById('eq-catalog-list').addEventListener('click', function (e) {
+            var btn = e.target.closest('.eq-add-btn');
+            if (btn) addItem(btn.dataset.name);
+        });
+        document.getElementById('eq-loadout-list').addEventListener('click', function (e) {
+            var btn = e.target.closest('.eq-remove-btn');
+            if (btn) removeItem(parseInt(btn.dataset.index, 10));
+        });
 
         _render();
     }
@@ -311,9 +297,7 @@
         add: addItem,
         remove: removeItem,
         clear: clearLoadout,
-        getLoadout: getLoadout,
-        _onSearch: _onSearch,
-        _onCat: _onCat
+        getLoadout: getLoadout
     };
 
     document.addEventListener('DOMContentLoaded', function () {
