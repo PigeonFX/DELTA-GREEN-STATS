@@ -69,6 +69,7 @@ A user-friendly character creation and management tool for the Delta Green RPG s
 - Specialty support (Art, Craft, Science, Pilot, Military)
 - Add custom skills (languages, special abilities)
 - **Bonus Skill Points**: Enhance up to 8 skills with +20 each (capped at 80%)
+- Dropdown labels show the full skill name (e.g. *Art (Photography)*, *Science (Chemistry)*) so you always know exactly which specialty you're boosting
 
 ### Bond Management
 - Random bond generation from 5 categories:
@@ -89,6 +90,7 @@ A user-friendly character creation and management tool for the Delta Green RPG s
 - **Print-Optimized Layout**: Clean formatting with fillable sections
 - **All Character Data**: Stats, skills, bonds, biography on one page
 - **Pen & Paper Ready**: Perfect for table use without digital tools
+- Specialty skills display correctly (e.g. *Science (Chemistry)* — no longer duplicated)
 
 ---
 
@@ -100,7 +102,7 @@ A user-friendly character creation and management tool for the Delta Green RPG s
 | **Modern** | Catppuccin color palette | Enhanced readability |
 | **Morris** | Dracula colors | Dark mode preference |
 | **Son of Sam** | Red/black high contrast | Alternative dark |
-| **Mobile** | Blue responsive design | Mobile devices (auto-detects) |
+| **Mobile** | Blue responsive design | Mobile devices |
 
 ---
 
@@ -186,8 +188,9 @@ DELTA-GREEN-STATS/
 - **Configuration**: CSS variables for colors and spacing
 - **Layout**: Grid and flexbox arrangements
 - **Components**: Buttons, inputs, fieldsets, skills grid
-- **Theming**: X-Files and Modern theme overrides
+- **Theming**: X-Files, Modern (Catppuccin), Son of Sam, and Mobile theme overrides
 - **Bonus Skills**: Styling for bonus skill points section
+- **Specialty Dropdowns**: Flex-grow so specialty selects expand to fill available space
 
 ### bonds.js
 - **Bond Categories**: Arrays of bond strings by category
@@ -257,9 +260,24 @@ This project is open source and available under the MIT License. Feel free to us
 
 ---
 
-<div align="center">
-    <img src="assets/art/icon.png" width="150" height="150">
-</div>
+## Changelog
+
+### Experimental Branch — 2026
+
+#### Bug Fixes
+- **Printable sheet double-specialty bug fixed** — skills like *Science (Chemistry)* were being exported as *Science (Chemistry) (Chemistry)*. The sheet now renders specialty names correctly.
+- **Bonus skill dropdown labels fixed** — dropdowns now show the full skill name including type, e.g. *Craft (Microelectronics)* instead of just *Microelectronics*.
+
+#### UI Improvements
+- **Specialty dropdowns flex to fill space** — specialty select elements in the skills grid now expand to use available width instead of being truncated at a fixed character count.
+- **CSS vendor-prefix warnings resolved** — standard `appearance` property added alongside `-moz-appearance` to satisfy browser compatibility linting.
+
+#### Code Quality
+- **Dead CSS removed** — cleaned up unused selectors: `.panel-stats`, `.lp-num`, `.lp-attr-status`, `.lp-attr-max`, `.lp-tc-top`, `.field-hint`, `.stats-derived-grid`, `.text-box-left`, and empty LP layout stubs.
+- **Dead JS removed** — removed unused `isMobileDevice()` function.
+- **Empty ruleset warnings resolved** — removed four empty CSS rulesets that were triggering linter warnings.
+
+---
 
 <p align="center">
   Built with ❤️ by <a href="https://github.com/pigeon-labs-stack">Pigeon Labs Stack</a> for Delta Green enthusiasts and role-playing game fans everywhere.
