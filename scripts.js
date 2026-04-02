@@ -2068,6 +2068,25 @@ function buildFoundryJSON() {
             incident3: document.getElementById('cs-helplessness-incident3')?.checked || false
         };
 
+        // Build motivation items — one per non-empty line of the motivations textarea
+        const motivationItems = motivations
+            .split('\n')
+            .map(s => s.trim())
+            .filter(s => s.length > 0)
+            .map(text => ({
+                name: text,
+                type: 'motivation',
+                img: 'systems/deltagreen/assets/icons/swap-bag-black-bg.svg',
+                system: { name: '', description: '', disorder: '', crossedOut: false, disorderCured: false },
+                effects: [],
+                folder: null,
+                sort: 0,
+                flags: {}
+            }));
+
+        // Read wounds from the LP sheet wounds field
+        const lpWounds = document.getElementById('lp-wounds')?.value?.trim() || '';
+
         const foundry = {
             name: name,
             type: type,
@@ -2082,16 +2101,14 @@ function buildFoundryJSON() {
                 specialTraining: [],
                 settings: { sorting: { weaponSortAlphabetical: false, armorSortAlphabetical: false, gearSortAlphabetical: false, tomeSortAlphabetical: false, ritualSortAlphabetical: false }, rolling: { defaultPercentileModifier: 20 } },
                 schemaVersion: 1,
-                // physicalDescription is the top-level field the agent sheet reads/writes
-                physicalDescription: physicalDesc,
                 sanity: { value: sanityValue, currentBreakingPoint: breakingPoint, adaptations: { violence: violenceAdaptations, helplessness: helplessnessAdaptations } },
-                physical: { description: physicalDesc, wounds: "", firstAidAttempted: false, exhausted: false, exhaustedPenalty: -20 },
-                biography: { profession: bioProfession, employer: bioEmployer, nationality: bioNationality, sex: bioSex, age: bioAge, education: bioEducation, motivations: motivations },
-                corruption: { value: corruptionValue, haveSeenTheYellowSign: false, gift: "", insight: "" }
+                physical: { description: physicalDesc, wounds: lpWounds, firstAidAttempted: false, exhausted: false, exhaustedPenalty: -20 },
+                biography: { profession: bioProfession, employer: bioEmployer, nationality: bioNationality, sex: bioSex, age: bioAge, education: bioEducation },
+                corruption: { value: corruptionValue, haveSeenTheYellowSign: false, gift: '', insight: '' }
             },
-            items: items,
+            items: items.concat(motivationItems),
             effects: [],
-            flags: { exportSource: { world: "generated", system: "deltagreen" } }
+            flags: { exportSource: { world: 'generated', system: 'deltagreen' } }
         };
 
         return foundry;
@@ -2275,8 +2292,25 @@ function importFoundryJSONToEditor() {
         // Physical description
         const physDescEl = document.getElementById('cs-physical-desc');
         if (physDescEl) physDescEl.value = sys.physicalDescription || sys.physical?.description || '';
+
+        // Wounds — populate LP wounds field if present
+        const importedWounds = sys.physical?.wounds || '';
+        if (importedWounds) {
+            const woundsEl = document.getElementById('lp-wounds');
+            if (woundsEl) woundsEl.value = importedWounds;
+        }
+
+        // Motivations — read from type:motivation items (real Foundry DG schema)
         const motivationsEl = document.getElementById('cs-motivations');
-        if (motivationsEl) motivationsEl.value = sys.biography?.motivations || '';
+        if (motivationsEl) {
+            const motivationNames = (data.items || [])
+                .filter(item => item.type === 'motivation')
+                .map(item => item.name || '')
+                .filter(n => n.length > 0);
+            motivationsEl.value = motivationNames.length > 0
+                ? motivationNames.join('\n')
+                : (sys.biography?.motivations || '');
+        }
 
         // Sanity adaptation checkboxes
         const adaptations = sys.sanity?.adaptations || {};
