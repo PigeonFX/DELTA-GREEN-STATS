@@ -73,10 +73,10 @@ A full-featured character creation, management, and live play tool for the **Del
 
 1. **Roll or buy stats** — point buy, full random, or 4d6 drop lowest
 2. **Pick a profession** — choose from 18 official Delta Green professions; skills apply automatically
-3. **Tune your skills** — adjust specialties, add custom skills, and spend bonus skill points
-4. **Fill your biography** — hit *Random Bio* for an instant procedurally generated agent, or write your own
-5. **Pick your gear** — browse the equipment catalog and build your loadout
-6. **Generate bonds** — pull from five NPC pools or write your own
+3. **Fill your biography** — hit *Random Bio* for an instant procedurally generated agent, or write your own
+4. **Tune your skills** — adjust specialties, add custom skills, and spend bonus skill points
+5. **Generate bonds** — pull from five NPC pools or write your own
+6. **Pick your gear** — browse the equipment catalog and build your loadout
 7. **Export** — download a Foundry VTT actor JSON, a printable HTML sheet, or a shareable link
 8. **Play** — switch to *Live Play (Field Notes)* for an in-session tracking sheet with HP/WP/SAN controls
 
@@ -114,7 +114,16 @@ A full-featured character creation, management, and live play tool for the **Del
 | Soldier or Marine | 4 |
 | Special Operator | 2 |
 
-A **Build a New Profession** template is also included for custom agents: 400 points across 10 skills, with bonds traded ±50 points each.
+A **Build a New Profession** template is also included for custom agents: 400 points across 10 skills. You can trade bonds for skill points or vice versa — each bond removed grants +50 points; each extra bond costs 50 points.
+
+### Biography & Random Generation
+- Fields for name, sex, age, nationality, employer, education, physical description, and motivations
+- **Random Bio** button generates a complete biography instantly:
+  - Name from gender-specific first name pools + 56 last names
+  - Age 25–65
+  - Nationality from a weighted pool (25+ countries, US-weighted to reflect faction)
+  - Employer and education matched to the selected profession (e.g. FBI/DEA/ATF for Federal Agents; Johns Hopkins/NIH/CDC for Physicians)
+  - Physical description procedurally constructed from build, height, hair, eyes, skin tone, and notable features — all stat-influenced
 
 ### Skills System
 42 base skills covering the full Delta Green rulebook, each with a tooltip explanation drawn from the sourcebook.
@@ -134,15 +143,6 @@ Multiple instances of the same specialty skill can be added (e.g. Science (Chemi
 
 ### Bonus Skill Points
 After finalising your profession and custom skills, optionally boost up to 8 skills by +20 each (capped at 80%). Each dropdown shows the full skill name including specialty — no guessing which *Chemistry* you're boosting.
-
-### Biography & Random Generation
-- Fields for name, sex, age, nationality, employer, education, physical description, and motivations
-- **Random Bio** button generates a complete biography instantly:
-  - Name from gender-specific first name pools + 56 last names
-  - Age 25–65
-  - Nationality from a weighted pool (25+ countries, US-weighted to reflect faction)
-  - Employer and education matched to the selected profession (e.g. FBI/DEA/ATF for Federal Agents; Johns Hopkins/NIH/CDC for Physicians)
-  - Physical description procedurally constructed from build, height, hair, eyes, skin tone, and notable features — all stat-influenced
 
 ### Bond Management
 Generate NPC bonds from five themed pools:
@@ -208,6 +208,11 @@ Rules:
 - Individual die results are shown as a breakdown below the total (e.g. `[4, 2, 6] + 3`)
 - Entering a plain number (e.g. `65`) still works as a D% target — existing behaviour unchanged
 
+### Save, Load & Share
+- **Auto-save** to `localStorage` on every change — your agent persists between sessions
+- **Download / Upload** — save your full character state as a portable `.json` file
+- **Share Link** — encodes the entire character into a URL hash for instant one-click sharing
+
 ### Live Play — Field Notes
 Select the **Live Play (Field Notes)** theme to switch from character creation mode into an in-session tracking sheet styled as a DD Form 315 classified document.
 
@@ -224,14 +229,16 @@ Select the **Live Play (Field Notes)** theme to switch from character creation m
 - Three-column skill grid with session failure checkboxes and inline editable values
 - Weapons table (seeded from equipment loadout) with skill% cells wired to the dice roller
 - Gear & armor section (seeded from non-weapon loadout items)
-- Wounds & injuries, session notes, and remarks fields
+- Wounds and ailments, and personal details and notes fields
 - Download / upload sheet buttons
+- End-of-session advancement rolls (ROLL IMPROVEMENTS)
 
 ### Printable Character Sheet
 Export a self-contained `.html` file formatted as a **DD Form 315 Delta Green Agent Documentation Sheet** — ready to print or save.
 
 - Stats, derived attributes, skills (3-column grid), bonds, and biography on one page
 - Weapons table seeded from your equipment loadout
+- Wounds and ailments, and personal details and notes from the Live Play sheet
 - Sanity adaptations checkboxes
 - Can also be generated from an imported Foundry VTT actor `.json`
 
@@ -244,11 +251,6 @@ One-click export of a complete Foundry VTT `agent` actor JSON:
 - Sanity adaptations, biography, physical description, wounds
 - Prototype token config with HP/WP bars pre-configured
 - Supports custom token overrides and custom items via JSON textarea
-
-### Save, Load & Share
-- **Auto-save** to `localStorage` on every change — your agent persists between sessions
-- **Download / Upload** — save your full character state as a portable `.json` file
-- **Share Link** — encodes the entire character into a URL hash for instant one-click sharing
 
 ---
 
