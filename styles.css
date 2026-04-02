@@ -6877,3 +6877,60 @@ input[type="checkbox"]:checked+label {
     background: rgba(80, 120, 200, 0.28);
     color: #1a1408;
 }
+
+/* ── Profession details expand / description ────────────────────────── */
+.theme-mobile .profession-details {
+    border-color: rgba(26, 20, 8, 0.22);
+    background: transparent;
+    border-radius: 6px;
+}
+
+.theme-mobile .profession-details-summary {
+    background: rgba(26, 20, 8, 0.06);
+    justify-content: center;
+    padding: 10px 12px;
+}
+
+/* Completely hide the name and bonds pills */
+.theme-mobile .prof-name-pill,
+.theme-mobile .prof-bonds-pill {
+    display: none !important;
+}
+
+/* Hide the original hint text; inject replacement via ::before */
+.theme-mobile .prof-expand-hint {
+    position: static !important;
+    transform: none !important;
+    font-size: 0 !important;
+    color: transparent !important;
+    letter-spacing: 0 !important;
+    white-space: normal;
+    pointer-events: none;
+}
+
+.theme-mobile .prof-expand-hint::before {
+    content: 'CLICK FOR FULL DESCRIPTION';
+    display: block;
+    text-align: center;
+    font-size: 0.82rem;
+    color: rgba(26, 20, 8, 0.75);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+
+.theme-mobile .profession-details[open] .prof-expand-hint {
+    display: none !important;
+}
+
+/* Full description text — readable on the light Field Notes background */
+.theme-mobile .profession-details-text {
+    background: rgba(26, 20, 8, 0.04);
+    border-top-color: rgba(26, 20, 8, 0.12);
+    color: #1a1408;
+    font-size: 0.82rem;
+    padding: 10px 12px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: hidden;
+}
