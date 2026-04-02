@@ -37,7 +37,6 @@ function escapeHtml(str) {
 // ============================================================================
 const CONFIG = {
     STATS: ['STR', 'CON', 'DEX', 'INT', 'POW', 'CHA'],
-    ATTRIBUTES: ['Hit Points (HP)', 'Willpower Points (WP)', 'Sanity Points (SAN)', 'Breaking Point (BP)'],
     POINT_BUY_TOTAL: 72,
     STAT_MIN: 3,
     STAT_MAX: 18,
@@ -94,11 +93,6 @@ const CONFIG = {
         ["unarmed_combat", "Unarmed Combat", 40],
         ["unnatural", "Unnatural", 0]
     ],
-
-    // Get all skill keys in order
-    SKILL_KEYS: function () {
-        return this.SKILLS.map(s => s[0]);
-    }
 };
 
 /**
@@ -339,9 +333,6 @@ ADAPTING TO HELPLESSNESS: Your Agent's personal drive suffers — permanently lo
 
 ADAPTING TO THE UNNATURAL: There is no adapting to the Unnatural. Every encounter is a fresh shock. The only way to reach equilibrium is 0 SAN, whereupon the horrors make perfect sense and no longer inflict mental damage.`
 };
-/** Backwards-compat alias used by renderSpecialtySkills */
-const SPECIALTY_TOOLTIPS = SKILL_TOOLTIPS;
-
 /** Generates a unique ID for a specialty skill instance. */
 function _genInstId() {
     return 'inst-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
@@ -614,7 +605,6 @@ const appState = {
 };
 
 const stats = CONFIG.STATS;
-const attributesText = CONFIG.ATTRIBUTES;
 
 // Profession data
 // Professions data is now in professions.js
@@ -2649,6 +2639,16 @@ function setTheme(theme, { skipSave = false } = {}) {
                 window.dgDice?._toggle?.();
             }
         }
+        // Swap BMC badge colour to match theme
+        const BMC_SRC = {
+            'xfiles': 'https://cdn.buymeacoffee.com/buttons/v2/default-black.png',
+            'modern': 'https://cdn.buymeacoffee.com/buttons/v2/default-violet.png',
+            'son-of-sam': 'https://cdn.buymeacoffee.com/buttons/v2/default-red.png',
+            'field-doc': 'https://cdn.buymeacoffee.com/buttons/v2/default-blue.png',
+            'field-notes': 'https://cdn.buymeacoffee.com/buttons/v2/default-orange.png',
+        };
+        const bmcImg = document.getElementById('bmc-img');
+        if (bmcImg && BMC_SRC[theme]) bmcImg.src = BMC_SRC[theme];
     } catch (e) { }
 }
 
@@ -3782,9 +3782,9 @@ window.addEventListener('load', function () {
 
     function showTip(icon) {
         const key = icon.dataset.tooltipKey;
-        if (!key || !SPECIALTY_TOOLTIPS[key]) return;
+        if (!key || !SKILL_TOOLTIPS[key]) return;
         clearTimeout(_hideTimer);
-        panel.textContent = SPECIALTY_TOOLTIPS[key];
+        panel.textContent = SKILL_TOOLTIPS[key];
 
         // panel is position:fixed — use raw viewport (client) coordinates only, no scroll offset
         panel.style.display = 'block';

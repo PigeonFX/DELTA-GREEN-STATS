@@ -4146,25 +4146,26 @@ input[type="checkbox"]:checked+label {
     }
 }
 
+/* ── Utility: screen-reader-only (visually hidden but accessible) ─────────── */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 /* ============================================================================   BUY ME A COFFEE BADGE   ============================================================================*/
 .bmc-img {
     height: 60px !important;
     width: 217px !important;
-    display: none;
+    display: block;
     transform: scale(0.6);
     transform-origin: center;
-}
-
-.theme-xfiles .bmc-img[data-theme="xfiles"] {
-    display: block;
-}
-
-.theme-modern .bmc-img[data-theme="modern"] {
-    display: block;
-}
-
-.theme-son-of-sam .bmc-img[data-theme="son-of-sam"] {
-    display: block;
 }
 
 .bmc-badge-link {
@@ -5222,19 +5223,6 @@ input[type="checkbox"]:checked+label {
     font-size: 0.8rem;
 }
 
-/* ── BuyMeACoffee ────────────────────────────────────────────────────────── */
-.theme-field-notes .bmc-img[data-theme="xfiles"],
-.theme-field-notes .bmc-img[data-theme="modern"],
-.theme-field-notes .bmc-img[data-theme="son-of-sam"],
-.theme-field-notes .bmc-img[data-theme="mobile"],
-.theme-field-notes .bmc-img[data-theme="morris"] {
-    display: none !important;
-}
-
-.theme-field-notes .bmc-img[data-theme="field-notes"] {
-    display: block !important;
-}
-
 /* ── Custom scrollbar — kraft paper and ink ──────────────────────────────── */
 .theme-field-notes ::-webkit-scrollbar {
     width: 8px;
@@ -5427,19 +5415,6 @@ input[type="checkbox"]:checked+label {
     background: #2e2810;
     color: #f5f0e0;
     border: 1px solid #6a6040;
-}
-
-/* ── BuyMeACoffee ────────────────────────────────────────────────── */
-.theme-field-doc .bmc-img[data-theme="xfiles"],
-.theme-field-doc .bmc-img[data-theme="modern"],
-.theme-field-doc .bmc-img[data-theme="son-of-sam"],
-.theme-field-doc .bmc-img[data-theme="mobile"],
-.theme-field-doc .bmc-img[data-theme="field-notes"] {
-    display: none !important;
-}
-
-.theme-field-doc .bmc-img[data-theme="morris"] {
-    display: block !important;
 }
 
 /* ── Sigil / pyramid: hidden ─────────────────────────────────────── */

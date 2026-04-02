@@ -21,15 +21,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <title>Delta Green Character Creator - Stats, Skills & Foundry VTT Export</title>
     <meta name="description"
-        content="Create Delta Green RPG characters with point buy, random generation, professions, bonds, and more. Generate random bios, export to Foundry VTT, or print your character sheet. Features 5 themes and complete character sheet management.">
+        content="Create Delta Green RPG characters with point buy, dice roll, 18 professions, bonds, and equipment. Export to Foundry VTT or print your sheet. Free, no account required.">
+    <link rel="canonical" href="https://pigeon-labs-stack.github.io/DELTA-GREEN-STATS/">
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pigeon-labs-stack.github.io/DELTA-GREEN-STATS/">
+    <meta property="og:title" content="Delta Green Character Creator">
+    <meta property="og:description"
+        content="Create Delta Green RPG characters with point buy, dice roll, 18 professions, bonds, and equipment. Export to Foundry VTT or print your sheet.">
+    <meta property="og:image"
+        content="https://pigeon-labs-stack.github.io/DELTA-GREEN-STATS/assets/art/X-Files%202.png">
+    <meta property="og:image:width" content="1350">
+    <meta property="og:image:height" content="6207">
+    <meta property="og:image:type" content="image/png">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Delta Green Character Creator">
+    <meta name="twitter:description"
+        content="Create Delta Green RPG characters with point buy, dice roll, 18 professions, bonds, and equipment. Export to Foundry VTT or print your sheet.">
+    <meta name="twitter:image"
+        content="https://pigeon-labs-stack.github.io/DELTA-GREEN-STATS/assets/art/X-Files%202.png">
+    <meta name="author" content="pigeon-labs-stack">
+    <link rel="me" href="https://github.com/pigeon-labs-stack">
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/svg+xml"
         href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,17 95,95 5,95' fill='%2300aa44'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@700;900&family=Caveat:wght@400;600&family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700&family=Rock+Salt&family=Permanent+Marker&display=swap"
         rel="stylesheet">
@@ -39,535 +59,582 @@
           "@type": "WebApplication",
           "name": "Delta Green Character Creator",
           "description": "Complete Delta Green RPG character creation tool with stats, skills, professions, bonds, random bio generation, and Foundry VTT export.",
-          "url": "https://pigeon-labs-stack.github.io/DELTA-GREEN-STATS/"
+          "url": "https://pigeon-labs-stack.github.io/DELTA-GREEN-STATS/",
+          "applicationCategory": "GameApplication",
+          "operatingSystem": "All",
+          "featureList": "Point-buy stat allocation, Dice roll stat generation, 18 professions, Bonus skill points, Random bio generation, Bond system, Equipment loadout, Foundry VTT export, Printable character sheet, 5 visual themes, Live Play session mode",
+          "author": {
+            "@type": "Person",
+            "name": "pigeon-labs-stack",
+            "url": "https://github.com/pigeon-labs-stack"
+          },
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "screenshot": "https://pigeon-labs-stack.github.io/DELTA-GREEN-STATS/assets/art/X-Files%202.png"
         }
         </script>
 </head>
 
 <body>
     <div class="content">
-        <!-- ── Page banner — title + intro blurb ── -->
-        <h1 class="page-title">
-            <!-- Son of Sam theme: animated sigil replaces the title text -->
-            <svg id="sos-sigil" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <circle class="sp sp-ring" cx="60" cy="60" r="52" />
-                <polygon class="sp sp-tri" points="18.4,36 101.6,36 60,108" />
-                <line class="sp sp-vln" x1="60" y1="8" x2="60" y2="108" />
-                <line class="sp sp-hln" x1="8" y1="60" x2="112" y2="60" />
-                <circle class="sp sp-d1" cx="18" cy="36" r="3" />
-                <circle class="sp sp-d2" cx="102" cy="36" r="3" />
-                <circle class="sp sp-d3" cx="60" cy="108" r="3" />
-            </svg>
-            <span class="page-title-text">DELTA GREEN STATS<span class="blinking-cursor">_</span></span>
-        </h1>
-        <p class="site-intro">
-            Build your Agent. Roll stats. Pick a profession. Spend bonus points. Generate a background.
-            Export to <strong>Foundry VTT</strong> or print your sheet — with five themes including
-            "Live Play" theme for use at the table.
-        </p>
-        <div class="stats-section" id="stats-buy-section">
-            <h2>STATISTICS:</h2>
-            <div id="stats"></div>
-            <div class="total-points">Remaining Points: <span id="totalPoints">72</span></div>
-            <div id="cs-derived-attributes"><!-- populated by JS --></div>
-            <div id="cs-stats" style="display:none;"><!-- hidden inputs used by VTT export --></div>
-        </div>
-        <div class="button-container">
-            <button type="button" id="random-point-buy"
-                title="Randomly distributes your 72 stat points across all six stats using the point-buy rules."
-                onclick="randomStats()">RANDOM POINT BUY</button>
-            <button type="button" id="random-dice-roll"
-                title="Rolls 4d6 and drops the lowest die for each stat — results can exceed or fall below the point-buy budget."
-                onclick="randomDiceRoll()">RANDOM DICE ROLL</button>
-            <button type="button" id="reset-button"
-                title="Resets all six stats to their minimum value of 3 and returns all 54 points to spend."
-                onclick="resetStats()">RESET</button>
-        </div>
-        <!-- Character sheet section -->
-        <div class="stats-section">
-            <div id="character-sheet">
-                <!-- ── Live Play Sticky Tracker Bar (Field Document theme only) ── -->
-                <div id="lp-tracker-bar" class="lp-only">
-                    <div class="lp-tracker-item" id="lp-track-hp">
-                        <button type="button" class="lp-tracker-btn" onclick="lpAdjust('cs-hp',-1)"
-                            title="Reduce HP by 1">−</button>
-                        <div class="lp-tracker-inner">
-                            <span class="lp-tracker-label">HP</span>
-                            <div class="lp-tracker-values">
-                                <span class="lp-tracker-current" id="lp-cur-hp">—</span><span
-                                    class="lp-tracker-sep">/</span><span class="lp-tracker-max"
-                                    id="lp-bar-max-hp">—</span>
+        <noscript>
+            <div style="max-width:700px;margin:2em auto;padding:1em;font-family:sans-serif;line-height:1.6;">
+                <h2>Delta Green Character Creator</h2>
+                <p>A free, browser-based character creation tool for the <strong>Delta Green RPG</strong> — a d100
+                    percentile horror roleplaying game published by the Delta Green Partnership.</p>
+                <p>Features: point-buy and dice-roll stat allocation across 6 ability scores (STR, CON, DEX, INT, POW,
+                    CHA); 18 playable professions including Federal Agent, Soldier, Physician, Intelligence Analyst, and
+                    more; bonus skill point assignment; random biography generation; bond management; equipment loadout;
+                    Foundry VTT export; printable character sheet; and a dedicated Live Play theme for use at the table.
+                </p>
+                <p>No account or installation required. Runs entirely in your browser.</p>
+                <p><a href="https://github.com/pigeon-labs-stack/DELTA-GREEN-STATS">View source on GitHub</a></p>
+            </div>
+        </noscript>
+        <main id="app-main">
+            <!-- ── Page banner — title + intro blurb ── -->
+            <h1 class="page-title">
+                <!-- Son of Sam theme: animated sigil replaces the title text -->
+                <svg id="sos-sigil" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle class="sp sp-ring" cx="60" cy="60" r="52" />
+                    <polygon class="sp sp-tri" points="18.4,36 101.6,36 60,108" />
+                    <line class="sp sp-vln" x1="60" y1="8" x2="60" y2="108" />
+                    <line class="sp sp-hln" x1="8" y1="60" x2="112" y2="60" />
+                    <circle class="sp sp-d1" cx="18" cy="36" r="3" />
+                    <circle class="sp sp-d2" cx="102" cy="36" r="3" />
+                    <circle class="sp sp-d3" cx="60" cy="108" r="3" />
+                </svg>
+                <span class="page-title-text">DELTA GREEN STATS<span class="blinking-cursor">_</span></span>
+            </h1>
+            <p class="site-intro">
+                Build your Agent. Roll stats. Pick a profession. Spend bonus points. Generate a background.
+                Export to <strong>Foundry VTT</strong> or print your sheet — with five themes including
+                "Live Play" theme for use at the table.
+            </p>
+            <div class="stats-section" id="stats-buy-section">
+                <h2>STATISTICS:</h2>
+                <div id="stats"></div>
+                <div class="total-points">Remaining Points: <span id="totalPoints">72</span></div>
+                <div id="cs-derived-attributes"><!-- populated by JS --></div>
+                <div id="cs-stats" style="display:none;"><!-- hidden inputs used by VTT export --></div>
+            </div>
+            <div class="button-container">
+                <button type="button" id="random-point-buy"
+                    title="Randomly distributes your 72 stat points across all six stats using the point-buy rules."
+                    onclick="randomStats()">RANDOM POINT BUY</button>
+                <button type="button" id="random-dice-roll"
+                    title="Rolls 4d6 and drops the lowest die for each stat — results can exceed or fall below the point-buy budget."
+                    onclick="randomDiceRoll()">RANDOM DICE ROLL</button>
+                <button type="button" id="reset-button"
+                    title="Resets all six stats to their minimum value of 3 and returns all 54 points to spend."
+                    onclick="resetStats()">RESET</button>
+            </div>
+            <!-- Character sheet section -->
+            <div class="stats-section">
+                <div id="character-sheet">
+                    <!-- ── Live Play Sticky Tracker Bar (Field Document theme only) ── -->
+                    <div id="lp-tracker-bar" class="lp-only">
+                        <div class="lp-tracker-item" id="lp-track-hp">
+                            <button type="button" class="lp-tracker-btn" onclick="lpAdjust('cs-hp',-1)"
+                                title="Reduce HP by 1">−</button>
+                            <div class="lp-tracker-inner">
+                                <span class="lp-tracker-label">HP</span>
+                                <div class="lp-tracker-values">
+                                    <span class="lp-tracker-current" id="lp-cur-hp">—</span><span
+                                        class="lp-tracker-sep">/</span><span class="lp-tracker-max"
+                                        id="lp-bar-max-hp">—</span>
+                                </div>
+                                <span class="lp-tracker-status" id="lp-bar-sta-hp"></span>
                             </div>
-                            <span class="lp-tracker-status" id="lp-bar-sta-hp"></span>
+                            <button type="button" class="lp-tracker-btn" onclick="lpAdjust('cs-hp',1)"
+                                title="Restore 1 HP">+</button>
                         </div>
-                        <button type="button" class="lp-tracker-btn" onclick="lpAdjust('cs-hp',1)"
-                            title="Restore 1 HP">+</button>
-                    </div>
-                    <div class="lp-tracker-item" id="lp-track-wp">
-                        <button type="button" class="lp-tracker-btn" onclick="lpAdjust('cs-wp',-1)"
-                            title="Reduce WP by 1">−</button>
-                        <div class="lp-tracker-inner">
-                            <span class="lp-tracker-label">WP</span>
-                            <div class="lp-tracker-values">
-                                <span class="lp-tracker-current" id="lp-cur-wp">—</span><span
-                                    class="lp-tracker-sep">/</span><span class="lp-tracker-max"
-                                    id="lp-bar-max-wp">—</span>
+                        <div class="lp-tracker-item" id="lp-track-wp">
+                            <button type="button" class="lp-tracker-btn" onclick="lpAdjust('cs-wp',-1)"
+                                title="Reduce WP by 1">−</button>
+                            <div class="lp-tracker-inner">
+                                <span class="lp-tracker-label">WP</span>
+                                <div class="lp-tracker-values">
+                                    <span class="lp-tracker-current" id="lp-cur-wp">—</span><span
+                                        class="lp-tracker-sep">/</span><span class="lp-tracker-max"
+                                        id="lp-bar-max-wp">—</span>
+                                </div>
+                            </div>
+                            <button type="button" class="lp-tracker-btn" onclick="lpAdjust('cs-wp',1)"
+                                title="Restore 1 WP">+</button>
+                        </div>
+                        <div class="lp-tracker-item" id="lp-track-san">
+                            <button type="button" class="lp-tracker-btn" onclick="lpAdjust('cs-sanity-value',-1)"
+                                title="Reduce SAN by 1">−</button>
+                            <div class="lp-tracker-inner">
+                                <span class="lp-tracker-label">SAN</span>
+                                <div class="lp-tracker-values">
+                                    <span class="lp-tracker-current" id="lp-cur-san">—</span><span
+                                        class="lp-tracker-sep">/</span><span class="lp-tracker-max"
+                                        id="lp-bar-max-san">—</span>
+                                </div>
+                                <span class="lp-tracker-status" id="lp-bar-sta-san"></span>
+                            </div>
+                            <button type="button" class="lp-tracker-btn" onclick="lpAdjust('cs-sanity-value',1)"
+                                title="Restore 1 SAN">+</button>
+                        </div>
+                        <div class="lp-tracker-item lp-track-bp" id="lp-track-bp">
+                            <div class="lp-tracker-inner">
+                                <span class="lp-tracker-label">BP</span>
+                                <span class="lp-tracker-current" id="lp-cur-bp">—</span>
                             </div>
                         </div>
-                        <button type="button" class="lp-tracker-btn" onclick="lpAdjust('cs-wp',1)"
-                            title="Restore 1 WP">+</button>
-                    </div>
-                    <div class="lp-tracker-item" id="lp-track-san">
-                        <button type="button" class="lp-tracker-btn" onclick="lpAdjust('cs-sanity-value',-1)"
-                            title="Reduce SAN by 1">−</button>
-                        <div class="lp-tracker-inner">
-                            <span class="lp-tracker-label">SAN</span>
-                            <div class="lp-tracker-values">
-                                <span class="lp-tracker-current" id="lp-cur-san">—</span><span
-                                    class="lp-tracker-sep">/</span><span class="lp-tracker-max"
-                                    id="lp-bar-max-san">—</span>
-                            </div>
-                            <span class="lp-tracker-status" id="lp-bar-sta-san"></span>
-                        </div>
-                        <button type="button" class="lp-tracker-btn" onclick="lpAdjust('cs-sanity-value',1)"
-                            title="Restore 1 SAN">+</button>
-                    </div>
-                    <div class="lp-tracker-item lp-track-bp" id="lp-track-bp">
-                        <div class="lp-tracker-inner">
-                            <span class="lp-tracker-label">BP</span>
-                            <span class="lp-tracker-current" id="lp-cur-bp">—</span>
+                        <div class="lp-tracker-item lp-track-dice">
+                            <button type="button" class="lp-tracker-btn lp-dice-quick" onclick="lpQuickRoll()"
+                                title="Roll D%"></button>
+                            <span class="lp-dice-result" id="lp-dice-result"></span>
                         </div>
                     </div>
-                    <div class="lp-tracker-item lp-track-dice">
-                        <button type="button" class="lp-tracker-btn lp-dice-quick" onclick="lpQuickRoll()"
-                            title="Roll D%"></button>
-                        <span class="lp-dice-result" id="lp-dice-result"></span>
-                    </div>
-                </div>
-                <!-- ── Full live-play sheet (Field Document theme only) ── -->
-                <div id="lp-sheet"></div>
-                <input type="hidden" id="cs-img" value="">
-                <input type="hidden" id="cs-type" value="agent">
-                <fieldset id="cs-biography-fieldset" class="panel panel-bio fieldset-default">
-                    <legend>Biography</legend>
-                    <p class="description-text" style="text-align:center;max-width:50%;margin:0 auto 8px;">
-                        The <strong class="random-bio-ref">RANDOM BIO?</strong> button works best <strong>after
-                            selecting a profession</strong>
-                        — the generated employer, education, and background will then match your agent's field of work
-                        rather than using generic defaults.
-                    </p>
-                    <div id="bio-gender-row">
-                        <button type="button" id="random-bio-button" onclick="generateRandomBio()"
-                            title="Randomly fills: Name, Sex, Age, Nationality, Employer, Education, and Physical Description. Employer &amp; education match your profession. Physical description is influenced by STR &amp; CON.">RANDOM
-                            BIO?</button>
-                        <select id="bio-gender-select"
-                            title="Sets the gender used when generating a random name. Does not affect any other field.">
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="non-binary">Non-binary</option>
-                        </select>
-                    </div>
-                    <label>Name: <input type="text" id="cs-name" value="Agent"></label><br>
-
-                    <!-- Profession lives here — selecting it expands the description + skills inline -->
-                    <div id="bio-profession-row">
-                        <label for="cs-profession-select">Profession:
-                            <select id="cs-profession-select" onchange="selectProfession(this.value)">
-                                <option value="">— choose a profession —</option>
+                    <!-- ── Full live-play sheet (Field Document theme only) ── -->
+                    <div id="lp-sheet"></div>
+                    <input type="hidden" id="cs-img" value="">
+                    <input type="hidden" id="cs-type" value="agent">
+                    <h2 class="visually-hidden">Biography</h2>
+                    <fieldset id="cs-biography-fieldset" class="panel panel-bio fieldset-default">
+                        <legend>Biography</legend>
+                        <p class="description-text" style="text-align:center;max-width:50%;margin:0 auto 8px;">
+                            The <strong class="random-bio-ref">RANDOM BIO?</strong> button works best <strong>after
+                                selecting a profession</strong>
+                            — the generated employer, education, and background will then match your agent's field of
+                            work
+                            rather than using generic defaults.
+                        </p>
+                        <div id="bio-gender-row">
+                            <button type="button" id="random-bio-button" onclick="generateRandomBio()"
+                                title="Randomly fills: Name, Sex, Age, Nationality, Employer, Education, and Physical Description. Employer &amp; education match your profession. Physical description is influenced by STR &amp; CON.">RANDOM
+                                BIO?</button>
+                            <select id="bio-gender-select"
+                                title="Sets the gender used when generating a random name. Does not affect any other field.">
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="non-binary">Non-binary</option>
                             </select>
-                        </label>
-                        <!-- Profession detail expands inline once selected -->
-                        <div id="cs-profession-info"></div>
-                        <div id="cs-profession-optional-skills"></div>
-                        <div id="bio-profession-apply-row" style="display: none;">
-                            <span class="reminder-text" id="reminder-apply-profession">↓ apply professional skills
-                                before continuing</span>
-                            <button type="button" id="apply-profession-button"
-                                title="Applies the selected profession's skill bonuses to your character sheet. Do this before spending bonus skill points."
-                                onclick="applyProfessionSkills()">Apply
-                                Professional Skills</button>
-                            <button type="button" id="reset-profession-button"
-                                title="Resets all profession-applied skills back to their defaults so you can choose a different profession."
-                                onclick="resetProfessionSkills()">Reset Profession Skills</button>
                         </div>
-                    </div>
+                        <label>Name: <input type="text" id="cs-name" value="Agent"></label><br>
 
-                    <label>Employer: <input type="text" id="cs-bio-employer" value=""></label>
-                    <label>Nationality: <input type="text" id="cs-bio-nationality" value=""></label>
-                    <label>Sex: <input type="text" id="cs-bio-sex" value=""></label>
-                    <label>Age: <input type="number" id="cs-bio-age" value="" min="0"></label>
-                    <label>Education: <input type="text" id="cs-bio-education" value=""></label>
-                    <label>Physical Description: <textarea id="cs-physical-desc" autocomplete="off"
-                            placeholder="Physical description of agent"></textarea></label>
-                    <label>Motivations and Mental Disorders: <textarea id="cs-motivations" autocomplete="off"
-                            placeholder="You may define up to 5 Motivations — deeply held beliefs, ideals, or drives that keep your agent going. Once per session, acting on a Motivation can restore lost Willpower. When your agent develops a Mental Disorder, it replaces one of their Motivations."></textarea></label>
-                </fieldset>
-                <fieldset class="panel panel-skills fieldset-default">
-                    <legend>Skills</legend>
-                    <div id="cs-skills"> <!-- skill inputs created by JS --> </div>
-                    <!-- Specialty skill instances (Art, Craft, Science, Pilot, Military Science).
+                        <!-- Profession lives here — selecting it expands the description + skills inline -->
+                        <div id="bio-profession-row">
+                            <label for="cs-profession-select">Profession:
+                                <select id="cs-profession-select" onchange="selectProfession(this.value)">
+                                    <option value="">— choose a profession —</option>
+                                </select>
+                            </label>
+                            <!-- Profession detail expands inline once selected -->
+                            <div id="cs-profession-info"></div>
+                            <div id="cs-profession-optional-skills"></div>
+                            <div id="bio-profession-apply-row" style="display: none;">
+                                <span class="reminder-text" id="reminder-apply-profession">↓ apply professional skills
+                                    before continuing</span>
+                                <button type="button" id="apply-profession-button"
+                                    title="Applies the selected profession's skill bonuses to your character sheet. Do this before spending bonus skill points."
+                                    onclick="applyProfessionSkills()">Apply
+                                    Professional Skills</button>
+                                <button type="button" id="reset-profession-button"
+                                    title="Resets all profession-applied skills back to their defaults so you can choose a different profession."
+                                    onclick="resetProfessionSkills()">Reset Profession Skills</button>
+                            </div>
+                        </div>
+
+                        <label>Employer: <input type="text" id="cs-bio-employer" value=""></label>
+                        <label>Nationality: <input type="text" id="cs-bio-nationality" value=""></label>
+                        <label>Sex: <input type="text" id="cs-bio-sex" value=""></label>
+                        <label>Age: <input type="number" id="cs-bio-age" value="" min="0"></label>
+                        <label>Education: <input type="text" id="cs-bio-education" value=""></label>
+                        <label>Physical Description: <textarea id="cs-physical-desc" autocomplete="off"
+                                placeholder="Physical description of agent"></textarea></label>
+                        <label>Motivations and Mental Disorders: <textarea id="cs-motivations" autocomplete="off"
+                                placeholder="You may define up to 5 Motivations — deeply held beliefs, ideals, or drives that keep your agent going. Once per session, acting on a Motivation can restore lost Willpower. When your agent develops a Mental Disorder, it replaces one of their Motivations."></textarea></label>
+                    </fieldset>
+                    <h2 class="visually-hidden">Skills</h2>
+                    <fieldset class="panel panel-skills fieldset-default">
+                        <legend>Skills</legend>
+                        <div id="cs-skills"> <!-- skill inputs created by JS --> </div>
+                        <!-- Specialty skill instances (Art, Craft, Science, Pilot, Military Science).
                          Rendered from appState.specialtyInstances by renderSpecialtySkills(). -->
-                    <div id="cs-specialty-skills"></div>
-                    <div class="skills-footer-row specialty-add-row">
-                        <button type="button" class="specialty-add-btn"
-                            title="Adds a blank specialty-skill row so you can manually pick the type (Art, Craft, Science, Pilot, Military Science) and sub-option."
-                            onclick="addManualSpecialtySkill()">Add Specialty Skill</button>
-                    </div>
-                    <div class="skills-footer-row">
-                        <div class="sanity-adaptations-section">
-                            <div class="sanity-adaptations-title" data-tooltip-key="sanity_adaptations">Sanity
-                                Adaptations:</div>
-                            <div class="sanity-adaptations-list">
-                                <div class="sanity-row">
-                                    <label class="sanity-category-label">Violence:</label>
-                                    <div class="sanity-checkboxes">
-                                        <label class="sanity-checkbox-label">
-                                            <input type="checkbox" id="cs-violence-incident1"
-                                                class="sanity-adaptation-checkbox" onchange="updateSanityAdaptations()">
-                                            <span>1</span>
-                                        </label>
-                                        <label class="sanity-checkbox-label">
-                                            <input type="checkbox" id="cs-violence-incident2"
-                                                class="sanity-adaptation-checkbox" onchange="updateSanityAdaptations()">
-                                            <span>2</span>
-                                        </label>
-                                        <label class="sanity-checkbox-label">
-                                            <input type="checkbox" id="cs-violence-incident3"
-                                                class="sanity-adaptation-checkbox" onchange="updateSanityAdaptations()">
-                                            <span>3</span>
-                                        </label>
+                        <div id="cs-specialty-skills"></div>
+                        <div class="skills-footer-row specialty-add-row">
+                            <button type="button" class="specialty-add-btn"
+                                title="Adds a blank specialty-skill row so you can manually pick the type (Art, Craft, Science, Pilot, Military Science) and sub-option."
+                                onclick="addManualSpecialtySkill()">Add Specialty Skill</button>
+                        </div>
+                        <div class="skills-footer-row">
+                            <div class="sanity-adaptations-section">
+                                <div class="sanity-adaptations-title" data-tooltip-key="sanity_adaptations">Sanity
+                                    Adaptations:</div>
+                                <div class="sanity-adaptations-list">
+                                    <div class="sanity-row">
+                                        <label class="sanity-category-label">Violence:</label>
+                                        <div class="sanity-checkboxes">
+                                            <label class="sanity-checkbox-label">
+                                                <input type="checkbox" id="cs-violence-incident1"
+                                                    class="sanity-adaptation-checkbox"
+                                                    onchange="updateSanityAdaptations()">
+                                                <span>1</span>
+                                            </label>
+                                            <label class="sanity-checkbox-label">
+                                                <input type="checkbox" id="cs-violence-incident2"
+                                                    class="sanity-adaptation-checkbox"
+                                                    onchange="updateSanityAdaptations()">
+                                                <span>2</span>
+                                            </label>
+                                            <label class="sanity-checkbox-label">
+                                                <input type="checkbox" id="cs-violence-incident3"
+                                                    class="sanity-adaptation-checkbox"
+                                                    onchange="updateSanityAdaptations()">
+                                                <span>3</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="sanity-row">
+                                        <label class="sanity-category-label">Helplessness:</label>
+                                        <div class="sanity-checkboxes">
+                                            <label class="sanity-checkbox-label">
+                                                <input type="checkbox" id="cs-helplessness-incident1"
+                                                    class="sanity-adaptation-checkbox"
+                                                    onchange="updateSanityAdaptations()">
+                                                <span>1</span>
+                                            </label>
+                                            <label class="sanity-checkbox-label">
+                                                <input type="checkbox" id="cs-helplessness-incident2"
+                                                    class="sanity-adaptation-checkbox"
+                                                    onchange="updateSanityAdaptations()">
+                                                <span>2</span>
+                                            </label>
+                                            <label class="sanity-checkbox-label">
+                                                <input type="checkbox" id="cs-helplessness-incident3"
+                                                    class="sanity-adaptation-checkbox"
+                                                    onchange="updateSanityAdaptations()">
+                                                <span>3</span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="sanity-row">
-                                    <label class="sanity-category-label">Helplessness:</label>
-                                    <div class="sanity-checkboxes">
-                                        <label class="sanity-checkbox-label">
-                                            <input type="checkbox" id="cs-helplessness-incident1"
-                                                class="sanity-adaptation-checkbox" onchange="updateSanityAdaptations()">
-                                            <span>1</span>
-                                        </label>
-                                        <label class="sanity-checkbox-label">
-                                            <input type="checkbox" id="cs-helplessness-incident2"
-                                                class="sanity-adaptation-checkbox" onchange="updateSanityAdaptations()">
-                                            <span>2</span>
-                                        </label>
-                                        <label class="sanity-checkbox-label">
-                                            <input type="checkbox" id="cs-helplessness-incident3"
-                                                class="sanity-adaptation-checkbox" onchange="updateSanityAdaptations()">
-                                            <span>3</span>
-                                        </label>
-                                    </div>
+                            </div>
+                        </div>
+                        <div id="cs-custom-skills"></div>
+                    </fieldset>
+
+                    <h2 class="visually-hidden">Bonus Skill Points</h2>
+                    <fieldset class="panel panel-bonus-skills fieldset-default">
+                        <legend>Bonus Skill Points</legend>
+                        <div class="bonus-prep-row">
+                            <span class="reminder-text" id="reminder-prepare-bonus">↓ Press me before continuing</span>
+                            <button type="button" id="prepare-bonus-button"
+                                title="Locks in your current skill values as the baseline and reveals the bonus skill dropdowns — do this after applying your profession skills."
+                                onclick="prepareBonusSkills()">Prepare
+                                Skills for Bonus Points</button>
+                        </div>
+                        <div id="bonus-skills-section">
+                            <p class="bonus-skills-description">
+                                BONUS SKILL POINTS: Pick any eight skills and add 20 points to each. This allows your
+                                Agent
+                                to specialize in certain professional skills or to
+                                learn a little about skills not included in his or her profession. You can even boost a
+                                single skill more than once, adding +20 each time. Unless the Handler says otherwise,
+                                you
+                                can't raise a skill higher than 80% during Agent creation.</p>
+                            <div id="bonus-dropdowns"></div>
+                            <div class="bonus-apply-row">
+                                <span class="reminder-text" id="reminder-apply-bonus">↓ Press me before
+                                    continuing</span>
+                                <button type="button" id="apply-bonus-button"
+                                    title="Adds +20 points to each of your chosen bonus skills. Do this after selecting all 8 skills in the dropdowns above."
+                                    onclick="applyBonusSkills()">Apply
+                                    Bonuses</button>
+                                <button type="button" id="reset-bonus-button"
+                                    title="Removes the +20 bonus points that were applied, letting you re-select and re-apply."
+                                    onclick="resetBonusSkills()" style="display:none">Reset Bonuses</button>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <h2 class="visually-hidden">Bonds</h2>
+                    <fieldset class="fieldset-default" id="cs-bonds-fieldset">
+                        <legend>Bonds</legend>
+                        <div class="bonds-layout">
+                            <div class="bonds-left">
+                                <!-- Bond generation text box -->
+                                <div class="text-box" id="bondText">
+                                    <!-- Canvas pyramid: JS-driven, 24fps capped, no shadowBlur -->
+                                    <canvas id="bond-pyramid-canvas" aria-hidden="true"></canvas>
+                                    <!-- Son of Sam theme: animated sigil replaces the pyramid -->
+                                    <svg id="sos-bond-sigil" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"
+                                        aria-hidden="true">
+                                        <circle class="sp sp-ring" cx="60" cy="60" r="52" />
+                                        <polygon class="sp sp-tri" points="18.4,36 101.6,36 60,108" />
+                                        <line class="sp sp-vln" x1="60" y1="8" x2="60" y2="108" />
+                                        <line class="sp sp-hln" x1="8" y1="60" x2="112" y2="60" />
+                                        <circle class="sp sp-d1" cx="18" cy="36" r="3" />
+                                        <circle class="sp sp-d2" cx="102" cy="36" r="3" />
+                                        <circle class="sp sp-d3" cx="60" cy="108" r="3" />
+                                        <circle class="sp sp-eye" cx="60" cy="60" r="8" />
+                                        <circle class="sp sp-core" cx="60" cy="60" r="2" />
+                                    </svg>
+                                    <span id="bond-text-content"></span>
+                                </div>
+                                <!-- Bond generation buttons -->
+                                <div class="section-flex-buttons">
+                                    <button type="button" id="bonds-button"
+                                        title="Randomly generates a bond from the selected categories below and displays it in the text box above. Use the checkboxes to filter which bond pools to draw from."
+                                        onclick="generateRandomBond()">GENERATE BOND</button>
+                                    <button type="button" id="add-bond-button"
+                                        title="Adds the currently displayed generated bond to your character sheet on the right, where you can then edit its name, description, relationship, and score."
+                                        onclick="addBondToSheet()">ADD TO SHEET</button>
+                                    <button type="button" id="new-empty-bond-button"
+                                        title="Adds a blank bond entry directly to your character sheet so you can write your own custom bond from scratch."
+                                        onclick="addEmptyBond()">NEW EMPTY BOND</button>
+                                </div>
+                                <!-- Bond categories form -->
+                                <form id="bond-categories" class="bond-categories">
+                                    <label for="PISCES_UK"
+                                        title="PISCES — Paranormal Intelligence Collation Executive, Secret. Britain's shadow answer to Delta Green. Same war, different accent. Bonds from this pool connect your agent to the Crown's deniable, underfunded, and deeply compromised occult apparatus.">
+                                        <input type="checkbox" id="PISCES_UK" name="bond-category" value="PISCES_UK">
+                                        PISCES (UK)
+                                    </label>
+                                    <label for="DELTA_GREEN"
+                                        title="Delta Green — the US government's illegal covert programme fighting horrors it officially denies exist. Bonds from this pool tie your agent to handlers, fellow operatives, and the classified world of sanctioned — and unsanctioned — black operations.">
+                                        <input type="checkbox" id="DELTA_GREEN" name="bond-category" value="DELTA_GREEN"
+                                            checked>
+                                        DELTA GREEN (US)
+                                    </label>
+                                    <label for="FRIENDS_FAMILY"
+                                        title="Friends &amp; Family — the people who still think you're normal. Bonds from this pool are spouses, parents, children, old friends — the ones you lie to, protect, and slowly drift away from as the job changes you.">
+                                        <input type="checkbox" id="FRIENDS_FAMILY" name="bond-category"
+                                            value="FRIENDS_FAMILY">
+                                        FRIENDS &amp; FAMILY
+                                    </label>
+                                    <label for="UNDERWORLD"
+                                        title="Underworld — sometimes the mission takes you somewhere law enforcement doesn't reach. Bonds from this pool are fixers, informants, criminals, and morally flexible contacts who owe you one — or the reverse.">
+                                        <input type="checkbox" id="UNDERWORLD" name="bond-category" value="UNDERWORLD">
+                                        UNDERWORLD
+                                    </label>
+                                    <label for="LGBTQ"
+                                        title="LGBTQ — queer bonds for queer agents. Partners, chosen family, community ties, and the people who knew you before the badge and the nightmares. Representation in the dark corners of the world.">
+                                        <input type="checkbox" id="LGBTQ" name="bond-category" value="LGBTQ">
+                                        LGBTQ
+                                    </label>
+                                </form>
+                                <p class="bonus-skills-description"><strong>Bonds</strong> indicate the strength of
+                                    relationships with the
+                                    most important people in your Agent's life, like a spouse, children, a partner, or a
+                                    mentor. <strong>Bonds</strong> help Agents resist <strong>mental trauma</strong>—but
+                                    as
+                                    your Agent's life falls apart
+                                    under the stress of <strong>Delta Green</strong>, Bonds deteriorate. Each Bond has a
+                                    value that starts
+                                    equal to your Agent's <strong>Charisma (CHA)</strong>.</p>
+                            </div>
+                            <div class="bonds-right">
+                                <div id="cs-bonds" class="bonds-list">
+                                    <p class="description-text">(No bonds yet — generated bonds will appear here.)</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div id="cs-custom-skills"></div>
-                </fieldset>
+                    </fieldset>
 
-                <fieldset class="panel panel-bonus-skills fieldset-default">
-                    <legend>Bonus Skill Points</legend>
-                    <div class="bonus-prep-row">
-                        <span class="reminder-text" id="reminder-prepare-bonus">↓ Press me before continuing</span>
-                        <button type="button" id="prepare-bonus-button"
-                            title="Locks in your current skill values as the baseline and reveals the bonus skill dropdowns — do this after applying your profession skills."
-                            onclick="prepareBonusSkills()">Prepare
-                            Skills for Bonus Points</button>
-                    </div>
-                    <div id="bonus-skills-section">
-                        <p class="bonus-skills-description">
-                            BONUS SKILL POINTS: Pick any eight skills and add 20 points to each. This allows your Agent
-                            to specialize in certain professional skills or to
-                            learn a little about skills not included in his or her profession. You can even boost a
-                            single skill more than once, adding +20 each time. Unless the Handler says otherwise, you
-                            can't raise a skill higher than 80% during Agent creation.</p>
-                        <div id="bonus-dropdowns"></div>
-                        <div class="bonus-apply-row">
-                            <span class="reminder-text" id="reminder-apply-bonus">↓ Press me before
-                                continuing</span>
-                            <button type="button" id="apply-bonus-button"
-                                title="Adds +20 points to each of your chosen bonus skills. Do this after selecting all 8 skills in the dropdowns above."
-                                onclick="applyBonusSkills()">Apply
-                                Bonuses</button>
-                            <button type="button" id="reset-bonus-button"
-                                title="Removes the +20 bonus points that were applied, letting you re-select and re-apply."
-                                onclick="resetBonusSkills()" style="display:none">Reset Bonuses</button>
-                        </div>
-                    </div>
-                </fieldset>
+                    <h2 class="visually-hidden">Equipment Loadout</h2>
+                    <fieldset class="fieldset-default" id="eq-picker-fieldset">
+                        <legend id="eq-picker-legend">EQUIPMENT LOADOUT</legend>
+                        <div id="eq-picker-container"></div>
+                    </fieldset>
 
-                <fieldset class="fieldset-default" id="cs-bonds-fieldset">
-                    <legend>Bonds</legend>
-                    <div class="bonds-layout">
-                        <div class="bonds-left">
-                            <!-- Bond generation text box -->
-                            <div class="text-box" id="bondText">
-                                <!-- Canvas pyramid: JS-driven, 24fps capped, no shadowBlur -->
-                                <canvas id="bond-pyramid-canvas" aria-hidden="true"></canvas>
-                                <!-- Son of Sam theme: animated sigil replaces the pyramid -->
-                                <svg id="sos-bond-sigil" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"
-                                    aria-hidden="true">
-                                    <circle class="sp sp-ring" cx="60" cy="60" r="52" />
-                                    <polygon class="sp sp-tri" points="18.4,36 101.6,36 60,108" />
-                                    <line class="sp sp-vln" x1="60" y1="8" x2="60" y2="108" />
-                                    <line class="sp sp-hln" x1="8" y1="60" x2="112" y2="60" />
-                                    <circle class="sp sp-d1" cx="18" cy="36" r="3" />
-                                    <circle class="sp sp-d2" cx="102" cy="36" r="3" />
-                                    <circle class="sp sp-d3" cx="60" cy="108" r="3" />
-                                    <circle class="sp sp-eye" cx="60" cy="60" r="8" />
-                                    <circle class="sp sp-core" cx="60" cy="60" r="2" />
-                                </svg>
-                                <span id="bond-text-content"></span>
-                            </div>
-                            <!-- Bond generation buttons -->
-                            <div class="section-flex-buttons">
-                                <button type="button" id="bonds-button"
-                                    title="Randomly generates a bond from the selected categories below and displays it in the text box above. Use the checkboxes to filter which bond pools to draw from."
-                                    onclick="generateRandomBond()">GENERATE BOND</button>
-                                <button type="button" id="add-bond-button"
-                                    title="Adds the currently displayed generated bond to your character sheet on the right, where you can then edit its name, description, relationship, and score."
-                                    onclick="addBondToSheet()">ADD TO SHEET</button>
-                                <button type="button" id="new-empty-bond-button"
-                                    title="Adds a blank bond entry directly to your character sheet so you can write your own custom bond from scratch."
-                                    onclick="addEmptyBond()">NEW EMPTY BOND</button>
-                            </div>
-                            <!-- Bond categories form -->
-                            <form id="bond-categories" class="bond-categories">
-                                <label for="PISCES_UK"
-                                    title="PISCES — Paranormal Intelligence Collation Executive, Secret. Britain's shadow answer to Delta Green. Same war, different accent. Bonds from this pool connect your agent to the Crown's deniable, underfunded, and deeply compromised occult apparatus.">
-                                    <input type="checkbox" id="PISCES_UK" name="bond-category" value="PISCES_UK">
-                                    PISCES (UK)
-                                </label>
-                                <label for="DELTA_GREEN"
-                                    title="Delta Green — the US government's illegal covert programme fighting horrors it officially denies exist. Bonds from this pool tie your agent to handlers, fellow operatives, and the classified world of sanctioned — and unsanctioned — black operations.">
-                                    <input type="checkbox" id="DELTA_GREEN" name="bond-category" value="DELTA_GREEN"
-                                        checked>
-                                    DELTA GREEN (US)
-                                </label>
-                                <label for="FRIENDS_FAMILY"
-                                    title="Friends &amp; Family — the people who still think you're normal. Bonds from this pool are spouses, parents, children, old friends — the ones you lie to, protect, and slowly drift away from as the job changes you.">
-                                    <input type="checkbox" id="FRIENDS_FAMILY" name="bond-category"
-                                        value="FRIENDS_FAMILY">
-                                    FRIENDS &amp; FAMILY
-                                </label>
-                                <label for="UNDERWORLD"
-                                    title="Underworld — sometimes the mission takes you somewhere law enforcement doesn't reach. Bonds from this pool are fixers, informants, criminals, and morally flexible contacts who owe you one — or the reverse.">
-                                    <input type="checkbox" id="UNDERWORLD" name="bond-category" value="UNDERWORLD">
-                                    UNDERWORLD
-                                </label>
-                                <label for="LGBTQ"
-                                    title="LGBTQ — queer bonds for queer agents. Partners, chosen family, community ties, and the people who knew you before the badge and the nightmares. Representation in the dark corners of the world.">
-                                    <input type="checkbox" id="LGBTQ" name="bond-category" value="LGBTQ">
-                                    LGBTQ
-                                </label>
-                            </form>
-                            <p class="bonus-skills-description"><strong>Bonds</strong> indicate the strength of
-                                relationships with the
-                                most important people in your Agent's life, like a spouse, children, a partner, or a
-                                mentor. <strong>Bonds</strong> help Agents resist <strong>mental trauma</strong>—but as
-                                your Agent's life falls apart
-                                under the stress of <strong>Delta Green</strong>, Bonds deteriorate. Each Bond has a
-                                value that starts
-                                equal to your Agent's <strong>Charisma (CHA)</strong>.</p>
-                        </div>
-                        <div class="bonds-right">
-                            <div id="cs-bonds" class="bonds-list">
-                                <p class="description-text">(No bonds yet — generated bonds will appear here.)</p>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-
-                <fieldset class="fieldset-default" id="eq-picker-fieldset">
-                    <legend id="eq-picker-legend">EQUIPMENT LOADOUT</legend>
-                    <div id="eq-picker-container"></div>
-                </fieldset>
-
-                <fieldset class="panel panel-proto fieldset-default">
-                    <legend>Prototype Token / Misc JSON</legend>
-                    <label>Prototype Token (JSON):</label>
-                    <textarea id="cs-prototype-json">{
+                    <h2 class="visually-hidden">Prototype Token / Misc JSON</h2>
+                    <fieldset class="panel panel-proto fieldset-default">
+                        <legend>Prototype Token / Misc JSON</legend>
+                        <label>Prototype Token (JSON):</label>
+                        <textarea id="cs-prototype-json">{
   "actorLink": true,
   "name": "Agent",
   "width": 1,
   "height": 1,
   "texture": { "src": "icons/svg/mystery-man.svg" }
 }</textarea>
-                    <label>Items (JSON array):</label>
-                    <textarea id="cs-items-json">[{
+                        <label>Items (JSON array):</label>
+                        <textarea id="cs-items-json">[{
   "name": "Unarmed Attack",
   "type": "weapon",
   "flags": { "deltagreen": { "AutoAdded": true, "SystemName": "unarmed-attack" } },
   "img": "systems/deltagreen/assets/icons/punch.svg",
   "system": { "skill": "unarmed_combat", "damage": "1D4-1", "equipped": true }
 }]</textarea>
-                </fieldset>
+                    </fieldset>
 
-                <div id="save-share-bar" class="save-share-bar">
-                    <div class="section-buttons" id="save-share-buttons">
-                        <button type="button" id="copy-link-btn" onclick="dgSaveLoad.share()"
-                            title="Encodes your character into the URL so you can share or bookmark it.">Copy Share
-                            Link</button>
-                        <button type="button" id="clear-save-btn" onclick="dgSaveLoad.clearSave()"
-                            title="Wipes all locally saved character data.">Clear Save</button>
-                        <button type="button" id="download-sheet-btn" onclick="dgSaveLoad.downloadSheet()"
-                            title="Save your entire character sheet to a .json file. Captures all stats, skills, bonds, notes, wounds, gear, and Live Play session data. Use this after each session to back up your agent.">&#11015;
-                            Download Sheet</button>
-                        <button type="button" id="upload-sheet-btn" onclick="dgSaveLoad.uploadSheet()"
-                            title="Load a previously downloaded .json sheet file. Fully restores your agent — stats, skills, bonds, notes, wounds, gear, and session data — exactly as it was saved.">&#11014;
-                            Upload Sheet</button>
-                        <button type="button" id="clear-sheet-lp-btn" onclick="dgSaveLoad.clearSheet()"
-                            title="Permanently wipes all saved character data from this browser, including stats, skills, bonds, and session notes. Download your sheet first if you want to keep it.">Clear
-                            Sheet</button>
+                    <div id="save-share-bar" class="save-share-bar">
+                        <div class="section-buttons" id="save-share-buttons">
+                            <button type="button" id="copy-link-btn" onclick="dgSaveLoad.share()"
+                                title="Encodes your character into the URL so you can share or bookmark it.">Copy Share
+                                Link</button>
+                            <button type="button" id="clear-save-btn" onclick="dgSaveLoad.clearSave()"
+                                title="Wipes all locally saved character data.">Clear Save</button>
+                            <button type="button" id="download-sheet-btn" onclick="dgSaveLoad.downloadSheet()"
+                                title="Save your entire character sheet to a .json file. Captures all stats, skills, bonds, notes, wounds, gear, and Live Play session data. Use this after each session to back up your agent.">&#11015;
+                                Download Sheet</button>
+                            <button type="button" id="upload-sheet-btn" onclick="dgSaveLoad.uploadSheet()"
+                                title="Load a previously downloaded .json sheet file. Fully restores your agent — stats, skills, bonds, notes, wounds, gear, and session data — exactly as it was saved.">&#11014;
+                                Upload Sheet</button>
+                            <button type="button" id="clear-sheet-lp-btn" onclick="dgSaveLoad.clearSheet()"
+                                title="Permanently wipes all saved character data from this browser, including stats, skills, bonds, and session notes. Download your sheet first if you want to keep it.">Clear
+                                Sheet</button>
+                        </div>
                     </div>
-                </div>
 
-                <details id="advanced-options-details">
-                    <summary>Advanced Options <span class="advanced-options-hints">— Export to VTT &nbsp;·&nbsp;
-                            Import from VTT &nbsp;·&nbsp; Print</span></summary>
-                    <div class="advanced-options-body">
+                    <details id="advanced-options-details">
+                        <summary>Advanced Options <span class="advanced-options-hints">— Export to VTT &nbsp;·&nbsp;
+                                Import from VTT &nbsp;·&nbsp; Print</span></summary>
+                        <div class="advanced-options-body">
 
-                        <div class="export-actions-grid">
-                            <div class="export-action-group">
-                                <div class="export-action-group-label">Print</div>
-                                <div class="section-buttons">
-                                    <button type="button" id="export-printable" onclick="exportPrintable()"
-                                        title="Generates a clean, printer-friendly HTML character sheet from the current form — open it in your browser and use Print to PDF."
-                                        style="display:flex;flex-direction:column;align-items:center;gap:4px;"><span
-                                            style="font-size:3em;line-height:1;">&#128196;</span>Export Printable
-                                        Sheet</button>
+                            <div class="export-actions-grid">
+                                <div class="export-action-group">
+                                    <div class="export-action-group-label">Print</div>
+                                    <div class="section-buttons">
+                                        <button type="button" id="export-printable" onclick="exportPrintable()"
+                                            title="Generates a clean, printer-friendly HTML character sheet from the current form — open it in your browser and use Print to PDF."
+                                            style="display:flex;flex-direction:column;align-items:center;gap:4px;"><span
+                                                style="font-size:3em;line-height:1;">&#128196;</span>Export Printable
+                                            Sheet</button>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="export-action-group">
-                                <div class="export-action-group-label">Foundry VTT</div>
-                                <p class="description-text">Export to Foundry VTT, print your character sheet, or
-                                    generate a printable sheet from an existing Foundry .json file.</p>
-                                <div class="section-buttons">
-                                    <button type="button" id="preview-json" onclick="populateCharacterJSON()"
-                                        title="Renders the Foundry VTT .json data for your character below — useful for a quick review before exporting.">Preview
-                                        Foundry VTT .json</button>
-                                    <button type="button" id="export-json" onclick="exportCharacterJSON()"
-                                        title="Downloads your character as a .json file ready to import directly into Foundry VTT via the Actors tab.">Export
-                                        to Foundry</button>
-                                    <button type="button" id="refresh-stats" onclick="populateCharacterSheetForm()"
-                                        title="Re-reads your stat values from the top section and updates the character sheet fields — useful if you changed your stats after filling in the sheet.">Sync
-                                        Stats → Sheet</button>
+                                <div class="export-action-group">
+                                    <div class="export-action-group-label">Foundry VTT</div>
+                                    <p class="description-text">Export to Foundry VTT, print your character sheet, or
+                                        generate a printable sheet from an existing Foundry .json file.</p>
+                                    <div class="section-buttons">
+                                        <button type="button" id="preview-json" onclick="populateCharacterJSON()"
+                                            title="Renders the Foundry VTT .json data for your character below — useful for a quick review before exporting.">Preview
+                                            Foundry VTT .json</button>
+                                        <button type="button" id="export-json" onclick="exportCharacterJSON()"
+                                            title="Downloads your character as a .json file ready to import directly into Foundry VTT via the Actors tab.">Export
+                                            to Foundry</button>
+                                        <button type="button" id="refresh-stats" onclick="populateCharacterSheetForm()"
+                                            title="Re-reads your stat values from the top section and updates the character sheet fields — useful if you changed your stats after filling in the sheet.">Sync
+                                            Stats → Sheet</button>
+                                    </div>
+                                    <pre id="cs-json" class="hidden-section"></pre>
                                 </div>
-                                <pre id="cs-json" class="hidden-section"></pre>
-                            </div>
 
-                            <div class="export-action-group">
-                                <div class="export-action-group-label">Print from Foundry .json</div>
-                                <p class="description-text">Paste, drag-and-drop, or upload a Foundry VTT character
-                                    .json file.</p>
-                                <div id="json-drop-zone" class="json-drop-zone" ondragover="jsonDropZone.over(event)"
-                                    ondragleave="jsonDropZone.leave(event)" ondrop="jsonDropZone.drop(event)"
-                                    onclick="document.getElementById('json-file-input').click()">
-                                    <span class="json-drop-label">Drop Foundry VTT .json here or click to browse</span>
-                                    <input type="file" id="json-file-input" accept=".json,application/json"
-                                        style="display:none" onchange="jsonDropZone.fileSelected(event)">
+                                <div class="export-action-group">
+                                    <div class="export-action-group-label">Print from Foundry .json</div>
+                                    <p class="description-text">Paste, drag-and-drop, or upload a Foundry VTT character
+                                        .json file.</p>
+                                    <div id="json-drop-zone" class="json-drop-zone"
+                                        ondragover="jsonDropZone.over(event)" ondragleave="jsonDropZone.leave(event)"
+                                        ondrop="jsonDropZone.drop(event)"
+                                        onclick="document.getElementById('json-file-input').click()">
+                                        <span class="json-drop-label">Drop Foundry VTT .json here or click to
+                                            browse</span>
+                                        <input type="file" id="json-file-input" accept=".json,application/json"
+                                            style="display:none" onchange="jsonDropZone.fileSelected(event)">
+                                    </div>
+                                    <textarea id="json-import-area" rows="5"
+                                        placeholder="Paste exported Foundry VTT character .json here..."></textarea>
+                                    <div class="section-buttons">
+                                        <button type="button" id="json-to-printable-button"
+                                            onclick="exportPrintableFromJSON()"
+                                            title="Generates a printable HTML character sheet directly from the pasted Foundry VTT .json — no need to fill in the form manually.">Generate
+                                            Printable Sheet</button>
+                                        <button type="button" id="json-to-editor-button"
+                                            onclick="importFoundryJSONToEditor()"
+                                            title="Loads all stats, skills, bonds, and biography from the pasted Foundry VTT .json back into the web editor for further editing.">Load
+                                            into Editor</button>
+                                    </div>
                                 </div>
-                                <textarea id="json-import-area" rows="5"
-                                    placeholder="Paste exported Foundry VTT character .json here..."></textarea>
-                                <div class="section-buttons">
-                                    <button type="button" id="json-to-printable-button"
-                                        onclick="exportPrintableFromJSON()"
-                                        title="Generates a printable HTML character sheet directly from the pasted Foundry VTT .json — no need to fill in the form manually.">Generate
-                                        Printable Sheet</button>
-                                    <button type="button" id="json-to-editor-button"
-                                        onclick="importFoundryJSONToEditor()"
-                                        title="Loads all stats, skills, bonds, and biography from the pasted Foundry VTT .json back into the web editor for further editing.">Load
-                                        into Editor</button>
-                                </div>
-                            </div>
 
-                            <div class="export-action-group" id="lp-sheet-io-group">
-                                <div class="export-action-group-label">Live Play Sheet <span
-                                        style="font-size:0.7em;font-weight:normal;opacity:0.7;">(Beta)</span></div>
-                                <p class="description-text">
-                                    <strong>Live Play</strong> is a purpose-built session theme designed for use at the
-                                    table.
-                                    It presents your agent's stats, skills, bonds, gear, and wounds on a single
-                                    streamlined sheet
-                                    with quick-roll buttons and a sticky tracker bar for HP, WP, and Sanity — no
-                                    scrolling required mid-session.
-                                </p>
-                                <p class="description-text">
-                                    To use it, build your character on any theme as normal, then switch to <em>Live Play
-                                        (Field Notes)</em>
-                                    from the theme selector. Your stats, skills, and equipment will carry over
-                                    automatically.
-                                </p>
-                                <p class="description-text reminder-text"
-                                    style="white-space:normal;color:#ff3b30;animation:pulse-reminder 1.6s ease-in-out infinite;text-align:center;">
-                                    <strong>⚠ Beta feature:</strong> Because Live Play includes session-specific data
-                                    (wounds, notes, tracker values, and free-form gear) that cannot be fully preserved
-                                    by a share link alone, we've added JSON save files so you can keep a full offline
-                                    backup
-                                    of your character between sessions. Use <em>Download Live Play</em> after each
-                                    session and
-                                    <em>Upload Live Play</em> to restore it next time — nothing will be lost.
-                                </p>
-                                <div class="section-buttons">
-                                    <button type="button" onclick="dgSaveLoad.downloadSheet()"
-                                        title="Downloads the full character sheet as a Live Play .json file.">&#11015;
-                                        Download Live Play</button>
-                                    <button type="button" onclick="dgSaveLoad.uploadSheet()"
-                                        title="Load a previously downloaded Live Play .json file.">&#11014;
-                                        Upload Live Play</button>
+                                <div class="export-action-group" id="lp-sheet-io-group">
+                                    <div class="export-action-group-label">Live Play Sheet <span
+                                            style="font-size:0.7em;font-weight:normal;opacity:0.7;">(Beta)</span></div>
+                                    <p class="description-text">
+                                        <strong>Live Play</strong> is a purpose-built session theme designed for use at
+                                        the
+                                        table.
+                                        It presents your agent's stats, skills, bonds, gear, and wounds on a single
+                                        streamlined sheet
+                                        with quick-roll buttons and a sticky tracker bar for HP, WP, and Sanity — no
+                                        scrolling required mid-session.
+                                    </p>
+                                    <p class="description-text">
+                                        To use it, build your character on any theme as normal, then switch to <em>Live
+                                            Play
+                                            (Field Notes)</em>
+                                        from the theme selector. Your stats, skills, and equipment will carry over
+                                        automatically.
+                                    </p>
+                                    <p class="description-text reminder-text"
+                                        style="white-space:normal;color:#ff3b30;animation:pulse-reminder 1.6s ease-in-out infinite;text-align:center;">
+                                        <strong>⚠ Beta feature:</strong> Because Live Play includes session-specific
+                                        data
+                                        (wounds, notes, tracker values, and free-form gear) that cannot be fully
+                                        preserved
+                                        by a share link alone, we've added JSON save files so you can keep a full
+                                        offline
+                                        backup
+                                        of your character between sessions. Use <em>Download Live Play</em> after each
+                                        session and
+                                        <em>Upload Live Play</em> to restore it next time — nothing will be lost.
+                                    </p>
+                                    <div class="section-buttons">
+                                        <button type="button" onclick="dgSaveLoad.downloadSheet()"
+                                            title="Downloads the full character sheet as a Live Play .json file.">&#11015;
+                                            Download Live Play</button>
+                                        <button type="button" onclick="dgSaveLoad.uploadSheet()"
+                                            title="Load a previously downloaded Live Play .json file.">&#11014;
+                                            Upload Live Play</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </details>
+                    </details>
+                </div>
             </div>
-        </div>
-        <!-- Theme selector -->
-        <div id="theme-selector">
-            <label>Theme:</label>
-            <select id="cs-theme-select" aria-label="Theme selector">
-                <option value="xfiles">X-Files</option>
-                <option value="modern">Modern</option>
-                <option value="son-of-sam">Son of Sam</option>
-                <option value="field-notes">Field Notes</option>
-                <option value="field-doc">Live Play (Field Notes)</option>
-            </select>
-        </div>
-        <div class="github-link-container">
-            <a href="https://github.com/PigeonFX/DELTA-GREEN-STATS" target="_blank" rel="noopener noreferrer">
-                <svg class="github-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path
-                        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
-                    </path>
-                </svg>
-                GitHub
-            </a>
-        </div>
-        <div class="bmc-container">
-            <a href="https://www.buymeacoffee.com/pigeon_labs" target="_blank" rel="noopener noreferrer"
-                class="bmc-badge-link">
-                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-black.png" alt="Buy Me A Coffee"
-                    class="bmc-img" data-theme="xfiles">
-                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee"
-                    class="bmc-img" data-theme="modern">
-                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-red.png" alt="Buy Me A Coffee" class="bmc-img"
-                    data-theme="son-of-sam">
-                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-white.png" alt="Buy Me A Coffee"
-                    class="bmc-img" data-theme="mobile">
-                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee"
-                    class="bmc-img" data-theme="morris">
-                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-orange.png" alt="Buy Me A Coffee"
-                    class="bmc-img" data-theme="field-notes">
-            </a>
-        </div>
-        <div class="disclaimer">
-            <p>Published by arrangement with the Delta Green Partnership. The intellectual property known as Delta Green
-                is a trademark and copyright owned by the Delta Green Partnership, who has licensed its use here. The
-                contents of this document are © pigeonlabs.org, excepting those elements that are components of the
-                Delta Green intellectual property.</p>
-        </div>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+            <!-- Theme selector -->
+            <div id="theme-selector">
+                <label>Theme:</label>
+                <select id="cs-theme-select" aria-label="Theme selector">
+                    <option value="xfiles">X-Files</option>
+                    <option value="modern">Modern</option>
+                    <option value="son-of-sam">Son of Sam</option>
+                    <option value="field-notes">Field Notes</option>
+                    <option value="field-doc">Live Play (Field Notes)</option>
+                </select>
+            </div>
+        </main>
+        <footer class="site-footer">
+            <div class="github-link-container">
+                <a href="https://github.com/PigeonFX/DELTA-GREEN-STATS" target="_blank" rel="noopener noreferrer">
+                    <svg class="github-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path
+                            d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+                        </path>
+                    </svg>
+                    GitHub
+                </a>
+            </div>
+            <div class="bmc-container">
+                <a href="https://www.buymeacoffee.com/pigeon_labs" target="_blank" rel="noopener noreferrer"
+                    class="bmc-badge-link">
+                    <img id="bmc-img" src="https://cdn.buymeacoffee.com/buttons/v2/default-black.png"
+                        alt="Buy Me A Coffee" class="bmc-img">
+                </a>
+            </div>
+            <div class="disclaimer">
+                <p>Published by arrangement with the Delta Green Partnership. The intellectual property known as Delta
+                    Green
+                    is a trademark and copyright owned by the Delta Green Partnership, who has licensed its use here.
+                    The
+                    contents of this document are © pigeonlabs.org, excepting those elements that are components of the
+                    Delta Green intellectual property.</p>
+            </div>
+        </footer>
         <script src="professions.js"></script>
         <script src="bonds.js"></script>
         <script src="bio.js"></script>

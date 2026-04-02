@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pigeon-labs-stack.github.io/DELTA-GREEN-STATS/sitemap.xml
