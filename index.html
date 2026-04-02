@@ -63,7 +63,7 @@
         <p class="site-intro">
             Build your Agent. Roll stats. Pick a profession. Spend bonus points. Generate a background.
             Export to <strong>Foundry VTT</strong> or print your sheet — with five themes including
-            <strong>Live Play (Field Notes)</strong> for use at the table.
+            "Live Play" theme for use at the table.
         </p>
         <div class="stats-section" id="stats-buy-section">
             <h2>STATISTICS:</h2>
@@ -151,7 +151,8 @@
                 <fieldset id="cs-biography-fieldset" class="panel panel-bio fieldset-default">
                     <legend>Biography</legend>
                     <p class="description-text" style="text-align:center;max-width:50%;margin:0 auto 8px;">
-                        The <strong>RANDOM BIO?</strong> button works best <strong>after selecting a profession</strong>
+                        The <strong class="random-bio-ref">RANDOM BIO?</strong> button works best <strong>after
+                            selecting a profession</strong>
                         — the generated employer, education, and background will then match your agent's field of work
                         rather than using generic defaults.
                     </p>
@@ -409,13 +410,14 @@
                         <button type="button" id="clear-save-btn" onclick="dgSaveLoad.clearSave()"
                             title="Wipes all locally saved character data.">Clear Save</button>
                         <button type="button" id="download-sheet-btn" onclick="dgSaveLoad.downloadSheet()"
-                            title="Downloads your entire character sheet as a .json file — including all notes, skills, bonds, and tracker values. Load it back at any time with Upload Sheet.">&#11015;
+                            title="Save your entire character sheet to a .json file. Captures all stats, skills, bonds, notes, wounds, gear, and Live Play session data. Use this after each session to back up your agent.">&#11015;
                             Download Sheet</button>
                         <button type="button" id="upload-sheet-btn" onclick="dgSaveLoad.uploadSheet()"
-                            title="Load a previously downloaded .json sheet file. Restores all character data exactly as it was saved.">&#11014;
+                            title="Load a previously downloaded .json sheet file. Fully restores your agent — stats, skills, bonds, notes, wounds, gear, and session data — exactly as it was saved.">&#11014;
                             Upload Sheet</button>
                         <button type="button" id="clear-sheet-lp-btn" onclick="dgSaveLoad.clearSheet()"
-                            title="Wipes all locally saved character data. Use for testing.">Clear Sheet</button>
+                            title="Permanently wipes all saved character data from this browser, including stats, skills, bonds, and session notes. Download your sheet first if you want to keep it.">Clear
+                            Sheet</button>
                     </div>
                 </div>
 

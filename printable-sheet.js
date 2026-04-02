@@ -101,6 +101,17 @@ function _dataFromDOM() {
     }
   });
 
+  // LP-added custom skill rows (added via + ADD SKILL in the Live Play theme)
+  document.querySelectorAll('#lp-sheet .lp-skill-name-inp').forEach(nameInput => {
+    const row = nameInput.closest('tr');
+    if (!row) return;
+    const valInput = row.querySelector('.lp-skill-cust-val');
+    const skillName = nameInput.value.trim();
+    if (skillName && valInput) {
+      skillsList.push({ name: skillName, value: parseInt(valInput.value) || 0, specialty: '' });
+    }
+  });
+
   // Sanity adaptations
   const adaptations = {
     violence: [
@@ -154,7 +165,11 @@ function _dataFromDOM() {
     });
   }
 
-  return { name, professionTitle, statsArr, attributes, bio, skillsList, adaptations, weapons, gear, bonds };
+  // LP free-text fields (only populated when field-doc theme is active)
+  const lpWounds = document.getElementById('lp-wounds')?.value?.trim() || '';
+  const lpRemarks = document.getElementById('lp-remarks')?.value?.trim() || '';
+
+  return { name, professionTitle, statsArr, attributes, bio, skillsList, adaptations, weapons, gear, bonds, lpWounds, lpRemarks };
 }
 
 // ─── Foundry JSON constants (hoisted — built once) ──────────────────────────
@@ -297,7 +312,7 @@ function _dataFromFoundryJSON(obj) {
 /** Build the complete printable HTML document from a normalised data object.
  *  Layout matches the official DD Form 315 Delta Green Agent Documentation Sheet. */
 function _buildPrintableHTML(data) {
-  const { name, professionTitle, statsArr, attributes, bio, skillsList, adaptations, weapons, gear, bonds } = data;
+  const { name, professionTitle, statsArr, attributes, bio, skillsList, adaptations, weapons, gear, bonds, lpWounds, lpRemarks } = data;
   const now = new Date();
 
   // ── helpers ──────────────────────────────────────────────────────────────
@@ -611,7 +626,7 @@ function _buildPrintableHTML(data) {
     <div class="rot-label" style="border-right:1px solid #000;">Injuries</div>
     <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
       <div class="sec-hd">14.&nbsp;&nbsp;WOUNDS AND AILMENTS</div>
-      <div style="flex:1;padding:4px;font-size:8pt;"></div>
+      <div style="flex:1;padding:4px;font-size:8pt;white-space:pre-wrap;">${_esc(lpWounds || '')}</div>
       <div style="border-top:1px solid #000;padding:2px 6px;font-size:7pt;font-style:italic;">
         Has First Aid been attempted since the last injury?&nbsp;${cb()}&nbsp;yes: only Medicine, Surgery, or long-term rest can help further
       </div>
@@ -655,7 +670,7 @@ function _buildPrintableHTML(data) {
         <!-- 17: Personal Details -->
         <div style="flex:1;display:flex;flex-direction:column;border-right:1px solid #000;">
           <div class="sec-hd">17.&nbsp;&nbsp;PERSONAL DETAILS AND NOTES</div>
-          <div style="flex:1;padding:4px;font-size:8pt;"></div>
+          <div style="flex:1;padding:4px;font-size:8pt;white-space:pre-wrap;">${_esc(lpRemarks || '')}</div>
         </div>
         <!-- 18 + 19 stacked -->
         <div style="flex:1;display:flex;flex-direction:column;">

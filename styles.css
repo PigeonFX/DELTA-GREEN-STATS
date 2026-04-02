@@ -82,9 +82,14 @@
 .theme-modern .site-intro {
     color: var(--ctp-subtext0);
     font-size: 0.82rem;
-    line-height: 1.6;
+    line-height: 1.4;
     text-align: center;
-    padding: 0 1rem 0.75rem;
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 33.5%;
+    box-sizing: border-box;
+    margin-bottom: var(--spacing-lg);
     opacity: 0.85;
 }
 
@@ -156,6 +161,41 @@
     border-radius: 5px;
     font-family: 'JetBrains Mono', monospace;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Auto-expand motivations textarea to fit its content */
+.theme-modern #cs-motivations {
+    field-sizing: content;
+    min-height: 60px;
+    overflow: hidden;
+    resize: none;
+}
+
+/* ── Specialty skill name: match existing skill label style ──── */
+.theme-modern #cs-specialty-skills .cs-skill-name {
+    color: var(--primary-color);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+}
+
+/* ── Bond intro text: match bonds section accent (blue) ──────── */
+.theme-modern #cs-bonds-fieldset .bonus-skills-description {
+    color: var(--ctp-blue);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+.theme-modern #cs-bonds-fieldset .bonus-skills-description strong {
+    color: var(--ctp-blue);
+    -webkit-text-fill-color: var(--ctp-blue);
+}
+
+/* ── JSON import textarea placeholder: plain readable text ───── */
+.theme-modern #json-import-area::placeholder {
+    color: var(--ctp-subtext0);
+    font-style: normal;
+    opacity: 0.8;
 }
 
 .theme-modern input:focus,
@@ -1084,16 +1124,37 @@
 
 .theme-son-of-sam .site-intro {
     color: rgba(255, 255, 255, 0.5);
+    font-family: 'Permanent Marker', cursive;
     font-size: 0.82rem;
-    line-height: 1.6;
+    line-height: 1.4;
     text-align: center;
-    padding: 0 1rem 0.75rem;
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 33.5%;
+    box-sizing: border-box;
+    margin-bottom: var(--spacing-lg);
     letter-spacing: 0.06em;
 }
 
 .theme-son-of-sam .site-intro strong {
     color: #cc0000;
     text-shadow: 0 0 6px rgba(204, 0, 0, 0.6);
+}
+
+.theme-son-of-sam .random-bio-ref {
+    color: #cc0000;
+    text-shadow: 0 0 6px rgba(204, 0, 0, 0.6);
+}
+
+.theme-son-of-sam #cs-specialty-skills .cs-skill-name {
+    color: var(--primary-color);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+}
+
+.theme-son-of-sam #cs-bonds-fieldset .bonus-skills-description {
+    font-family: 'Permanent Marker', cursive;
 }
 
 /* ── Section legend headers — ominous uppercase + rare glitch ────────────── */
@@ -1639,14 +1700,44 @@ select {
 .theme-xfiles .site-intro {
     color: rgba(0, 181, 33, 0.65);
     font-size: 0.82rem;
-    line-height: 1.6;
+    line-height: 1.4;
     text-align: center;
-    padding: 0 1rem 0.75rem;
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 33.5%;
+    box-sizing: border-box;
+    margin-bottom: var(--spacing-lg);
     letter-spacing: 0.04em;
 }
 
 .theme-xfiles .site-intro strong {
     color: rgb(0, 181, 33);
+}
+
+/* ── Dropdown triangles: X-Files green ──────────────────────── */
+.theme-xfiles .profession-details-summary::before,
+.theme-xfiles #advanced-options-details>summary::before {
+    color: #00b521;
+    opacity: 1;
+}
+
+.theme-xfiles .prof-expand-hint {
+    color: #00b521;
+}
+
+.theme-xfiles .random-bio-ref {
+    color: #00b521;
+}
+
+.theme-xfiles #totalPoints.points-depleted {
+    color: #ff3333;
+    text-shadow: 0 0 8px rgba(255, 51, 51, 0.6);
+}
+
+.theme-xfiles .disclaimer p {
+    color: #00b521;
+    opacity: 1;
 }
 
 /* Restore the blinking cursor — .theme-xfiles * overrides it with textFlicker */
@@ -2847,6 +2938,15 @@ legend {
     display: none;
 }
 
+/* Larger text for these three buttons when visible in field-doc */
+.theme-field-doc #download-sheet-btn,
+.theme-field-doc #upload-sheet-btn,
+.theme-field-doc #clear-sheet-lp-btn {
+    font-size: 1rem !important;
+    letter-spacing: 0.08em;
+    padding: 8px 14px;
+}
+
 /* Advanced Options collapsible */
 #advanced-options-details {
     border: 1px solid var(--primary-color);
@@ -3884,8 +3984,9 @@ input[type="checkbox"]:checked+label {
     max-width: 100%;
     margin: var(--spacing-xl) auto var(--spacing-lg);
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
     align-items: center;
 }
 
@@ -5230,10 +5331,14 @@ input[type="checkbox"]:checked+label {
 /* ── Advanced options ────────────────────────────────────────────── */
 .theme-field-doc #advanced-options-details summary {
     color: #f5f0e0;
-    font-family: 'Courier New', Courier, monospace;
-    letter-spacing: 0.08em;
+    font-family: 'Bebas Neue', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    font-size: 0.78rem;
+    font-size: 1rem;
+}
+
+.theme-field-doc #advanced-options-details summary::before {
+    color: #008a2a;
 }
 
 .theme-field-doc .advanced-options-body {
@@ -5252,8 +5357,8 @@ input[type="checkbox"]:checked+label {
 
 /* ── Save/share bar ──────────────────────────────────────────────── */
 .theme-field-doc .save-share-bar {
-    border: 1px solid #1a1408;
-    background: #e8e4d4;
+    background: transparent;
+    border: none;
 }
 
 .theme-field-doc #theme-selector {
@@ -5272,7 +5377,7 @@ input[type="checkbox"]:checked+label {
     color: #f5f0e0;
     border: 1px solid #1a1408;
     border-radius: 0;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Bebas Neue', 'Barlow Condensed', 'Arial Narrow', sans-serif;
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -5545,6 +5650,7 @@ input[type="checkbox"]:checked+label {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
     display: block;
     margin: 0 auto;
+    transform: translateY(-5px);
     color: transparent !important;
     outline: none !important;
     transition: background 0.15s, box-shadow 0.15s;
@@ -5585,7 +5691,7 @@ input[type="checkbox"]:checked+label {
     letter-spacing: 5px;
     text-transform: uppercase;
     padding: 3px 0 5px;
-    font-family: 'Arial Black', Arial, sans-serif;
+    font-family: 'Bebas Neue', 'Barlow Condensed', 'Arial Narrow', sans-serif;
 }
 
 /* Section band (horizontal strip with rot-label) */
@@ -5616,10 +5722,11 @@ input[type="checkbox"]:checked+label {
 .lp-sec-hd {
     background: #000;
     color: #fff;
-    font-weight: bold;
-    font-size: 10pt;
+    font-family: 'Bebas Neue', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-weight: 400;
+    font-size: 11pt;
     padding: 2px 4px;
-    letter-spacing: 0.4px;
+    letter-spacing: 1px;
     /* No border — row separators are handled by .lp-sp-row { border-bottom }  */
     /* so the section header itself adds zero extra pixels above or below        */
 }
@@ -6137,16 +6244,20 @@ input[type="checkbox"]:checked+label {
 .lp-adv-title {
     background: #000;
     color: #fff;
-    font-size: 11pt;
-    font-weight: bold;
-    letter-spacing: 1.5px;
+    font-family: 'Bebas Neue', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-size: 14pt;
+    font-weight: 400;
+    letter-spacing: 2px;
     padding: 6px 10px;
     text-align: center;
 }
 
 .lp-adv-rule {
-    font-size: 8.5pt;
-    font-style: italic;
+    font-family: 'Bebas Neue', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-size: 10pt;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.5px;
     color: #444;
     margin: 4px 10px 2px;
     text-align: center;
@@ -6161,9 +6272,10 @@ input[type="checkbox"]:checked+label {
 
 .lp-adv-table th {
     background: #d6cfc0;
-    font-size: 8pt;
-    font-weight: bold;
-    letter-spacing: 0.5px;
+    font-family: 'Bebas Neue', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-size: 10pt;
+    font-weight: 400;
+    letter-spacing: 1px;
     text-align: center;
     padding: 3px 6px;
     border: 1px solid #888;
@@ -6191,13 +6303,14 @@ input[type="checkbox"]:checked+label {
 }
 
 .lp-adv-summary {
-    font-size: 9pt;
-    font-weight: bold;
-    font-style: italic;
+    font-family: 'Bebas Neue', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-size: 11pt;
+    font-weight: 400;
+    font-style: normal;
     text-align: center;
     padding: 6px 10px 4px;
     border-top: 1px solid #ccc;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 
 .lp-adv-footer {

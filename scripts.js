@@ -888,7 +888,9 @@ function adjustStat(stat, adjustment) {
 function updateTotalPoints() {
     const totalPointsUsed = stats.reduce((total, stat) => total + parseInt(document.getElementById(`${stat}-value`).innerText), 0);
     const remainingPoints = CONFIG.POINT_BUY_TOTAL - totalPointsUsed;
-    document.getElementById('totalPoints').innerText = remainingPoints;
+    const el = document.getElementById('totalPoints');
+    el.innerText = remainingPoints;
+    el.classList.toggle('points-depleted', remainingPoints <= 0);
 }
 
 /**
@@ -3084,9 +3086,9 @@ function buildLpSheet() {
             <div class="lp-skills-footer">
                 <span>Checkbox = Failed this session (mark after use)</span>
                 <div style="display:flex;gap:6px;">
-                    <button type="button" class="lp-btn-sm" onclick="addLpSkill()">+ ADD SKILL</button>
-                    <button type="button" class="lp-btn-sm" onclick="lpClearSkillChecks()">CLEAR SESSION MARKS</button>
-                    <button type="button" class="lp-btn-sm lp-btn-advance" onclick="lpRollAdvancement()">ROLL IMPROVEMENTS</button>
+                    <button type="button" class="lp-btn-sm" onclick="addLpSkill()" title="Add a custom skill row to this sheet. Use for any skill your agent has that isn't already listed.">+ ADD SKILL</button>
+                    <button type="button" class="lp-btn-sm" onclick="lpClearSkillChecks()" title="Uncheck all session-failure checkboxes. Do this at the start of a new session once improvement rolls are done.">CLEAR SESSION MARKS</button>
+                    <button type="button" class="lp-btn-sm lp-btn-advance" onclick="lpRollAdvancement()" title="Do this at the end of a session. Rolls for skill improvement on every skill marked as failed. Skills that roll higher than their current value improve by 1d4. Results are shown in a summary before applying.">ROLL IMPROVEMENTS</button>
                 </div>
             </div>
         </div>
@@ -3096,7 +3098,7 @@ function buildLpSheet() {
     <div class="lp-band">
         <span class="lp-rot-label"></span>
         <div style="flex:1;">
-            <div class="lp-sec-hd">WOUNDS &amp; INJURIES</div>
+            <div class="lp-sec-hd">WOUNDS AND AILMENTS</div>
             <textarea class="lp-ta" id="lp-wounds" name="lp-wounds" autocomplete="off" placeholder="Record wounds, injuries, and conditions here..." style="min-height:48px;overflow:hidden;resize:none;"></textarea>
         </div>
     </div>
@@ -3139,7 +3141,7 @@ function buildLpSheet() {
     <div class="lp-band">
         <span class="lp-rot-label"></span>
         <div style="flex:1;">
-            <div class="lp-sec-hd">SESSION NOTES &amp; REMARKS</div>
+            <div class="lp-sec-hd">PERSONAL DETAILS AND NOTES</div>
             <textarea class="lp-ta" id="lp-remarks" name="lp-remarks" autocomplete="off" placeholder="Session notes, clues, leads, contacts..." style="min-height:60px;overflow:hidden;resize:none;"></textarea>
         </div>
     </div>
@@ -3667,7 +3669,7 @@ function lpDismissAdvancement() {
  * Use this to track skills the agent picked up since the last print, or ones the
  * Handler invented five minutes ago.
  */
-function addLpSkill() {
+function addLpSkill(noFocus) {
     const grid = document.querySelector('#lp-sheet .lp-skills-grid');
     if (!grid) return;
     // Append to the last table in the grid
@@ -3689,7 +3691,7 @@ function addLpSkill() {
             <input type="text" inputmode="numeric" class="lp-skill-val lp-skill-cust-val" name="lp-skill-val-extra" autocomplete="off" value="" placeholder="%" style="width:100%;box-sizing:border-box;" title="Click to roll">
         </td>`;
     tbody.appendChild(tr);
-    tr.querySelector('.lp-skill-name-inp').focus();
+    if (!noFocus) tr.querySelector('.lp-skill-name-inp').focus();
 }
 
 /**
@@ -3708,6 +3710,26 @@ document.addEventListener('input', e => {
     if (e.target.matches('#lp-wounds, #lp-gear-content, #lp-remarks, #lp-sheet [data-src="cs-motivations"], #cs-motivations')) {
         lpAutoExpand(e.target);
     }
+});
+
+// Enter key commits and removes focus from LP single-line inputs
+document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const t = e.target;
+    // Only fire inside the LP sheet, only on single-line inputs (not textareas)
+    if (!t.closest('#lp-sheet')) return;
+    if (t.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+    t.blur();
+});
+
+// Auto-append % to skill value fields on blur if the user didn't type one
+document.addEventListener('focusout', e => {
+    const t = e.target;
+    if (!t.matches('#lp-sheet .lp-skill-val')) return;
+    const v = t.value.trim();
+    if (v === '' || v === '%') return;
+    if (!v.endsWith('%')) t.value = v + '%';
 });
 
 /* ── Specialty skill ⓘ tooltip — fixed-position, never clipped ─────────── */

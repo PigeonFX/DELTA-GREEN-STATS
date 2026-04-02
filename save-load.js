@@ -174,7 +174,15 @@
             }
         });
 
-        return { v: 1, stats, csStats, derived, bio, skills, skillSpecs, customSkills, bonds, sanity, theme, protoJson, itemsJson, bondCats, equipment, lpNotes, lpWeapons, lpFeat, bonusSkills, bonusApplied, appliedBonuses, specialtyInstances, lpCheckedSkills };
+        // LP-only custom skill rows added via + ADD SKILL
+        const lpCustomSkills = [];
+        document.querySelectorAll('#lp-sheet .lp-skill-name-inp').forEach(nameInp => {
+            const tr = nameInp.closest('tr');
+            const valInp = tr?.querySelector('.lp-skill-cust-val');
+            if (valInp) lpCustomSkills.push({ name: nameInp.value.trim(), val: valInp.value.trim() });
+        });
+
+        return { v: 1, stats, csStats, derived, bio, skills, skillSpecs, customSkills, bonds, sanity, theme, protoJson, itemsJson, bondCats, equipment, lpNotes, lpWeapons, lpFeat, bonusSkills, bonusApplied, appliedBonuses, specialtyInstances, lpCheckedSkills, lpCustomSkills };
     }
 
     /* =========================================================================
@@ -429,6 +437,22 @@
                     wtb.querySelectorAll('tr').forEach(r => r.remove());
                     state.lpWeapons.forEach(w => addLpWeapon(w, w.fromEquip));
                 }
+            }
+
+            // LP custom skill rows (added via + ADD SKILL)
+            if (state.lpCustomSkills?.length && typeof addLpSkill === 'function') {
+                state.lpCustomSkills.forEach(sk => {
+                    addLpSkill(true);
+                    const grid = document.querySelector('#lp-sheet .lp-skills-grid');
+                    if (!grid) return;
+                    const allNameInps = grid.querySelectorAll('.lp-skill-name-inp');
+                    const lastNameInp = allNameInps[allNameInps.length - 1];
+                    if (lastNameInp) {
+                        lastNameInp.value = sk.name;
+                        const valInp = lastNameInp.closest('tr')?.querySelector('.lp-skill-cust-val');
+                        if (valInp) valInp.value = sk.val;
+                    }
+                });
             }
 
             // LP stat feature labels
@@ -739,6 +763,6 @@
     // This ensures in-progress state (checked skills, edits within the 1.5 s debounce window)
     // is always committed to localStorage before the page disappears.
     window.addEventListener('beforeunload', () => {
-        if (!_restoring && !_clearing) try { save(); } catch (e) {}
+        if (!_restoring && !_clearing) try { save(); } catch (e) { }
     });
 })();
