@@ -2426,8 +2426,11 @@ window.onload = function () {
     }
 
     // initialize theme from storage and wire selector
+    // Auto-apply mobile theme on small screens if no preference is saved yet
     try {
-        const savedTheme = localStorage.getItem('dg_theme') || 'xfiles';
+        const stored = localStorage.getItem('dg_theme');
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        const savedTheme = stored || (isMobile ? 'mobile' : 'xfiles');
         setTheme(savedTheme, { skipSave: true });
         const sel = document.getElementById('cs-theme-select');
         if (sel) sel.addEventListener('change', (e) => setTheme(e.target.value));
@@ -2584,7 +2587,7 @@ function setTheme(theme, { skipSave = false } = {}) {
         if (!skipSave) window.dgSaveLoad?.save?.();
 
         const body = document.body;
-        body.classList.remove('theme-xfiles', 'theme-modern', 'theme-son-of-sam', 'theme-field-notes', 'theme-field-doc');
+        body.classList.remove('theme-xfiles', 'theme-modern', 'theme-son-of-sam', 'theme-field-notes', 'theme-field-doc', 'theme-mobile');
         body.classList.add('theme-' + theme);
         localStorage.setItem('dg_theme', theme);
         const sel = document.getElementById('cs-theme-select');

@@ -6377,3 +6377,503 @@ input[type="checkbox"]:checked+label {
 .lp-bond-damage-btn {
     display: none;
 }
+
+/* ============================================================================
+   MOBILE THEME — Field Notes aesthetic, touch-optimised single-column layout
+   Auto-applied on page load when screen width ≤ 768px (user can switch away).
+   ============================================================================ */
+
+.theme-mobile {
+    --primary-color: #1a1408;
+    --bg-color: #faf7ee;
+    --text-color: #1a1408;
+    --input-bg: transparent;
+    --input-border: rgba(26, 20, 8, 0.5);
+    --spacing-xs: 6px;
+    --spacing-sm: 10px;
+    --spacing-md: 14px;
+    --spacing-lg: 20px;
+    --spacing-xl: 28px;
+    --spacing-2xl: 36px;
+    --radius-sm: 0px;
+    --radius-md: 0px;
+    background-color: #faf7ee;
+    /* Ruled-paper lines */
+    background-image: linear-gradient(rgba(80, 120, 200, 0.12) 1px, transparent 1px);
+    background-size: 100% 32px;
+    color: #1a1408;
+    font-family: 'Permanent Marker', cursive;
+    font-weight: 400;
+    font-size: 15px;
+}
+
+/* Hard right-angles like field-notes */
+.theme-mobile *,
+.theme-mobile *::before,
+.theme-mobile *::after {
+    border-radius: 0 !important;
+    font-weight: 400;
+}
+
+/* ── Page title ─────────────────────────────────────────────────────── */
+.theme-mobile .page-title {
+    color: #1a1408;
+    font-family: 'Bebas Neue', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-shadow: none;
+    -webkit-text-fill-color: #1a1408;
+    border-bottom: 3px solid #1a1408;
+    text-align: center;
+    width: 100%;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: 8px;
+}
+
+.theme-mobile .blinking-cursor {
+    display: none;
+}
+
+.theme-mobile .site-intro {
+    color: #1a1408;
+    font-family: 'Permanent Marker', cursive;
+    font-size: 0.75rem;
+    text-align: center;
+    padding: 0;
+    margin-bottom: var(--spacing-md);
+    opacity: 0.75;
+}
+
+.theme-mobile .site-intro strong {
+    color: #1a1408;
+    -webkit-text-fill-color: #1a1408;
+}
+
+/* ── STATISTICS section ─────────────────────────────────────────────── */
+.theme-mobile #stats-buy-section {
+    background-color: #faf7ee;
+    background-image:
+        linear-gradient(rgba(80, 120, 200, 0.12) 1px, transparent 1px);
+    background-size: 100% 32px;
+    border: 2px solid #1a1408;
+    padding: 16px 12px 12px;
+    width: 100%;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.25);
+}
+
+.theme-mobile #stats-buy-section+.button-container {
+    --primary-color: #1a1408;
+}
+
+/* Stat cards: 2-column on mobile, tight and minimal */
+.theme-mobile #stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+}
+
+.theme-mobile #stats .stat-container {
+    background-color: #f0ecdf;
+    border: 1px solid rgba(26, 20, 8, 0.35);
+    padding: 4px 6px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 4px;
+}
+
+.theme-mobile #stats .stat-container .stat-label {
+    font-family: 'Bebas Neue', 'Barlow Condensed', sans-serif;
+    font-size: 0.95rem;
+    color: #1a1408;
+    text-align: left;
+    min-width: unset;
+}
+
+.theme-mobile #stats .stat-container .stat-value {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1.1rem;
+    color: #1a1408;
+    min-width: unset;
+    text-align: center;
+}
+
+.theme-mobile #stats .stat-container .x5-value {
+    font-size: 0.7rem;
+    color: rgba(26, 20, 8, 0.55);
+    text-align: right;
+}
+
+.theme-mobile #stats .stat-container .descriptor {
+    display: none;
+}
+
+/* Adjust/increment buttons: touch-friendly but compact */
+.theme-mobile .adjust-button,
+.theme-mobile .stat-dec-btn,
+.theme-mobile .stat-inc-btn {
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 1rem;
+    padding: 2px;
+}
+
+/* ── Fieldsets ──────────────────────────────────────────────────────── */
+.theme-mobile #cs-biography-fieldset,
+.theme-mobile .panel-skills,
+.theme-mobile .panel-bonus-skills,
+.theme-mobile #cs-bonds-fieldset,
+.theme-mobile #eq-picker-fieldset {
+    background-color: #faf7ee;
+    background-image: linear-gradient(rgba(80, 120, 200, 0.12) 1px, transparent 1px);
+    background-size: 100% 32px;
+    border: 2px solid #1a1408;
+    padding: 16px 12px 12px;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.25);
+    margin-bottom: var(--spacing-md);
+}
+
+.theme-mobile #cs-biography-fieldset>legend,
+.theme-mobile .panel-skills>legend,
+.theme-mobile .panel-bonus-skills>legend,
+.theme-mobile #cs-bonds-fieldset>legend,
+.theme-mobile #eq-picker-fieldset>legend {
+    font-family: 'Bebas Neue', 'Barlow Condensed', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
+    background: #1a1408;
+    color: #faf7ee;
+    padding: 2px 10px;
+}
+
+/* ── STATISTICS heading ─────────────────────────────────────────────── */
+.theme-mobile .stats-section h2 {
+    font-family: 'Bebas Neue', 'Barlow Condensed', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #1a1408;
+    letter-spacing: 0.08em;
+    text-align: center;
+    -webkit-text-fill-color: #1a1408;
+}
+
+/* ── Inputs ─────────────────────────────────────────────────────────── */
+.theme-mobile input[type="text"],
+.theme-mobile input[type="number"],
+.theme-mobile textarea {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid rgba(26, 20, 8, 0.5);
+    color: #1a1408;
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1rem;
+    box-shadow: none;
+    padding: 4px 2px;
+    min-height: 40px;
+    width: 100%;
+}
+
+.theme-mobile input[type="text"]:focus,
+.theme-mobile input[type="number"]:focus,
+.theme-mobile textarea:focus {
+    outline: none;
+    border-bottom-color: #1a1408;
+    background: rgba(80, 120, 200, 0.06);
+}
+
+/* ── Skills: single column on mobile ───────────────────────────────── */
+.theme-mobile #cs-skills {
+    grid-template-columns: 1fr !important;
+    gap: 2px 0;
+}
+
+/* Override the inline gridColumn/gridRow set by JS — force every pair into column 1 */
+.theme-mobile #cs-skills .cs-skill-pair {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+}
+
+.theme-mobile .cs-skill-pair {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border-bottom: 1px solid rgba(26, 20, 8, 0.12);
+    padding: 3px 0;
+}
+
+.theme-mobile .cs-skill-value-wrap {
+    background: transparent;
+    border: 1.5px solid rgba(26, 20, 8, 0.45);
+    min-width: 52px;
+}
+
+.theme-mobile .cs-skill-pct {
+    color: rgba(26, 20, 8, 0.55);
+    font-size: 0.7rem;
+}
+
+.theme-mobile #cs-skills .cs-skill-input,
+.theme-mobile #cs-specialty-skills .cs-skill-input,
+.theme-mobile .cs-skill-input {
+    font-family: 'Permanent Marker', cursive;
+    color: #1a1408;
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    text-align: center;
+    width: 3ch;
+}
+
+.theme-mobile #cs-skills .cs-skill-name,
+.theme-mobile #cs-specialty-skills .cs-skill-name,
+.theme-mobile .cs-skill-name {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 0.85rem;
+    color: #1a1408;
+    letter-spacing: 0.02em;
+}
+
+/* ── Select dropdowns ───────────────────────────────────────────────── */
+.theme-mobile select {
+    background: #f0ecdf;
+    color: #1a1408;
+    border: 1.5px solid rgba(26, 20, 8, 0.5);
+    font-family: 'Permanent Marker', cursive;
+    font-size: 0.9rem;
+    padding: 6px 8px;
+    min-height: 40px;
+}
+
+.theme-mobile select option {
+    background: #faf7ee;
+    color: #1a1408;
+}
+
+/* ── Buttons: full-width, large touch targets ───────────────────────── */
+.theme-mobile button,
+.theme-mobile .adjust-button {
+    background: #1a1408;
+    color: #faf7ee;
+    border: 2px solid #1a1408;
+    font-family: 'Bebas Neue', 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.06em;
+    padding: 10px 14px;
+    min-height: 44px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.theme-mobile button:hover,
+.theme-mobile .adjust-button:hover {
+    background: #faf7ee;
+    color: #1a1408;
+}
+
+.theme-mobile button:active,
+.theme-mobile .adjust-button:active {
+    opacity: 0.75;
+}
+
+.theme-mobile .button-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.theme-mobile .button-container button {
+    max-width: 100%;
+    width: 100%;
+}
+
+/* ── Bonds: single-column stacked layout ───────────────────────────── */
+.theme-mobile .bonds-layout {
+    grid-template-columns: 1fr;
+}
+
+.theme-mobile .bonds-right {
+    border: 1.5px solid rgba(26, 20, 8, 0.4);
+    padding: var(--spacing-sm);
+    min-height: unset;
+}
+
+/* ── Bonus skill dropdowns: single column ───────────────────────────── */
+.theme-mobile #bonus-dropdowns {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-auto-flow: row;
+    justify-items: stretch;
+    text-align: left;
+}
+
+.theme-mobile #bonus-dropdowns label {
+    align-items: flex-start !important;
+}
+
+/* ── Equipment panels: single column ───────────────────────────────── */
+.theme-mobile .eq-panels {
+    grid-template-columns: 1fr;
+}
+
+/* Allow text to wrap — base rules use white-space:nowrap which overflows */
+.theme-mobile .eq-item-name,
+.theme-mobile .eq-item-meta,
+.theme-mobile .eq-card-name,
+.theme-mobile .eq-card-stats {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+/* Loadout cards: full-width stack on mobile */
+.theme-mobile .eq-loadout-card {
+    flex: 1 1 100%;
+    min-width: 0;
+}
+
+/* Scrollable catalog: taller on mobile so less scrolling needed */
+.theme-mobile .eq-scrolllist {
+    max-height: 50vh;
+}
+
+/* Search + filter row: stack vertically */
+.theme-mobile .eq-search-row {
+    flex-direction: column;
+    gap: 6px;
+}
+
+.theme-mobile .eq-search-input,
+.theme-mobile .eq-cat-select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ── Bond entries ──────────────────────────────────────────────────── */
+.theme-mobile .bond-entry {
+    border-bottom: 1.5px solid rgba(26, 20, 8, 0.3);
+    padding: var(--spacing-sm) 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Override inline flex rows so they wrap on narrow screens */
+.theme-mobile .bond-entry>div[style] {
+    flex-wrap: wrap !important;
+}
+
+/* Name row: input fills width, remove button shrinks */
+.theme-mobile .bond-entry>div:first-child {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+    align-items: flex-start;
+}
+
+.theme-mobile .bond-entry>div:first-child .bond-entry-field {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.theme-mobile .bond-entry>div:first-child .bond-remove-button {
+    flex: 0 0 auto;
+    font-size: 0.75rem;
+    padding: 6px 8px;
+    min-height: 36px;
+}
+
+/* Description textarea: auto-height, fills width */
+.theme-mobile .bond-entry textarea.bond-entry-field {
+    height: auto !important;
+    min-height: 60px;
+    field-sizing: content;
+    width: 100% !important;
+    resize: none;
+    overflow-y: hidden;
+    box-sizing: border-box;
+}
+
+/* Relationship + score row: stack vertically */
+.theme-mobile .bond-entry>div:last-child {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px;
+}
+
+.theme-mobile .bond-entry>div:last-child>div {
+    flex: 1 1 100% !important;
+    width: 100%;
+}
+
+.theme-mobile .bond-entry input,
+.theme-mobile .bond-entry textarea,
+.theme-mobile .bond-entry-field {
+    font-family: 'Permanent Marker', cursive;
+    color: #1a1408;
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ── Theme selector ─────────────────────────────────────────────────── */
+.theme-mobile #theme-selector {
+    border-color: #1a1408;
+    color: #1a1408;
+}
+
+/* ── Save/share bar ─────────────────────────────────────────────────── */
+.theme-mobile .save-share-bar {
+    background: rgba(26, 20, 8, 0.06);
+    border: 1.5px solid rgba(26, 20, 8, 0.4);
+}
+
+/* ── Footer links ───────────────────────────────────────────────────── */
+.theme-mobile .github-link-container a,
+.theme-mobile .github-link-container svg {
+    color: #1a1408;
+    stroke: #1a1408;
+}
+
+/* ── JSON / Advanced options: keep visible but collapsed ───────────── */
+.theme-mobile #cs-json {
+    background: rgba(26, 20, 8, 0.04);
+    border: 1.5px solid rgba(26, 20, 8, 0.3);
+}
+
+/* ── Hide LP-only elements ──────────────────────────────────────────── */
+.theme-mobile #lp-tracker-bar,
+.theme-mobile #lp-sheet {
+    display: none !important;
+}
+
+/* ── Hide canvas-heavy decoration ───────────────────────────────────── */
+.theme-mobile #bond-pyramid-canvas,
+.theme-mobile #sos-bond-sigil,
+.theme-mobile #sos-sigil {
+    display: none !important;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────────────── */
+.theme-mobile ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.theme-mobile ::-webkit-scrollbar-track {
+    background: #ece8d9;
+}
+
+.theme-mobile ::-webkit-scrollbar-thumb {
+    background: rgba(26, 20, 8, 0.35);
+}
+
+/* ── Text selection ─────────────────────────────────────────────────── */
+.theme-mobile ::selection {
+    background: rgba(80, 120, 200, 0.28);
+    color: #1a1408;
+}
