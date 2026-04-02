@@ -67,6 +67,13 @@ A full-featured character creation, management, and live play tool for the **Del
 
 </details>
 
+<details>
+<summary><strong>🎲 Foundry VTT</strong> — Drag-and-drop actor import</summary>
+
+[![Foundry VTT](assets/art/VTT.png)](assets/art/VTT.png)
+
+</details>
+
 ---
 
 ## Quick Start
