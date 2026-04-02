@@ -304,17 +304,17 @@ const professions = {
             { name: "Persuade", value: 50 }
         ],
         optionalSkills: [
-            { name: "Anthropology", value: 40, limit: 6 },
-            { name: "Archeology", value: 40, limit: 6 },
-            { name: "Art", value: 40, limit: 6 },
-            { name: "Bureaucracy", value: 50, limit: 6 },
-            { name: "Computer Science", value: 40, limit: 6 },
-            { name: "Criminology", value: 50, limit: 6 },
-            { name: "Foreign Language", value: 40, limit: 6 },
-            { name: "Law", value: 40, limit: 6 },
-            { name: "Military Science", value: 40, limit: 6 },
-            { name: "Occult", value: 50, limit: 6 },
-            { name: "Science", value: 40, limit: 6 }
+            { name: "Anthropology", value: 40, limit: 5 },
+            { name: "Archeology", value: 40, limit: 5 },
+            { name: "Art", value: 40, limit: 5 },
+            { name: "Bureaucracy", value: 50, limit: 5 },
+            { name: "Computer Science", value: 40, limit: 5 },
+            { name: "Criminology", value: 50, limit: 5 },
+            { name: "Foreign Language", value: 40, limit: 5 },
+            { name: "Law", value: 40, limit: 5 },
+            { name: "Military Science", value: 40, limit: 5 },
+            { name: "Occult", value: 50, limit: 5 },
+            { name: "Science", value: 40, limit: 5 }
         ]
     },
     "nurse_paramedic": {
