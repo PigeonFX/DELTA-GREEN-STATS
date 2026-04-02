@@ -816,7 +816,7 @@ function generateStatContainers() {
                             <button onclick="adjustStat('${stat}', -1)" class="adjust-button" title="Reduce ${stat} by 1 (refunds 1 point in Point Buy mode)">−</button>
                             <button onclick="adjustStat('${stat}', 1)" class="adjust-button stat-inc-btn" title="Increase ${stat} by 1 (costs 1 point in Point Buy mode)">${plusSymbol}</button>
                         </div>
-                        <span class="x5-value" id="${stat}-x5-value">15</span>
+                        <span class="x5-value" id="${stat}-x5-value" title="Click to roll ${stat}×5">15</span>
                         <span class="descriptor" id="${stat}-descriptor">${getDescriptor(stat, 3)}</span>
                     </div>
                 `);

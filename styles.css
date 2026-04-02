@@ -6934,3 +6934,46 @@ input[type="checkbox"]:checked+label {
     word-break: break-word;
     overflow-x: hidden;
 }
+
+/* ── LP tracker: SAN Check button ──────────────────────────────────── */
+.lp-track-san-check {
+    flex: 0 0 auto;
+    padding: 4px 10px;
+}
+
+.lp-san-check-btn {
+    width: auto !important;
+    height: auto !important;
+    min-height: 38px !important;
+    padding: 4px 16px !important;
+    font-family: 'Bebas Neue', 'Barlow Condensed', 'Arial Narrow', sans-serif !important;
+    font-size: 1.15rem !important;
+    line-height: 1 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    background: rgba(0, 100, 30, 0.18) !important;
+    border-color: #3a7a3a !important;
+    color: #8acf8a !important;
+}
+
+.lp-san-check-btn:hover {
+    background: #2a6a2a !important;
+    color: #c8f0c8 !important;
+    border-color: #6acf6a !important;
+}
+
+/* ── LP theme: clickable x5 stat values ─────────────────────────────── */
+.theme-field-doc #stats .x5-value,
+.theme-field-doc #lp-sheet span[id^="lp-stat-"][id$="-x5"] {
+    cursor: pointer;
+    border-bottom: 1px dashed rgba(180, 160, 100, 0.4);
+    transition: color 0.1s, border-bottom-color 0.1s;
+}
+
+.theme-field-doc #stats .x5-value:hover,
+.theme-field-doc #lp-sheet span[id^="lp-stat-"][id$="-x5"]:hover {
+    color: #f5c542;
+    border-bottom-color: #f5c542;
+}

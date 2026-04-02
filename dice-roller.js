@@ -11,43 +11,43 @@
 
     /* ── Dice config ──────────────────────────────────────────────── */
     const DICE = [
-        { id: 'd4',   sides: 4,   label: 'D4'  },
-        { id: 'd6',   sides: 6,   label: 'D6'  },
-        { id: 'd8',   sides: 8,   label: 'D8'  },
-        { id: 'd10',  sides: 10,  label: 'D10' },
-        { id: 'd12',  sides: 12,  label: 'D12' },
-        { id: 'd20',  sides: 20,  label: 'D20' },
-        { id: 'dpct', sides: 100, label: 'D%'  },
+        { id: 'd4', sides: 4, label: 'D4' },
+        { id: 'd6', sides: 6, label: 'D6' },
+        { id: 'd8', sides: 8, label: 'D8' },
+        { id: 'd10', sides: 10, label: 'D10' },
+        { id: 'd12', sides: 12, label: 'D12' },
+        { id: 'd20', sides: 20, label: 'D20' },
+        { id: 'dpct', sides: 100, label: 'D%' },
     ];
 
     // O(1) die config lookup — avoids Array.find() on every roll/selection
     const DICE_MAP = new Map(DICE.map(d => [d.id, d]));
 
     // Hoisted constant — avoids per-selectDie array allocation
-    const SHAPE_CLASSES = ['dr-shape-d4','dr-shape-d6','dr-shape-d8','dr-shape-d10','dr-shape-d12','dr-shape-d20'];
+    const SHAPE_CLASSES = ['dr-shape-d4', 'dr-shape-d6', 'dr-shape-d8', 'dr-shape-d10', 'dr-shape-d12', 'dr-shape-d20'];
 
     /* ── Die wireframe SVGs (stroke='currentColor' picks up theme colour) ── */
     const DIE_SVGS = {
-        d4:  `<svg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'><polygon points='50,5 95,90 5,90' stroke='currentColor' stroke-width='5' stroke-linejoin='round'/><line x1='50' y1='5' x2='50' y2='90' stroke='currentColor' stroke-width='1.5' stroke-opacity='0.45'/></svg>`,
-        d6:  `<svg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'><polygon points='50,5 91,28 91,72 50,95 9,72 9,28' stroke='currentColor' stroke-width='5' stroke-linejoin='round'/><line x1='50' y1='5' x2='50' y2='50' stroke='currentColor' stroke-width='1.5' stroke-opacity='0.5'/><line x1='91' y1='28' x2='50' y2='50' stroke='currentColor' stroke-width='1.5' stroke-opacity='0.5'/><line x1='9' y1='28' x2='50' y2='50' stroke='currentColor' stroke-width='1.5' stroke-opacity='0.5'/></svg>`,
-        d8:  `<svg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'><polygon points='50,4 96,50 50,96 4,50' stroke='currentColor' stroke-width='5' stroke-linejoin='round'/><line x1='4' y1='50' x2='96' y2='50' stroke='currentColor' stroke-width='1.5' stroke-opacity='0.5'/></svg>`,
+        d4: `<svg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'><polygon points='50,5 95,90 5,90' stroke='currentColor' stroke-width='5' stroke-linejoin='round'/><line x1='50' y1='5' x2='50' y2='90' stroke='currentColor' stroke-width='1.5' stroke-opacity='0.45'/></svg>`,
+        d6: `<svg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'><polygon points='50,5 91,28 91,72 50,95 9,72 9,28' stroke='currentColor' stroke-width='5' stroke-linejoin='round'/><line x1='50' y1='5' x2='50' y2='50' stroke='currentColor' stroke-width='1.5' stroke-opacity='0.5'/><line x1='91' y1='28' x2='50' y2='50' stroke='currentColor' stroke-width='1.5' stroke-opacity='0.5'/><line x1='9' y1='28' x2='50' y2='50' stroke='currentColor' stroke-width='1.5' stroke-opacity='0.5'/></svg>`,
+        d8: `<svg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'><polygon points='50,4 96,50 50,96 4,50' stroke='currentColor' stroke-width='5' stroke-linejoin='round'/><line x1='4' y1='50' x2='96' y2='50' stroke='currentColor' stroke-width='1.5' stroke-opacity='0.5'/></svg>`,
         d10: `<svg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'><polygon points='50,4 93,38 74,96 26,96 7,38' stroke='currentColor' stroke-width='5' stroke-linejoin='round'/><line x1='7' y1='38' x2='93' y2='38' stroke='currentColor' stroke-width='1.5' stroke-opacity='0.5'/><line x1='50' y1='4' x2='50' y2='38' stroke='currentColor' stroke-width='1.5' stroke-opacity='0.4'/></svg>`,
         d12: `<svg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'><polygon points='50,4 96,36 78,93 22,93 4,36' stroke='currentColor' stroke-width='5' stroke-linejoin='round'/><polygon points='50,28 74,46 66,73 34,73 26,46' stroke='currentColor' stroke-width='1.5' stroke-opacity='0.55' stroke-linejoin='round'/></svg>`,
         d20: `<svg viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'><polygon points='50,4 91,27 91,73 50,96 9,73 9,27' stroke='currentColor' stroke-width='5' stroke-linejoin='round'/><polygon points='50,4 91,73 9,73' stroke='currentColor' stroke-width='1.5' stroke-opacity='0.6' stroke-linejoin='round'/></svg>`,
     };
 
     let _activeDie = 'dpct';   // default to percentile
-    let _rolling   = false;
-    let _e         = null;     // cached DOM nodes, populated after buildPanel
+    let _rolling = false;
+    let _e = null;     // cached DOM nodes, populated after buildPanel
 
     /* ── Percentile result tiers (Delta Green Agent's Handbook pp.44-45) ── */
     // Critical Success: 01 always, OR matching dice (11,22,33,44) on a success
     // Fumble:           00/100 always, OR matching dice (55,66,77,88,99) on a failure
     function evaluate(roll, target) {
         if (!target || target <= 0) return null;
-        if (roll === 1)   return { tier: 'critical', label: 'CRITICAL SUCCESS', color: '#ffd700' };
-        if (roll === 100) return { tier: 'fumble',   label: 'FUMBLE',           color: '#ff1744' };
-        const tens  = Math.floor(roll / 10);
+        if (roll === 1) return { tier: 'critical', label: 'CRITICAL SUCCESS', color: '#ffd700' };
+        if (roll === 100) return { tier: 'fumble', label: 'FUMBLE', color: '#ff1744' };
+        const tens = Math.floor(roll / 10);
         const units = roll % 10;
         if (tens === units) {
             if (roll <= target) return { tier: 'critical', label: 'CRITICAL SUCCESS', color: '#ffd700' };
@@ -86,13 +86,13 @@
         const { tens, units, tensNum, unitsNum } = _e;
         if (!tens || !units) { onDone?.(); return; }
         let f = 0;
-        const fTens  = finalRoll === 100 ? '00' : String(Math.floor(finalRoll / 10) * 10).padStart(2, '0');
-        const fUnits = finalRoll === 100 ? '0'  : String(finalRoll % 10);
+        const fTens = finalRoll === 100 ? '00' : String(Math.floor(finalRoll / 10) * 10).padStart(2, '0');
+        const fUnits = finalRoll === 100 ? '0' : String(finalRoll % 10);
         function step() {
             if (f < FRAMES) {
                 const r = Math.floor(Math.random() * 100) + 1;
-                tensNum.textContent  = r === 100 ? '00' : String(Math.floor(r / 10) * 10).padStart(2, '0');
-                unitsNum.textContent = r === 100 ? '0'  : String(r % 10);
+                tensNum.textContent = r === 100 ? '00' : String(Math.floor(r / 10) * 10).padStart(2, '0');
+                unitsNum.textContent = r === 100 ? '0' : String(r % 10);
                 tens.classList.add('dr-spin');
                 units.classList.add('dr-spin');
                 // One combined timeout instead of two (halves timer callbacks per frame)
@@ -100,7 +100,7 @@
                 f++;
                 setTimeout(step, f > FRAMES - 4 ? SLOW : FAST);
             } else {
-                tensNum.textContent  = fTens;
+                tensNum.textContent = fTens;
                 unitsNum.textContent = fUnits;
                 tens.classList.add('dr-land');
                 units.classList.add('dr-land');
@@ -117,7 +117,7 @@
         _e.dieBtns.forEach(b => b.classList.toggle('dr-die-btn-active', b.dataset.die === id));
         const isPct = id === 'dpct';
         _e.faceSingle.style.display = isPct ? 'none' : 'flex';
-        _e.facePct.style.display    = isPct ? 'flex' : 'none';
+        _e.facePct.style.display = isPct ? 'flex' : 'none';
         const cfg = DICE_MAP.get(id);
         if (_e.faceLabel) _e.faceLabel.textContent = cfg ? cfg.label : '';
         resetResult();
@@ -128,19 +128,19 @@
             const svgWrap = el.querySelector('.dr-die-svg-wrap');
             if (svgWrap) svgWrap.innerHTML = DIE_SVGS[shapeId] || DIE_SVGS.d10;
         });
-        if (_e.nameEl)   _e.nameEl.textContent = '';
+        if (_e.nameEl) _e.nameEl.textContent = '';
         if (_e.manualEl && id !== 'dpct') _e.manualEl.value = '';
     }
 
     function resetResult() {
         const { resultLabel, resultBox, targetDisp, singleNum, tensNum, unitsNum, breakdownEl } = _e;
-        if (resultLabel)  { resultLabel.textContent = ''; resultLabel.style.color = ''; }
-        if (resultBox)    resultBox.className = 'dr-result-box';
-        if (targetDisp)   targetDisp.textContent = '';
-        if (singleNum)    singleNum.textContent = '--';
-        if (tensNum)      tensNum.textContent    = '--';
-        if (unitsNum)     unitsNum.textContent   = '--';
-        if (breakdownEl)  breakdownEl.textContent = '';
+        if (resultLabel) { resultLabel.textContent = ''; resultLabel.style.color = ''; }
+        if (resultBox) resultBox.className = 'dr-result-box';
+        if (targetDisp) targetDisp.textContent = '';
+        if (singleNum) singleNum.textContent = '--';
+        if (tensNum) tensNum.textContent = '--';
+        if (unitsNum) unitsNum.textContent = '--';
+        if (breakdownEl) breakdownEl.textContent = '';
     }
 
     /* ── Core roll ────────────────────────────────────────────────── */
@@ -148,17 +148,17 @@
         if (_rolling) return;
         _rolling = true;
 
-        const cfg    = DICE_MAP.get(_activeDie);
-        const sides  = cfg?.sides ?? 100;
+        const cfg = DICE_MAP.get(_activeDie);
+        const sides = cfg?.sides ?? 100;
         const rawVal = Math.floor(Math.random() * sides) + 1;
-        const isPct  = _activeDie === 'dpct';
+        const isPct = _activeDie === 'dpct';
 
         const { resultLabel, resultBox, targetDisp, nameEl, manualEl, panel, singleFace } = _e;
 
-        if (nameEl)          nameEl.textContent          = skillName || '';
-        if (_e.breakdownEl)  _e.breakdownEl.textContent  = '';
-        if (resultLabel)     { resultLabel.textContent = ''; resultLabel.style.color = ''; }
-        if (resultBox)       resultBox.className        = 'dr-result-box dr-rolling';
+        if (nameEl) nameEl.textContent = skillName || '';
+        if (_e.breakdownEl) _e.breakdownEl.textContent = '';
+        if (resultLabel) { resultLabel.textContent = ''; resultLabel.style.color = ''; }
+        if (resultBox) resultBox.className = 'dr-result-box dr-rolling';
 
         const target = typeof targetOverride === 'number' && targetOverride > 0
             ? targetOverride
@@ -175,11 +175,11 @@
                     if (resultBox) resultBox.className = `dr-result-box dr-result-${result.tier}`;
                 } else {
                     if (resultLabel) resultLabel.textContent = `ROLLED ${rawVal}`;
-                    if (resultBox)   resultBox.className = 'dr-result-box';
+                    if (resultBox) resultBox.className = 'dr-result-box';
                 }
             } else {
                 if (resultLabel) { resultLabel.textContent = String(rawVal); resultLabel.style.color = ''; }
-                if (resultBox)   resultBox.className = 'dr-result-box';
+                if (resultBox) resultBox.className = 'dr-result-box';
             }
             _rolling = false;
         }
@@ -205,8 +205,8 @@
         if (!str) return null;
         const m = str.trim().replace(/\s+/g, '').match(/^(\d*)d(\d+)([+-]\d+)?$/i);
         if (!m) return null;
-        const count    = m[1] === '' ? 1 : parseInt(m[1], 10);
-        const sides    = parseInt(m[2], 10);
+        const count = m[1] === '' ? 1 : parseInt(m[1], 10);
+        const sides = parseInt(m[2], 10);
         const modifier = m[3] ? parseInt(m[3], 10) : 0;
         if (!count || count < 1 || count > 20 || sides < 2 || sides > 100) return null;
         return { count, sides, modifier };
@@ -217,23 +217,23 @@
         if (_rolling) return;
         _rolling = true;
 
-        const rolls   = Array.from({ length: expr.count }, () => Math.floor(Math.random() * expr.sides) + 1);
-        const total   = rolls.reduce((a, b) => a + b, 0) + expr.modifier;
+        const rolls = Array.from({ length: expr.count }, () => Math.floor(Math.random() * expr.sides) + 1);
+        const total = rolls.reduce((a, b) => a + b, 0) + expr.modifier;
 
         const { resultLabel, resultBox, targetDisp, nameEl,
-                faceSingle, facePct, faceLabel, breakdownEl } = _e;
+            faceSingle, facePct, faceLabel, breakdownEl } = _e;
 
-        if (facePct)    facePct.style.display    = 'none';
+        if (facePct) facePct.style.display = 'none';
         if (faceSingle) faceSingle.style.display = 'flex';
 
-        if (nameEl)      nameEl.textContent      = '';
-        if (targetDisp)  targetDisp.textContent  = '';
+        if (nameEl) nameEl.textContent = '';
+        if (targetDisp) targetDisp.textContent = '';
         if (resultLabel) { resultLabel.textContent = ''; resultLabel.style.color = ''; }
-        if (resultBox)   resultBox.className      = 'dr-result-box dr-rolling';
-        if (breakdownEl) breakdownEl.textContent  = '';
+        if (resultBox) resultBox.className = 'dr-result-box dr-rolling';
+        if (breakdownEl) breakdownEl.textContent = '';
 
         // Update die shape to match the expression die sides
-        const shapeId = ['d4','d6','d8','d10','d12','d20']
+        const shapeId = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20']
             .find(key => DICE_MAP.get(key)?.sides === expr.sides) || 'd10';
         _e.faceDivs.forEach(el => {
             el.classList.remove(...SHAPE_CLASSES);
@@ -248,11 +248,11 @@
 
         animateSingle(_e.singleFace, expr.count * expr.sides, total, () => {
             if (resultLabel) { resultLabel.textContent = String(total); resultLabel.style.color = ''; }
-            if (resultBox)   resultBox.className = 'dr-result-box';
+            if (resultBox) resultBox.className = 'dr-result-box';
             if (breakdownEl && (expr.count > 1 || expr.modifier !== 0)) {
                 const rollStr = expr.count > 1 ? `[${rolls.join(', ')}]` : `${rolls[0]}`;
-                const modStr  = expr.modifier > 0 ? ` + ${expr.modifier}`
-                              : expr.modifier < 0 ? ` \u2212 ${Math.abs(expr.modifier)}` : '';
+                const modStr = expr.modifier > 0 ? ` + ${expr.modifier}`
+                    : expr.modifier < 0 ? ` \u2212 ${Math.abs(expr.modifier)}` : '';
                 breakdownEl.textContent = `${rollStr}${modStr}`;
             }
             _rolling = false;
@@ -263,7 +263,7 @@
 
     /* ── Manual roll button ───────────────────────────────────────── */
     function rollManual() {
-        const val  = _e.manualEl?.value?.trim() || '';
+        const val = _e.manualEl?.value?.trim() || '';
         const expr = parseExpr(val);
         if (expr) { rollExpr(expr); return; }
         rollDie(parseInt(val) || 0);
@@ -274,8 +274,8 @@
         const { panel, body, arrow } = _e;
         if (!panel) return;
         const collapsed = panel.classList.toggle('dr-collapsed');
-        if (body)  body.style.display = collapsed ? 'none' : '';
-        if (arrow) arrow.textContent  = collapsed ? '▲' : '▼';
+        if (body) body.style.display = collapsed ? 'none' : '';
+        if (arrow) arrow.textContent = collapsed ? '▲' : '▼';
     }
 
     /* ── Drag ─────────────────────────────────────────────────────── */
@@ -285,11 +285,11 @@
             if (e.target.closest('button, input')) return;
             e.preventDefault();
             ox = panel.offsetLeft; oy = panel.offsetTop;
-            sx = e.clientX;        sy = e.clientY;
+            sx = e.clientX; sy = e.clientY;
             function onMove(e) {
-                panel.style.left  = `${Math.max(0, Math.min(ox + e.clientX - sx, window.innerWidth  - panel.offsetWidth))}px`;
-                panel.style.top   = `${Math.max(0, Math.min(oy + e.clientY - sy, window.innerHeight - panel.offsetHeight))}px`;
-                panel.style.right  = 'auto';
+                panel.style.left = `${Math.max(0, Math.min(ox + e.clientX - sx, window.innerWidth - panel.offsetWidth))}px`;
+                panel.style.top = `${Math.max(0, Math.min(oy + e.clientY - sy, window.innerHeight - panel.offsetHeight))}px`;
+                panel.style.right = 'auto';
                 panel.style.bottom = 'auto';
             }
             function onUp() { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
@@ -302,9 +302,9 @@
         }, { passive: true });
         handle.addEventListener('touchmove', e => {
             const t = e.touches[0];
-            panel.style.left   = `${Math.max(0, Math.min(ox + t.clientX - sx, window.innerWidth  - panel.offsetWidth))}px`;
-            panel.style.top    = `${Math.max(0, Math.min(oy + t.clientY - sy, window.innerHeight - panel.offsetHeight))}px`;
-            panel.style.right  = 'auto';
+            panel.style.left = `${Math.max(0, Math.min(ox + t.clientX - sx, window.innerWidth - panel.offsetWidth))}px`;
+            panel.style.top = `${Math.max(0, Math.min(oy + t.clientY - sy, window.innerHeight - panel.offsetHeight))}px`;
+            panel.style.right = 'auto';
             panel.style.bottom = 'auto';
         }, { passive: true });
     }
@@ -366,25 +366,25 @@
         const $ = id => document.getElementById(id);
         _e = {
             panel,
-            body:        $('dr-body'),
-            arrow:       $('dr-arrow'),
+            body: $('dr-body'),
+            arrow: $('dr-arrow'),
             resultLabel: $('dr-result-label'),
-            resultBox:   $('dr-result-box'),
-            targetDisp:  $('dr-target-display'),
-            nameEl:      $('dr-skill-name'),
+            resultBox: $('dr-result-box'),
+            targetDisp: $('dr-target-display'),
+            nameEl: $('dr-skill-name'),
             breakdownEl: $('dr-breakdown'),
-            manualEl:    $('dr-manual-target'),
-            faceSingle:  $('dr-face-single'),
-            facePct:     $('dr-face-percent'),
-            faceLabel:   $('dr-face-label'),
-            singleFace:  $('dr-single-face'),
-            singleNum:   $('dr-single-face')?.querySelector('.dr-face-num'),
-            tens:        $('dr-tens'),
-            tensNum:     $('dr-tens')?.querySelector('.dr-face-num'),
-            units:       $('dr-units'),
-            unitsNum:    $('dr-units')?.querySelector('.dr-face-num'),
-            dieBtns:     panel.querySelectorAll('.dr-die-btn'),
-            faceDivs:    panel.querySelectorAll('.dr-die-face'),
+            manualEl: $('dr-manual-target'),
+            faceSingle: $('dr-face-single'),
+            facePct: $('dr-face-percent'),
+            faceLabel: $('dr-face-label'),
+            singleFace: $('dr-single-face'),
+            singleNum: $('dr-single-face')?.querySelector('.dr-face-num'),
+            tens: $('dr-tens'),
+            tensNum: $('dr-tens')?.querySelector('.dr-face-num'),
+            units: $('dr-units'),
+            unitsNum: $('dr-units')?.querySelector('.dr-face-num'),
+            dieBtns: panel.querySelectorAll('.dr-die-btn'),
+            faceDivs: panel.querySelectorAll('.dr-die-face'),
         };
 
         // Wire events via addEventListener — no global dgDice dependency in markup
@@ -396,7 +396,7 @@
         // Start collapsed by default
         panel.classList.add('dr-collapsed');
         _e.body.style.display = 'none';
-        _e.arrow.textContent  = '▲';
+        _e.arrow.textContent = '▲';
         initDrag($('dr-handle'), panel);
     }
 
@@ -413,9 +413,9 @@
                 return;
             }
             if (el.matches?.('#cs-custom-skills .custom-skill-value')) {
-                const row  = el.closest('.custom-skill-row');
-                const ni   = row?.querySelector('.custom-skill-name');
-                const lbl  = row?.querySelector('label');
+                const row = el.closest('.custom-skill-row');
+                const ni = row?.querySelector('.custom-skill-name');
+                const lbl = row?.querySelector('label');
                 const spec = row?.querySelector('select');
                 let name = lbl ? lbl.textContent.replace(':', '').trim() : (ni ? ni.value : 'Skill');
                 if (spec?.value) name += ` (${spec.value})`;
@@ -431,14 +431,14 @@
                 return;
             }
             if (el.matches?.('#lp-weapons-tbody .lp-weapon-pct')) {
-                const pct  = parseInt(el.dataset.pct)  || 0;
+                const pct = parseInt(el.dataset.pct) || 0;
                 const name = el.dataset.name || 'Weapon';
                 rollPercent(pct, name);
                 return;
             }
             if (el.matches?.('#lp-weapons-tbody .lp-weapon-skill-inp')) {
-                const pct  = parseInt(el.value) || 0;
-                const row  = el.closest('tr');
+                const pct = parseInt(el.value) || 0;
+                const row = el.closest('tr');
                 const name = row?.querySelector('.lp-weapon-name-inp')?.value || 'Weapon';
                 rollPercent(pct, name);
                 return;
@@ -446,6 +446,19 @@
             if (el.matches?.('#cs-stats input.stat-input')) {
                 const stat = el.id.replace('cs-', '');
                 rollPercent((parseInt(el.value) || 0) * 5, `${stat} \u00d7 5`);
+                return;
+            }
+            if (el.matches?.('#stats .x5-value')) {
+                const stat = (el.id || '').replace('-x5-value', '');
+                const val = parseInt(el.textContent) || 0;
+                rollPercent(val, `${stat} \u00d75`);
+                return;
+            }
+            // LP sheet stat x5 spans (id pattern: lp-stat-STR-x5)
+            if (el.matches?.('#lp-sheet span[id^="lp-stat-"][id$="-x5"]')) {
+                const stat = (el.id || '').replace('lp-stat-', '').replace('-x5', '');
+                const val = parseInt(el.textContent) || 0;
+                if (val > 0) rollPercent(val, `${stat} \u00d75`);
                 return;
             }
         });

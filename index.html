@@ -187,6 +187,11 @@
                                 <span class="lp-tracker-current" id="lp-cur-bp">—</span>
                             </div>
                         </div>
+                        <div class="lp-tracker-item lp-track-san-check" id="lp-track-san-check">
+                            <button type="button" class="lp-tracker-btn lp-san-check-btn"
+                                onclick="if(window.dgDice)dgDice.roll(parseInt(document.getElementById('cs-sanity-value').value)||0,'Sanity Roll')"
+                                title="Roll D% against current SAN value">SANITY ROLL</button>
+                        </div>
                         <div class="lp-tracker-item lp-track-dice">
                             <button type="button" class="lp-tracker-btn lp-dice-quick" onclick="lpQuickRoll()"
                                 title="Roll D%"></button>
