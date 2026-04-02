@@ -21,6 +21,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Delta Green Character Creator - Stats, Skills & Foundry VTT Export</title>
     <meta name="description"
         content="Create Delta Green RPG characters with point buy, random generation, professions, bonds, and more. Generate random bios, export to Foundry VTT, or print your character sheet. Features 5 themes and complete character sheet management.">
@@ -28,7 +31,7 @@
     <link rel="icon" type="image/svg+xml"
         href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,17 95,95 5,95' fill='%2300aa44'/%3E%3C/svg%3E">
     <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700&family=Rock+Salt&family=Permanent+Marker&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@700;900&family=Caveat:wght@400;600&family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700&family=Rock+Salt&family=Permanent+Marker&display=swap"
         rel="stylesheet">
     <script type="application/ld+json">
         {
@@ -356,11 +359,14 @@
                                     LGBTQ
                                 </label>
                             </form>
-                            <p class="bonus-skills-description">Bonds indicate the strength of relationships with the
+                            <p class="bonus-skills-description"><strong>Bonds</strong> indicate the strength of
+                                relationships with the
                                 most important people in your Agent's life, like a spouse, children, a partner, or a
-                                mentor. Bonds help Agents resist mental trauma—but as your Agent's life falls apart
-                                under the stress of Delta Green, Bonds deteriorate. Each Bond has a value that starts
-                                equal to your Agent's Charisma (CHA).</p>
+                                mentor. <strong>Bonds</strong> help Agents resist <strong>mental trauma</strong>—but as
+                                your Agent's life falls apart
+                                under the stress of <strong>Delta Green</strong>, Bonds deteriorate. Each Bond has a
+                                value that starts
+                                equal to your Agent's <strong>Charisma (CHA)</strong>.</p>
                         </div>
                         <div class="bonds-right">
                             <div id="cs-bonds" class="bonds-list">
@@ -491,7 +497,7 @@
                                     automatically.
                                 </p>
                                 <p class="description-text reminder-text"
-                                    style="white-space:normal;color:#ff3b30;animation:pulse-reminder 1.6s ease-in-out infinite;">
+                                    style="white-space:normal;color:#ff3b30;animation:pulse-reminder 1.6s ease-in-out infinite;text-align:center;">
                                     <strong>⚠ Beta feature:</strong> Because Live Play includes session-specific data
                                     (wounds, notes, tracker values, and free-form gear) that cannot be fully preserved
                                     by a share link alone, we've added JSON save files so you can keep a full offline
@@ -521,6 +527,7 @@
                 <option value="xfiles">X-Files</option>
                 <option value="modern">Modern</option>
                 <option value="son-of-sam">Son of Sam</option>
+                <option value="field-notes">Field Notes</option>
                 <option value="field-doc">Live Play (Field Notes)</option>
             </select>
         </div>
@@ -548,6 +555,8 @@
                     class="bmc-img" data-theme="mobile">
                 <img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee"
                     class="bmc-img" data-theme="morris">
+                <img src="https://cdn.buymeacoffee.com/buttons/v2/default-orange.png" alt="Buy Me A Coffee"
+                    class="bmc-img" data-theme="field-notes">
             </a>
         </div>
         <div class="disclaimer">

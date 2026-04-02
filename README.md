@@ -6,7 +6,7 @@ A full-featured character creation, management, and live play tool for the **Del
 
 - No installation. No account. Runs entirely in the browser.
 - Covers the full agent lifecycle: creation → session play → export
-- Five distinct visual themes including a dedicated live play field sheet
+- Six distinct visual themes including a dedicated live play field sheet
 - Zero math required — all derived values calculated automatically
 
 ---
@@ -154,6 +154,29 @@ A floating, draggable dice panel available at all times.
   - Matching double at or above target → **Fumble**
   - `100` → **Fumble**
 
+#### Custom Dice Expressions
+Type a dice expression into the input field and press **ROLL** or **Enter** to run it without leaving the current die button selection.
+
+**Input schema:** `[count]d<sides>[±modifier]`
+
+| Expression | Meaning |
+|---|---|
+| `d6` | Roll one D6 |
+| `2d6` | Roll two D6, sum the results |
+| `6d6` | Roll six D6, sum the results |
+| `d4-1` | Roll a D4 and subtract 1 |
+| `3d8+5` | Roll three D8 and add 5 |
+| `d20` | Roll a D20 |
+| `2d10+3` | Roll two D10 and add 3 |
+
+Rules:
+- `count` is optional — omitting it rolls one die (`d8` = `1d8`)
+- `count` may be 1–20
+- `sides` may be 2–100
+- Modifier is optional and may be positive (`+N`) or negative (`−N`)
+- Individual die results are shown as a breakdown below the total (e.g. `[4, 2, 6] + 3`)
+- Entering a plain number (e.g. `65`) still works as a D% target — existing behaviour unchanged
+
 ### Live Play — Field Notes
 Select the **Live Play (Field Notes)** theme to switch from character creation mode into an in-session tracking sheet styled as a DD Form 315 classified document.
 
@@ -205,8 +228,18 @@ One-click export of a complete Foundry VTT `agent` actor JSON:
 | **X-Files** *(default)* | Dark grey terminal — retro TV surveillance |
 | **Modern** | Catppuccin Mocha — soft dark purples and blues |
 | **Son of Sam** | Black/red high contrast — animated occult sigil, glitch legend headers |
-| **Live Play (Field Notes)** | DD Form 315 classified document — in-session play interface |
-| **Redacted** | … |
+| **Field Notes** | Kraft paper notebook — hand-written biro annotations, Permanent Marker headings, Caveat script body text, coffee-stained parchment background |
+| **Live Play (Field Notes)** | DD Form 315 classified document — Field Notes aesthetic applied to the in-session play interface |
+
+### Field Notes
+The **Field Notes** theme reimagines the character sheet as a physical agent dossier — a spiral-bound field notebook pulled from a jacket pocket.
+
+- **Background** — aged kraft paper texture with subtle grain
+- **Typography** — *Bebas Neue* for stamped headings and buttons; *Permanent Marker* for labels, stat names, and skill values; *Caveat* for hand-written body text and bond entries
+- **Biro annotations** — description hints and reminder text rendered in angled blue-ink script, key terms in red correction ink
+- **Inputs** — transparent fields that blend into the paper, with ruled underlines instead of boxes
+- **Section legends** — rubber-stamp style uppercase lettering
+- All five Buy Me A Coffee badge variants are theme-aware; the orange badge is shown in Field Notes
 
 ---
 

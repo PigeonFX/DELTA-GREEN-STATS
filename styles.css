@@ -1,18 +1,5 @@
-/* ============================================================================
-   DELTA GREEN STATS - PRODUCTION STYLESHEET
-   ============================================================================
-   Organized for easy customization with clear sections for:
-   1. Color configuration (CSS variables)
-   2. Global styling
-   3. Component styling
-   4. Layout patterns
-   5. Modern theme (Catppuccin-inspired)
-   ============================================================================ */
-
-/* ============================================================================
-   CONFIGURATION: Colors, Spacing, Typography
-   ============================================================================ */
-
+﻿/* ============================================================================   DELTA GREEN STATS - PRODUCTION STYLESHEET   ============================================================================   Organized for easy customization with clear sections for:   1. Color configuration (CSS variables)   2. Global styling   3. Component styling   4. Layout patterns   5. Modern theme (Catppuccin-inspired)   ============================================================================ */
+/* ============================================================================   CONFIGURATION: Colors, Spacing, Typography   ============================================================================ */
 :root {
     /* === X-Files Theme Colors === */
     --primary-color: #00b521;
@@ -20,7 +7,6 @@
     --text-color: #ffffff;
     --input-bg: #000000;
     --input-border: #00b521;
-
     /* === Spacing === */
     --spacing-xs: 4px;
     --spacing-sm: 8px;
@@ -28,11 +14,9 @@
     --spacing-lg: 20px;
     --spacing-xl: 30px;
     --spacing-2xl: 50px;
-
     /* === Border Radius === */
     --radius-sm: 4px;
     --radius-md: 6px;
-
     /* === Font Sizes === */
     --font-xs: 12px;
     --font-sm: 14px;
@@ -42,11 +26,7 @@
 }
 
 /* ── Modern Theme (Catppuccin Mocha) ─────────────────────────────────── */
-/* ═══════════════════════════════════════════════════════════════════
-   MODERN THEME — Catppuccin Mocha
-   Full palette, JetBrains Mono, per-section accents, riced aesthetic
-═══════════════════════════════════════════════════════════════════ */
-
+/* ═══════════════════════════════════════════════════════════════════   MODERN THEME — Catppuccin Mocha   Full palette, JetBrains Mono, per-section accents, riced aesthetic═══════════════════════════════════════════════════════════════════ */
 .theme-modern {
     /* ── Catppuccin Mocha full palette ──────────────── */
     --ctp-crust: #11111b;
@@ -75,31 +55,23 @@
     --ctp-pink: #f5c2e7;
     --ctp-flamingo: #f2cdcd;
     --ctp-rosewater: #f5e0dc;
-
     /* ── Semantic tokens ────────────────────────────── */
     --primary-color: var(--ctp-mauve);
     --bg-color: var(--ctp-crust);
     --text-color: var(--ctp-text);
     --input-bg: var(--ctp-surface0);
     --input-border: var(--ctp-surface1);
-
     font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
     background-color: var(--bg-color);
     /* Faint dot-grid gives the flat page some texture */
-    background-image: radial-gradient(circle,
-            rgba(203, 166, 247, 0.07) 1px,
-            transparent 1px);
+    background-image: radial-gradient(circle, rgba(203, 166, 247, 0.07) 1px, transparent 1px);
     background-size: 28px 28px;
     color: var(--text-color);
 }
 
 /* ── Page title: pastel gradient across the full Mocha palette ─ */
 .theme-modern .page-title {
-    background: linear-gradient(90deg,
-            var(--ctp-mauve) 0%,
-            var(--ctp-blue) 40%,
-            var(--ctp-teal) 75%,
-            var(--ctp-green) 100%);
+    background: linear-gradient(90deg, var(--ctp-mauve) 0%, var(--ctp-blue) 40%, var(--ctp-teal) 75%, var(--ctp-green) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -153,10 +125,7 @@
     border-left: 3px solid var(--primary-color);
     border-radius: 8px;
     /* top-edge inner highlight + crisp drop shadow — no bloom */
-    box-shadow:
-        0 1px 0 0 rgba(255, 255, 255, 0.07) inset,
-        0 2px 4px rgba(0, 0, 0, 0.5),
-        0 6px 16px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.07) inset, 0 2px 4px rgba(0, 0, 0, 0.5), 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
 /* ── Legends: solid coloured pill, crust text ───────────────── */
@@ -277,14 +246,10 @@
 .theme-modern #export-printable,
 .theme-modern #json-to-printable-button,
 .theme-modern #json-to-editor-button {
-    background: linear-gradient(to bottom,
-            color-mix(in srgb, var(--primary-color) 90%, white) 0%,
-            var(--primary-color) 100%);
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--primary-color) 90%, white) 0%, var(--primary-color) 100%);
     border-color: color-mix(in srgb, var(--primary-color) 80%, black);
     color: var(--ctp-crust);
-    box-shadow:
-        0 1px 0 0 rgba(255, 255, 255, 0.18) inset,
-        0 3px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.18) inset, 0 3px 10px rgba(0, 0, 0, 0.4);
 }
 
 .theme-modern #random-point-buy:hover,
@@ -385,13 +350,7 @@
 /* ── Statistics section: multi-accent rainbow treatment ─────── */
 /* "STATISTICS:" heading gets the same gradient sweep as the page title */
 .theme-modern .stats-section h2 {
-    background: linear-gradient(90deg,
-            var(--ctp-flamingo) 0%,
-            var(--ctp-pink) 20%,
-            var(--ctp-mauve) 40%,
-            var(--ctp-lavender) 60%,
-            var(--ctp-blue) 80%,
-            var(--ctp-teal) 100%);
+    background: linear-gradient(90deg, var(--ctp-flamingo) 0%, var(--ctp-pink) 20%, var(--ctp-mauve) 40%, var(--ctp-lavender) 60%, var(--ctp-blue) 80%, var(--ctp-teal) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -475,9 +434,7 @@
     --radius-md: 0px;
     font-family: 'JetBrains Mono', monospace;
     /* Ritual manuscript grid — very faint red lines on black */
-    background-image:
-        linear-gradient(rgba(204, 0, 0, 0.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(204, 0, 0, 0.045) 1px, transparent 1px);
+    background-image: linear-gradient(rgba(204, 0, 0, 0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(204, 0, 0, 0.045) 1px, transparent 1px);
     background-size: 52px 52px;
     cursor: crosshair;
 }
@@ -621,7 +578,6 @@
 }
 
 /* All buttons use the same #cc0000 — no individual overrides needed */
-
 /* ── Reminder text (pulsing red) and action buttons ─────────────────────── */
 .theme-son-of-sam .bonus-prep-row #reminder-prepare-bonus,
 .theme-son-of-sam .bonus-apply-row #reminder-apply-bonus,
@@ -648,10 +604,7 @@
 
 /* ── Bond text box — sharp rectangle, blood-red glow ────────────────────── */
 .theme-son-of-sam #bondText {
-    box-shadow:
-        0 0 18px rgba(204, 0, 0, 0.45),
-        0 0 50px rgba(204, 0, 0, 0.08),
-        inset 0 0 80px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 18px rgba(204, 0, 0, 0.45), 0 0 50px rgba(204, 0, 0, 0.08), inset 0 0 80px rgba(0, 0, 0, 0.5);
     text-shadow: 0 0 5px rgba(204, 0, 0, 0.7);
     animation: none;
 }
@@ -686,13 +639,7 @@
     animation-delay: -7s;
 }
 
-/* ── Son of Sam sigil — animated occult symbol replaces the page title ────────────
-   A circle + inverted triangle + cross spine + inner eye, drawing itself stroke
-   by stroke as if being carved by an unseen hand, with periodic glitch cuts.
-   Uses stroke-dashoffset animation — no JS, compositor-friendly.
-   Path lengths: ring=327, tri=251, vln=100, hln=104, eye=50
-   Animation cycle: 14 s total — ~7.5 s draw, ~3 s hold, ~1.5 s glitch, ~2 s settle
-   ─────────────────────────────────────────────────────────────────── */
+/* ── Son of Sam sigil — animated occult symbol replaces the page title ────────────   A circle + inverted triangle + cross spine + inner eye, drawing itself stroke   by stroke as if being carved by an unseen hand, with periodic glitch cuts.   Uses stroke-dashoffset animation — no JS, compositor-friendly.   Path lengths: ring=327, tri=251, vln=100, hln=104, eye=50   Animation cycle: 14 s total — ~7.5 s draw, ~3 s hold, ~1.5 s glitch, ~2 s settle   ─────────────────────────────────────────────────────────────────── */
 #sos-sigil {
     display: none;
 }
@@ -715,11 +662,7 @@
 /* Scanlines overlay on both sigils — horizontal CRT bands */
 .theme-son-of-sam #sos-sigil,
 .theme-son-of-sam #sos-bond-sigil {
-    background: repeating-linear-gradient(0deg,
-            transparent 0px,
-            transparent 3px,
-            rgba(0, 0, 0, 0.20) 3px,
-            rgba(0, 0, 0, 0.20) 4px);
+    background: repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0, 0, 0, 0.20) 3px, rgba(0, 0, 0, 0.20) 4px);
 }
 
 /* Base style for all sigil paths */
@@ -798,19 +741,7 @@
     animation: sp-core-in 14s linear infinite;
 }
 
-/*
-  Timing breakdown (14 s cycle):
-    0 – 18 %  (0 – 2.5 s)  outer ring draws
-    18 – 32 %  (2.5 – 4.5 s)  triangle draws
-    32 – 39 %  (4.5 – 5.5 s)  vertical spine draws
-    39 – 47 %  (5.5 – 6.6 s)  horizontal bar draws
-    47 – 54 %  (6.6 – 7.6 s)  inner eye + anchor dots appear
-    54 – 57 %  (7.6 – 8.0 s)  centre point appears
-    57 – 87 %  fully visible, held
-    87 – 93 %  signal-dropout glitch burst
-    93 – 100 % settle before loop
-*/
-
+/*  Timing breakdown (14 s cycle):    0 – 18 %  (0 – 2.5 s)  outer ring draws    18 – 32 %  (2.5 – 4.5 s)  triangle draws    32 – 39 %  (4.5 – 5.5 s)  vertical spine draws    39 – 47 %  (5.5 – 6.6 s)  horizontal bar draws    47 – 54 %  (6.6 – 7.6 s)  inner eye + anchor dots appear    54 – 57 %  (7.6 – 8.0 s)  centre point appears    57 – 87 %  fully visible, held    87 – 93 %  signal-dropout glitch burst    93 – 100 % settle before loop*/
 @keyframes sp-draw-ring {
     0% {
         stroke-dashoffset: 327;
@@ -1117,7 +1048,6 @@
 }
 
 /* ── Atmospheric overlays on body (body IS .theme-son-of-sam) ────────────── */
-
 /* Vignette — darkness closing in from the edges */
 .theme-son-of-sam::after {
     content: '';
@@ -1148,10 +1078,7 @@
 .theme-son-of-sam .page-title {
     color: #cc0000;
     letter-spacing: 0.22em;
-    text-shadow:
-        0 0 8px rgba(204, 0, 0, 0.95),
-        0 0 22px rgba(204, 0, 0, 0.55),
-        0 0 55px rgba(204, 0, 0, 0.2);
+    text-shadow: 0 0 8px rgba(204, 0, 0, 0.95), 0 0 22px rgba(204, 0, 0, 0.55), 0 0 55px rgba(204, 0, 0, 0.2);
     animation: sos-title-flicker 9s ease-in-out infinite;
 }
 
@@ -1373,7 +1300,6 @@
 }
 
 /* ── Son of Sam keyframes ────────────────────────────────────────────────── */
-
 /* Page title: rare flicker, like a dying signal */
 @keyframes sos-title-flicker {
 
@@ -1381,10 +1307,7 @@
     90%,
     100% {
         opacity: 1;
-        text-shadow:
-            0 0 8px rgba(204, 0, 0, 0.95),
-            0 0 22px rgba(204, 0, 0, 0.55),
-            0 0 55px rgba(204, 0, 0, 0.2);
+        text-shadow: 0 0 8px rgba(204, 0, 0, 0.95), 0 0 22px rgba(204, 0, 0, 0.55), 0 0 55px rgba(204, 0, 0, 0.2);
     }
 
     91% {
@@ -1459,10 +1382,7 @@
     }
 }
 
-/* ============================================================================
-   GLOBAL STYLING
-   ============================================================================ */
-
+/* ============================================================================   GLOBAL STYLING   ============================================================================ */
 * {
     box-sizing: border-box;
 }
@@ -1474,9 +1394,7 @@ html {
 body {
     font-family: 'Courier New', monospace;
     background-color: var(--bg-color);
-    background-image:
-        linear-gradient(rgba(60, 100, 220, 0.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(60, 100, 220, 0.045) 1px, transparent 1px);
+    background-image: linear-gradient(rgba(60, 100, 220, 0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(60, 100, 220, 0.045) 1px, transparent 1px);
     background-size: 28px 28px;
     color: var(--text-color);
     padding: var(--spacing-lg);
@@ -1603,8 +1521,7 @@ select {
     --primary-color: #f5bde6;
 }
 
-/* The button-container (Random Point Buy / Dice Roll / Reset) sits as a sibling
-   to #stats-buy-section, so we need to explicitly scope it too */
+/* The button-container (Random Point Buy / Dice Roll / Reset) sits as a sibling   to #stats-buy-section, so we need to explicitly scope it too */
 .theme-modern #stats-buy-section+.button-container {
     --primary-color: #f5bde6;
 }
@@ -1638,7 +1555,6 @@ select {
 }
 
 /* ── X-Files atmospheric overlays ─────────────────────────────────────────── */
-
 /* Corner vignette — phosphor green-black darkness closing in from the edges */
 .theme-xfiles::before {
     content: '';
@@ -1656,11 +1572,7 @@ select {
     inset: 0;
     pointer-events: none;
     z-index: 999;
-    background: repeating-linear-gradient(0deg,
-            transparent,
-            transparent 2px,
-            rgba(0, 0, 0, 0.12) 2px,
-            rgba(0, 0, 0, 0.12) 4px);
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.12) 2px, rgba(0, 0, 0, 0.12) 4px);
 }
 
 /* Fieldset pulsing border glow — slow phosphor heartbeat */
@@ -1771,10 +1683,7 @@ select {
     100% {
         opacity: 1;
         transform: translateX(0);
-        text-shadow:
-            0 0 6px rgba(0, 255, 0, 0.9),
-            0 0 20px rgba(0, 181, 33, 0.5),
-            0 0 50px rgba(0, 181, 33, 0.15);
+        text-shadow: 0 0 6px rgba(0, 255, 0, 0.9), 0 0 20px rgba(0, 181, 33, 0.5), 0 0 50px rgba(0, 181, 33, 0.15);
     }
 
     85% {
@@ -1814,10 +1723,7 @@ select {
     }
 }
 
-/* ============================================================================
-   PAGE LAYOUT
-   ============================================================================ */
-
+/* ============================================================================   PAGE LAYOUT   ============================================================================ */
 .page-title {
     font-size: var(--font-xl);
     font-weight: 700;
@@ -1863,10 +1769,7 @@ select {
     max-width: 900px;
 }
 
-/* ============================================================================
-   STAT CONTAINERS
-   ============================================================================ */
-
+/* ============================================================================   STAT CONTAINERS   ============================================================================ */
 /* Base row layout — used by #cs-stats (character sheet) */
 .stat-container {
     display: flex;
@@ -1925,21 +1828,13 @@ select {
 
 /* Modern theme stat cards: gradient depth + lift shadow */
 .theme-modern #stats .stat-container {
-    background: linear-gradient(160deg,
-            color-mix(in srgb, var(--primary-color) 10%, var(--ctp-surface1)) 0%,
-            color-mix(in srgb, var(--primary-color) 3%, var(--ctp-surface0)) 100%);
-    box-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.07) inset,
-        0 3px 12px rgba(0, 0, 0, 0.45),
-        0 0 20px -6px color-mix(in srgb, var(--primary-color) 30%, transparent);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--primary-color) 10%, var(--ctp-surface1)) 0%, color-mix(in srgb, var(--primary-color) 3%, var(--ctp-surface0)) 100%);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 3px 12px rgba(0, 0, 0, 0.45), 0 0 20px -6px color-mix(in srgb, var(--primary-color) 30%, transparent);
     border-radius: 8px;
 }
 
 .theme-modern #stats .stat-container:hover {
-    box-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.07) inset,
-        0 4px 20px color-mix(in srgb, var(--primary-color) 35%, transparent),
-        0 6px 24px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 4px 20px color-mix(in srgb, var(--primary-color) 35%, transparent), 0 6px 24px rgba(0, 0, 0, 0.5);
     transform: translateY(-2px);
     transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
@@ -2011,10 +1906,7 @@ select {
     }
 }
 
-/* ============================================================================
-   BUTTONS
-   ============================================================================ */
-
+/* ============================================================================   BUTTONS   ============================================================================ */
 button,
 .adjust-button {
     background-color: var(--input-bg);
@@ -2059,10 +1951,7 @@ button:disabled,
     max-width: 220px;
 }
 
-/* ============================================================================
-   INFORMATION & FEEDBACK
-   ============================================================================ */
-
+/* ============================================================================   INFORMATION & FEEDBACK   ============================================================================ */
 .total-points {
     color: var(--primary-color);
     margin-top: var(--spacing-md);
@@ -2076,10 +1965,7 @@ button:disabled,
     letter-spacing: 1px;
 }
 
-/* ============================================================================
-   TEXT BOX & BONDS DISPLAY
-   ============================================================================ */
-
+/* ============================================================================   TEXT BOX & BONDS DISPLAY   ============================================================================ */
 .text-box {
     width: 100%;
     max-width: 600px;
@@ -2117,8 +2003,7 @@ button:disabled,
     /* contains z-index children so pyramid stays inside the box */
 }
 
-/* Rotating pyramid canvas — JS-driven, 24fps cap, no shadowBlur, batched paths.
-   Hidden on all themes except X-Files via opacity; JS also gates on _pyramidVisible. */
+/* Rotating pyramid canvas — JS-driven, 24fps cap, no shadowBlur, batched paths.   Hidden on all themes except X-Files via opacity; JS also gates on _pyramidVisible. */
 #bond-pyramid-canvas {
     position: absolute;
     top: 0;
@@ -2157,21 +2042,16 @@ button:disabled,
     /* clip canvas, scan lines, and text to the curved shape */
     box-shadow:
         /* outer phosphor glow */
-        0 0 18px rgba(0, 181, 33, 0.55),
-        0 0 60px rgba(0, 181, 33, 0.12),
+        0 0 18px rgba(0, 181, 33, 0.55), 0 0 60px rgba(0, 181, 33, 0.12),
         /* inset corner vignette — tube glass darkens toward all four edges */
-        inset 0 0 120px rgba(0, 0, 0, 0.85),
-        inset 0 0 50px rgba(0, 0, 0, 0.55);
+        inset 0 0 120px rgba(0, 0, 0, 0.85), inset 0 0 50px rgba(0, 0, 0, 0.55);
     text-shadow: 0 0 7px rgba(0, 181, 33, 0.95), 0 0 2px rgba(0, 181, 33, 0.5);
     animation: crt-flicker 9s ease-in-out infinite;
 }
 
 /* Glass specular highlight — subtle reflection on the curved screen surface */
 .theme-xfiles #bondText::before {
-    background-image: radial-gradient(ellipse at 38% 26%,
-            rgba(255, 255, 255, 0.06) 0%,
-            rgba(255, 255, 255, 0.01) 40%,
-            transparent 65%);
+    background-image: radial-gradient(ellipse at 38% 26%, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 40%, transparent 65%);
     background-size: 100% 100%;
     opacity: 1;
 }
@@ -2181,24 +2061,14 @@ button:disabled,
     content: "";
     position: absolute;
     inset: 0;
-    background: repeating-linear-gradient(0deg,
-            transparent,
-            transparent 2px,
-            rgba(0, 0, 0, 0.13) 2px,
-            rgba(0, 0, 0, 0.13) 4px);
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.13) 2px, rgba(0, 0, 0, 0.13) 4px);
     background-size: 100% 4px;
     animation: crt-scanlines-drift 8s linear infinite;
     pointer-events: none;
     z-index: 2;
 }
 
-/* Suspend expensive visual effects during bond text typing.
-   .bond-typing is added to <body> so we can target the whole X-Files page.
-   We need to beat both:
-     - .theme-xfiles * { animation: textFlicker }  (specificity 0,1,0)
-     - .theme-xfiles #some-id { animation: ... !important } (specificity 1,1,0)
-   .bond-typing.theme-xfiles * beats the wildcard rule (0,2,0 > 0,1,0).
-   .bond-typing.theme-xfiles #id beats the id rules (1,2,0 > 1,1,0). */
+/* Suspend expensive visual effects during bond text typing.   .bond-typing is added to <body> so we can target the whole X-Files page.   We need to beat both:     - .theme-xfiles * { animation: textFlicker }  (specificity 0,1,0)     - .theme-xfiles #some-id { animation: ... !important } (specificity 1,1,0)   .bond-typing.theme-xfiles * beats the wildcard rule (0,2,0 > 0,1,0).   .bond-typing.theme-xfiles #id beats the id rules (1,2,0 > 1,1,0). */
 .bond-typing.theme-xfiles,
 .bond-typing.theme-xfiles * {
     animation: none !important;
@@ -2214,10 +2084,7 @@ button:disabled,
     box-shadow: none !important;
 }
 
-/* ============================================================================
-   BOND MANAGEMENT
-   ============================================================================ */
-
+/* ============================================================================   BOND MANAGEMENT   ============================================================================ */
 /* Two-column layout: generator left, categories + list right */
 .bonds-layout {
     display: grid;
@@ -2444,10 +2311,7 @@ button:disabled,
     margin-right: 0;
 }
 
-/* ============================================================================
-   CHARACTER SHEET STYLING
-   ============================================================================ */
-
+/* ============================================================================   CHARACTER SHEET STYLING   ============================================================================ */
 #character-sheet {
     max-width: 1400px;
     width: 100%;
@@ -2466,7 +2330,10 @@ button:disabled,
 
 #cs-motivations {
     width: 100%;
-    height: 40px;
+    min-height: 40px;
+    height: auto;
+    overflow: hidden;
+    resize: none;
 }
 
 #cs-derived-attributes {
@@ -2512,7 +2379,6 @@ button:disabled,
     -webkit-appearance: none;
 }
 
-
 /* Skills Grid */
 #cs-skills {
     display: grid;
@@ -2525,10 +2391,31 @@ button:disabled,
 
 .cs-skill-pair {
     display: grid;
-    grid-template-columns: 1fr 7ch;
+    grid-template-columns: 1fr auto;
     align-items: center;
     gap: var(--spacing-xs);
     width: 100%;
+}
+
+.cs-skill-value-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 7ch;
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-md);
+    background-color: var(--input-bg);
+    padding: var(--spacing-xs) 2px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.cs-skill-pct {
+    color: var(--text-color);
+    font-size: var(--font-base);
+    line-height: 1;
+    pointer-events: none;
+    flex-shrink: 0;
 }
 
 #cs-skills .cs-skill-name {
@@ -2543,10 +2430,16 @@ button:disabled,
 
 #cs-skills .cs-skill-input,
 #cs-specialty-skills .cs-skill-input {
-    width: 7ch;
+    width: 3.5ch;
+    flex-shrink: 0;
     text-align: center;
-    padding: var(--spacing-xs) 2px;
-    min-width: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+    color: var(--text-color);
+    font-size: var(--font-base);
 }
 
 /* Remove spinner arrows so the value sits symmetrically centred */
@@ -2696,7 +2589,7 @@ button:disabled,
 
 .specialty-skill-row {
     display: grid;
-    grid-template-columns: 1fr 7ch;
+    grid-template-columns: 1fr auto;
     gap: 8px;
     align-items: center;
     grid-column: 1;
@@ -2808,6 +2701,8 @@ button:disabled,
 
 .custom-skill-name {
     flex: 1;
+    border: 1px solid color-mix(in srgb, var(--primary-color) 30%, transparent);
+    border-radius: 4px;
 }
 
 .highlight-empty-input {
@@ -2867,10 +2762,7 @@ button:disabled,
     padding: var(--spacing-md) 0;
 }
 
-/* ============================================================================
-   FIELDSETS & PANELS
-   ============================================================================ */
-
+/* ============================================================================   FIELDSETS & PANELS   ============================================================================ */
 fieldset {
     border: 1px solid var(--primary-color);
     padding: var(--spacing-lg) var(--spacing-md) var(--spacing-md);
@@ -3021,7 +2913,10 @@ textarea {
 }
 
 #cs-motivations {
-    height: 60px;
+    min-height: 60px;
+    height: auto;
+    overflow: hidden;
+    resize: none;
 }
 
 #cs-prototype-json,
@@ -3106,10 +3001,7 @@ textarea {
     transform: translateX(-50%) translateY(0);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   DICE ROLLER PANEL
-═══════════════════════════════════════════════════════════════════ */
-
+/* ═══════════════════════════════════════════════════════════════════   DICE ROLLER PANEL═══════════════════════════════════════════════════════════════════ */
 #dr-panel {
     position: fixed;
     bottom: 24px;
@@ -3504,6 +3396,20 @@ textarea {
     box-shadow: 0 0 16px rgba(255, 23, 68, 0.3);
 }
 
+/* ── Breakdown line (expr rolls) ────────────────────────────────── */
+#dr-breakdown {
+    font-size: 9px;
+    opacity: 0.55;
+    text-align: center;
+    letter-spacing: 0.03em;
+    min-height: 11px;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+}
+
 /* ── Skill context label ────────────────────────────────────────── */
 #dr-skill-name {
     font-size: 9px;
@@ -3703,6 +3609,8 @@ textarea {
 #bonus-dropdowns {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(4, auto);
+    grid-auto-flow: column;
     gap: 12px;
     margin-bottom: 24px;
     justify-items: center;
@@ -3751,10 +3659,7 @@ textarea {
     display: none;
 }
 
-/* ============================================================================
-   CHECKBOXES
-   ============================================================================ */
-
+/* ============================================================================   CHECKBOXES   ============================================================================ */
 input[type="checkbox"] {
     display: none;
 }
@@ -3770,6 +3675,12 @@ input[type="checkbox"]+label {
 input[type="checkbox"]:checked+label {
     background-color: var(--primary-color);
     color: #ffffff;
+}
+
+/* Field-notes: checked optional-skill labels need explicit light text so the
+   high-specificity biography label rule (color:#1a1408) doesn't win */
+.theme-field-notes input[type="checkbox"]:checked+label {
+    color: #f5f0e0 !important;
 }
 
 /* Sanity adaptation checkboxes */
@@ -3902,11 +3813,7 @@ input[type="checkbox"]:checked+label {
     width: 100%;
 }
 
-
-/* ============================================================================
-   MISC COMPONENTS
-   ============================================================================ */
-
+/* ============================================================================   MISC COMPONENTS   ============================================================================ */
 .github-link-container {
     margin-top: var(--spacing-2xl);
     text-align: center;
@@ -3936,11 +3843,12 @@ input[type="checkbox"]:checked+label {
 }
 
 /* Buy Me A Coffee Button removed - now uses simple link styled like GitHub button */
-
 .cs-bonus-skill-select {
     border: 2px solid var(--input-border);
     font-size: 0.95em;
     transition: all 0.2s ease;
+    text-align: center;
+    text-align-last: center;
 }
 
 .cs-bonus-skill-select:hover {
@@ -3952,7 +3860,6 @@ input[type="checkbox"]:checked+label {
     border-color: var(--primary-color);
     box-shadow: 0 0 8px color-mix(in srgb, var(--primary-color) 30%, transparent);
 }
-
 
 .disclaimer {
     margin-top: var(--spacing-2xl);
@@ -4017,10 +3924,7 @@ input[type="checkbox"]:checked+label {
     border-color: var(--primary-color) !important;
 }
 
-/* ============================================================================
-   ANIMATIONS
-   ============================================================================ */
-
+/* ============================================================================   ANIMATIONS   ============================================================================ */
 @keyframes blink {
 
     0%,
@@ -4041,10 +3945,7 @@ input[type="checkbox"]:checked+label {
 
     0%,
     100% {
-        text-shadow: 0 0 4px rgba(0, 255, 0, 0.4),
-            0 0 11px rgba(0, 255, 0, 0.2),
-            0 0 19px rgba(0, 255, 0, 0.1),
-            0 0 40px rgba(0, 255, 0, 0.05);
+        text-shadow: 0 0 4px rgba(0, 255, 0, 0.4), 0 0 11px rgba(0, 255, 0, 0.2), 0 0 19px rgba(0, 255, 0, 0.1), 0 0 40px rgba(0, 255, 0, 0.05);
         opacity: 0.99;
     }
 
@@ -4107,11 +4008,7 @@ input[type="checkbox"]:checked+label {
     animation: textFlicker 20s infinite;
 }
 
-
-/* ============================================================================
-   RESPONSIVE DESIGN
-   ============================================================================ */
-
+/* ============================================================================   RESPONSIVE DESIGN   ============================================================================ */
 @media (max-width: 900px) {
     .text-box {
         width: 100%;
@@ -4148,10 +4045,7 @@ input[type="checkbox"]:checked+label {
     }
 }
 
-/* ============================================================================
-   BUY ME A COFFEE BADGE
-   ============================================================================
-*/
+/* ============================================================================   BUY ME A COFFEE BADGE   ============================================================================*/
 .bmc-img {
     height: 60px !important;
     width: 217px !important;
@@ -4330,12 +4224,12 @@ input[type="checkbox"]:checked+label {
 }
 
 .eq-item-name {
-    font-size: var(--font-sm);
+    font-size: var(--font-base);
     font-weight: bold;
 }
 
 .eq-item-meta {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     opacity: 0.55;
     letter-spacing: 0.02em;
 }
@@ -4495,16 +4389,790 @@ input[type="checkbox"]:checked+label {
     margin-bottom: 0;
 }
 
-/* ============================================================================
-   LIVE PLAY ELEMENTS — hidden by default, shown in Field Document theme
-   ============================================================================ */
+/* ============================================================================   FIELD NOTES THEME — Handwritten notebook / field report aesthetic   Cardboard outer surround, graph-paper panel interiors, Permanent Marker   labels, black ink borders, squared-off everything. No drama — just notes   made in the dark by someone who knows too much already.   ============================================================================ */
+.theme-field-notes {
+    --primary-color: #1a1408;
+    --bg-color: #faf7ee;
+    --text-color: #1a1408;
+    --input-bg: transparent;
+    --input-border: #1a1408;
+    --radius-sm: 0px;
+    --radius-md: 0px;
+    /* Cork/cardboard outer surround — same worn texture as the LP sheet */
+    background-color: #7a5c2e;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.25'/%3E%3C/svg%3E");
+    color: #1a1408;
+    font-family: 'Permanent Marker', cursive;
+    font-weight: 400;
+}
+
+/* Desk-lamp vignette — strong overhead light source, darkness closing in from edges */
+.theme-field-notes::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 998;
+    background: radial-gradient(ellipse at 50% 35%, transparent 20%, rgba(0, 0, 0, 0.68) 80%);
+}
+
+/* Hard right-angles — no soft edges anywhere on a field notes page */
+.theme-field-notes *,
+.theme-field-notes *::before,
+.theme-field-notes *::after {
+    border-radius: 0 !important;
+    font-weight: 400;
+}
+
+/* ── Page title ────────────────────────────────────────────────────────────── */
+.theme-field-notes .page-title {
+    color: #1a1408;
+    font-family: 'Bebas Neue', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-size: 3.2rem;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-shadow: none;
+    -webkit-text-fill-color: #1a1408;
+    border-bottom: 3px solid #1a1408;
+}
+
+.theme-field-notes .blinking-cursor {
+    display: none;
+}
+
+/* ── Site intro ────────────────────────────────────────────────────────────── */
+.theme-field-notes .site-intro {
+    color: #1a1408;
+    font-family: 'Bebas Neue', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-align: center;
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 33.5%;
+    box-sizing: border-box;
+    margin-bottom: var(--spacing-lg);
+    line-height: 1.4;
+}
+
+.theme-field-notes .site-intro strong {
+    color: #1a1408;
+    font-family: 'Bebas Neue', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    -webkit-text-fill-color: #1a1408;
+}
+
+/* ── Stats buy section + its button row ─────────────────────────────────────── */
+.theme-field-notes #stats-buy-section {
+    background-color: #faf7ee;
+    background-image:
+        /* binding crease — soft shadow either side of the centre fold */
+        linear-gradient(to right,
+            transparent calc(50% - 18px),
+            rgba(0, 0, 0, 0.06) calc(50% - 4px),
+            rgba(0, 0, 0, 0.13) calc(50% - 1px),
+            rgba(0, 0, 0, 0.15) 50%,
+            rgba(0, 0, 0, 0.13) calc(50% + 1px),
+            rgba(0, 0, 0, 0.06) calc(50% + 4px),
+            transparent calc(50% + 18px)),
+        linear-gradient(rgba(80, 120, 200, 0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(80, 120, 200, 0.15) 1px, transparent 1px);
+    background-size: 100% 100%, 20px 20px, 20px 20px;
+    border: 3px solid #1a1408;
+    padding: 20px 16px 16px;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.35);
+    max-width: 960px;
+    width: 100%;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-top-right-radius: 30px !important;
+    border-bottom-right-radius: 30px !important;
+    overflow: hidden;
+    transform: translateX(0);
+    /* 1 — right */
+}
+
+.theme-field-notes #stats-buy-section+.button-container {
+    --primary-color: #1a1408;
+    transform: translateX(0);
+    /* follow stats section */
+}
+
+/* ── Stat containers in the buy section ──────────────────────────────────── */
+.theme-field-notes #stats .stat-container {
+    background-color: #faf7ee;
+    background-image: linear-gradient(rgba(80, 120, 200, 0.14) 1px, transparent 1px), linear-gradient(90deg, rgba(80, 120, 200, 0.14) 1px, transparent 1px);
+    background-size: 20px 20px;
+    border: 2px solid #1a1408;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.25);
+}
+
+.theme-field-notes #stats .stat-container .stat-label {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #1a1408;
+}
+
+.theme-field-notes #stats .stat-container .descriptor {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: #1a1408;
+}
+
+.theme-field-notes #stats .stat-container .stat-value {
+    font-family: 'Permanent Marker', cursive;
+    color: #1a1408;
+    font-size: 2.4rem;
+    font-weight: 400;
+}
+
+.theme-field-notes #stats .stat-container .x5-value {
+    font-family: 'Courier New', Courier, monospace;
+    color: #5a4a2a;
+    font-size: 0.78rem;
+    opacity: 0.8;
+}
+
+/* ── Per-section panels — graph paper on off-white ─────────────────────── */
+.theme-field-notes #cs-biography-fieldset,
+.theme-field-notes .panel-skills,
+.theme-field-notes .panel-bonus-skills,
+.theme-field-notes #cs-bonds-fieldset,
+.theme-field-notes #eq-picker-fieldset {
+    --primary-color: #1a1408;
+    background-color: #faf7ee;
+    background-image:
+        /* binding crease — soft shadow either side of the centre fold */
+        linear-gradient(to right,
+            transparent calc(50% - 18px),
+            rgba(0, 0, 0, 0.06) calc(50% - 4px),
+            rgba(0, 0, 0, 0.13) calc(50% - 1px),
+            rgba(0, 0, 0, 0.15) 50%,
+            rgba(0, 0, 0, 0.13) calc(50% + 1px),
+            rgba(0, 0, 0, 0.06) calc(50% + 4px),
+            transparent calc(50% + 18px)),
+        linear-gradient(rgba(80, 120, 200, 0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(80, 120, 200, 0.15) 1px, transparent 1px);
+    background-size: 100% 100%, 20px 20px, 20px 20px;
+    border: 2px solid #1a1408;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+    /* Field Notes notebook: right side only has rounded corners, left is flat (binding) */
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-top-right-radius: 30px !important;
+    border-bottom-right-radius: 30px !important;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Alternating left/right offsets — staggered notebook page effect */
+.theme-field-notes #cs-biography-fieldset {
+    transform: translateX(0);
+}
+
+/* 2 — left  */
+.theme-field-notes .panel-skills {
+    transform: translateX(0);
+}
+
+/* 3 — right */
+.theme-field-notes .panel-bonus-skills {
+    transform: translateX(0);
+}
+
+/* 4 — left  */
+.theme-field-notes #cs-bonds-fieldset {
+    transform: translateX(0);
+}
+
+/* 5 — right */
+.theme-field-notes #eq-picker-fieldset {
+    transform: translateX(0);
+}
+
+/* 6 — left  */
+
+/* ── Coffee drops ────────────────────────────────────────────────────────── */
+.theme-field-notes #cs-biography-fieldset::after {
+    content: '';
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3E%3Cdefs%3E%3Cfilter id='dp'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.08' numOctaves='3' seed='14' result='n'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='7' xChannelSelector='R' yChannelSelector='G'/%3E%3C/filter%3E%3C/defs%3E%3Cellipse cx='520' cy='690' rx='22' ry='13' fill='rgba(101,67,33,0.52)' transform='rotate(-15,520,690)' filter='url(%23dp)'/%3E%3Cellipse cx='570' cy='660' rx='13' ry='9' fill='rgba(101,67,33,0.42)' transform='rotate(18,570,660)' filter='url(%23dp)'/%3E%3Cellipse cx='480' cy='720' rx='10' ry='10' fill='rgba(101,67,33,0.36)' filter='url(%23dp)'/%3E%3Cellipse cx='555' cy='720' rx='7' ry='5' fill='rgba(101,67,33,0.30)' transform='rotate(-8,555,720)' filter='url(%23dp)'/%3E%3Cellipse cx='590' cy='700' rx='16' ry='9' fill='rgba(101,67,33,0.44)' transform='rotate(-30,590,700)' filter='url(%23dp)'/%3E%3Cellipse cx='500' cy='750' rx='8' ry='6' fill='rgba(101,67,33,0.28)' transform='rotate(22,500,750)' filter='url(%23dp)'/%3E%3C/svg%3E") no-repeat;
+    background-size: 100% 100%;
+    top: -250px;
+    right: -200px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.theme-field-notes #cs-bonds-fieldset::after {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cdefs%3E%3Cfilter id='dp2'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.09' numOctaves='3' seed='9' result='n'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='6' xChannelSelector='R' yChannelSelector='G'/%3E%3C/filter%3E%3C/defs%3E%3Cellipse cx='390' cy='515' rx='17' ry='10' fill='rgba(101,67,33,0.50)' transform='rotate(-15,390,515)' filter='url(%23dp2)'/%3E%3Cellipse cx='430' cy='490' rx='11' ry='7' fill='rgba(101,67,33,0.38)' transform='rotate(12,430,490)' filter='url(%23dp2)'/%3E%3Cellipse cx='360' cy='538' rx='9' ry='9' fill='rgba(101,67,33,0.32)' filter='url(%23dp2)'/%3E%3Cellipse cx='425' cy='530' rx='6' ry='4' fill='rgba(101,67,33,0.26)' filter='url(%23dp2)'/%3E%3Cellipse cx='408' cy='555' rx='12' ry='7' fill='rgba(101,67,33,0.40)' transform='rotate(-25,408,555)' filter='url(%23dp2)'/%3E%3C/svg%3E") no-repeat;
+    background-size: 100% 100%;
+    bottom: -150px;
+    right: -160px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Skills panel — small cluster top-left corner, like the notebook was open face-down on a wet desk */
+.theme-field-notes .panel-skills::after {
+    content: '';
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cdefs%3E%3Cfilter id='dp3'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.10' numOctaves='3' seed='5' result='n'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='8' xChannelSelector='R' yChannelSelector='G'/%3E%3C/filter%3E%3C/defs%3E%3Cellipse cx='60' cy='80' rx='28' ry='16' fill='rgba(101,67,33,0.48)' transform='rotate(8,60,80)' filter='url(%23dp3)'/%3E%3Cellipse cx='110' cy='55' rx='15' ry='10' fill='rgba(101,67,33,0.38)' transform='rotate(-20,110,55)' filter='url(%23dp3)'/%3E%3Cellipse cx='40' cy='130' rx='11' ry='11' fill='rgba(101,67,33,0.30)' filter='url(%23dp3)'/%3E%3Cellipse cx='85' cy='110' rx='8' ry='5' fill='rgba(101,67,33,0.24)' transform='rotate(15,85,110)' filter='url(%23dp3)'/%3E%3Cellipse cx='130' cy='85' rx='19' ry='10' fill='rgba(101,67,33,0.42)' transform='rotate(-10,130,85)' filter='url(%23dp3)'/%3E%3C/svg%3E") no-repeat;
+    background-size: 100% 100%;
+    top: -60px;
+    left: -60px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Bonus skills panel — long thin spill trail down the right edge */
+.theme-field-notes .panel-bonus-skills::after {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 500px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 500'%3E%3Cdefs%3E%3Cfilter id='dp4'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.07' numOctaves='4' seed='21' result='n'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='9' xChannelSelector='R' yChannelSelector='G'/%3E%3C/filter%3E%3C/defs%3E%3Cellipse cx='240' cy='120' rx='14' ry='24' fill='rgba(101,67,33,0.45)' transform='rotate(5,240,120)' filter='url(%23dp4)'/%3E%3Cellipse cx='260' cy='180' rx='9' ry='18' fill='rgba(101,67,33,0.35)' transform='rotate(-8,260,180)' filter='url(%23dp4)'/%3E%3Cellipse cx='250' cy='240' rx='11' ry='8' fill='rgba(101,67,33,0.30)' transform='rotate(12,250,240)' filter='url(%23dp4)'/%3E%3Cellipse cx='265' cy='155' rx='6' ry='12' fill='rgba(101,67,33,0.28)' transform='rotate(-3,265,155)' filter='url(%23dp4)'/%3E%3Cellipse cx='245' cy='290' rx='8' ry='6' fill='rgba(101,67,33,0.22)' transform='rotate(20,245,290)' filter='url(%23dp4)'/%3E%3C/svg%3E") no-repeat;
+    background-size: 100% 100%;
+    top: 40px;
+    right: -80px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Equipment panel — a couple of fat drops bottom-left, like something tipped over on the table */
+.theme-field-notes #eq-picker-fieldset::after {
+    content: '';
+    position: absolute;
+    width: 500px;
+    height: 300px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 300'%3E%3Cdefs%3E%3Cfilter id='dp5'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.06' numOctaves='4' seed='33' result='n'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='10' xChannelSelector='R' yChannelSelector='G'/%3E%3C/filter%3E%3C/defs%3E%3Cellipse cx='70' cy='220' rx='32' ry='19' fill='rgba(101,67,33,0.46)' transform='rotate(-12,70,220)' filter='url(%23dp5)'/%3E%3Cellipse cx='130' cy='245' rx='20' ry='13' fill='rgba(101,67,33,0.38)' transform='rotate(9,130,245)' filter='url(%23dp5)'/%3E%3Cellipse cx='50' cy='265' rx='14' ry='14' fill='rgba(101,67,33,0.32)' filter='url(%23dp5)'/%3E%3Cellipse cx='100' cy='270' rx='10' ry='7' fill='rgba(101,67,33,0.26)' transform='rotate(-18,100,270)' filter='url(%23dp5)'/%3E%3Cellipse cx='155' cy='215' rx='24' ry='12' fill='rgba(101,67,33,0.42)' transform='rotate(6,155,215)' filter='url(%23dp5)'/%3E%3Cellipse cx='80' cy='240' rx='7' ry='5' fill='rgba(101,67,33,0.20)' transform='rotate(25,80,240)' filter='url(%23dp5)'/%3E%3C/svg%3E") no-repeat;
+    background-size: 100% 100%;
+    bottom: -80px;
+    left: -60px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Section legend: stamped black label bar */
+.theme-field-notes #cs-biography-fieldset>legend,
+.theme-field-notes .panel-skills>legend,
+.theme-field-notes .panel-bonus-skills>legend,
+.theme-field-notes #cs-bonds-fieldset>legend,
+.theme-field-notes #eq-picker-fieldset>legend {
+    background: #1a1408;
+    color: #f5f0e0;
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1.2rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 14px 4px;
+}
+
+/* ── Stats section header ─────────────────────────────────────────────────── */
+.theme-field-notes .stats-section h2 {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #1a1408;
+    letter-spacing: 0.08em;
+}
+
+/* ── Inputs and textareas — written on the lines ───────────────────────── */
+.theme-field-notes input[type="text"],
+.theme-field-notes input[type="number"],
+.theme-field-notes textarea {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid rgba(26, 20, 8, 0.55);
+    color: #1a1408;
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1.2rem;
+    font-weight: 400;
+    box-shadow: none;
+}
+
+.theme-field-notes input[type="text"]:focus,
+.theme-field-notes input[type="number"]:focus,
+.theme-field-notes textarea:focus {
+    outline: none;
+    border-bottom: 2px solid #1a1408;
+    box-shadow: none;
+    background: rgba(80, 120, 200, 0.06);
+}
+
+/* Skill value inputs: wrapper is the visual box, input is naked inside */
+/* The wrapper overrides the base box style for field-notes look */
+.theme-field-notes .cs-skill-value-wrap {
+    border: 1px solid rgba(26, 20, 8, 0.45);
+    border-bottom: 2px solid #1a1408;
+    background: rgba(255, 255, 255, 0.35);
+    width: auto;
+    min-width: 4ch;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.theme-field-notes .cs-skill-pct {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #1a1408;
+    line-height: 1;
+}
+
+.theme-field-notes #cs-skills .cs-skill-input,
+.theme-field-notes #cs-specialty-skills .cs-skill-input,
+.theme-field-notes .panel-skills input[type="number"],
+.theme-field-notes .cs-skill-input {
+    font-family: 'Permanent Marker', cursive;
+    font-weight: 400;
+    font-size: 1.2rem;
+    color: #1a1408;
+}
+
+/* ── Selects ─────────────────────────────────────────────────────────────── */
+.theme-field-notes select {
+    background: #f5f0e0;
+    border: 2px solid #1a1408;
+    color: #1a1408;
+    font-family: 'Permanent Marker', cursive;
+    font-size: 0.85rem;
+}
+
+.theme-field-notes select:focus {
+    outline: none;
+    border-color: #1a1408;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.22);
+}
+
+.theme-field-notes select option {
+    background: #faf7ee;
+    color: #1a1408;
+}
+
+/* Specialty selects in the skills grid — underline only */
+.theme-field-notes .cs-skill-specialty {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(26, 20, 8, 0.4);
+    color: #1a1408;
+    font-family: 'Permanent Marker', cursive;
+    font-size: 0.8rem;
+}
+
+.theme-field-notes .cs-skill-specialty:focus {
+    outline: none;
+    box-shadow: none;
+    border-bottom-color: #1a1408;
+}
+
+/* Equipment search / category selects */
+.theme-field-notes .eq-search-input,
+.theme-field-notes .eq-cat-select {
+    border-color: rgba(26, 20, 8, 0.5);
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.theme-field-notes .eq-search-input:focus,
+.theme-field-notes .eq-cat-select:focus {
+    border-color: #1a1408;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.theme-field-notes button,
+.theme-field-notes .adjust-button {
+    background: #1a1408;
+    color: #f5f0e0;
+    border: 2px solid #1a1408;
+    font-family: 'Bebas Neue', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+.theme-field-notes button:hover,
+.theme-field-notes .adjust-button:hover {
+    background: #3a2e18;
+    border-color: #3a2e18;
+    box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
+    transform: translate(2px, 2px);
+}
+
+.theme-field-notes button:active,
+.theme-field-notes .adjust-button:active {
+    box-shadow: none;
+    transform: translate(3px, 3px);
+}
+
+/* Small utility / icon buttons — transparent so they don't scream */
+.theme-field-notes .eq-add-btn,
+.theme-field-notes .eq-remove-btn,
+.theme-field-notes .eq-clear-btn {
+    background: transparent;
+    border: 1px solid rgba(26, 20, 8, 0.4);
+    color: #1a1408;
+    box-shadow: none;
+}
+
+.theme-field-notes .eq-add-btn:hover,
+.theme-field-notes .eq-remove-btn:hover,
+.theme-field-notes .eq-clear-btn:hover {
+    background: rgba(26, 20, 8, 0.08);
+    transform: none;
+    box-shadow: none;
+}
+
+.theme-field-notes .dr-handle-controls button {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: inherit;
+    transform: none;
+}
+
+.theme-field-notes .dr-handle-controls button:hover {
+    background: rgba(26, 20, 8, 0.1);
+    transform: none;
+}
+
+/* ── Action buttons (prepare / apply / reset) ────────────────────────────── */
+.theme-field-notes #prepare-bonus-button,
+.theme-field-notes #apply-bonus-button,
+.theme-field-notes #bio-profession-apply-row #apply-profession-button {
+    background: #1a1408;
+    border-color: #1a1408;
+    color: #f5f0e0;
+}
+
+/* Done state: white paper check — job complete */
+.theme-field-notes #prepare-bonus-button.prepare-bonus-done,
+.theme-field-notes #apply-bonus-button.apply-bonus-done,
+.theme-field-notes #bio-profession-apply-row #apply-profession-button.apply-profession-done {
+    background: #f5f0e0;
+    border-color: #1a1408;
+    color: #1a1408;
+}
+
+/* Reminder text — written in red marker, hard to miss */
+.theme-field-notes .bonus-prep-row #reminder-prepare-bonus,
+.theme-field-notes .bonus-apply-row #reminder-apply-bonus,
+.theme-field-notes #bio-profession-apply-row #reminder-apply-profession {
+    color: #b01828;
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1.2rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-shadow: 1px 1px 0 rgba(176, 24, 40, 0.2);
+    animation: none;
+}
+
+.theme-field-notes .bonus-prep-row #reminder-prepare-bonus {
+    display: inline-block;
+    transform: rotate(-2deg);
+    transform-origin: left center;
+}
+
+/* ── Biography labels (Employer:, Nationality: etc) ─────────────────────── */
+.theme-field-notes #cs-biography-fieldset label {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #1a1408;
+}
+
+/* Bio hint text — Caveat biro style; key phrases in dark-red correction ink */
+.theme-field-notes #cs-biography-fieldset .description-text {
+    font-family: 'Caveat', cursive;
+    font-size: 1.2rem;
+    color: #1a3a7a;
+    transform: rotate(1.5deg);
+    transform-origin: left top;
+}
+
+.theme-field-notes #bio-gender-row {
+    margin-top: 28px;
+}
+
+.theme-field-notes #cs-biography-fieldset .description-text strong {
+    font-family: 'Caveat', cursive;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #8b1a1a;
+}
+
+/* Bonds description — same biro treatment */
+.theme-field-notes #cs-bonds-fieldset .bonus-skills-description {
+    font-family: 'Caveat', cursive;
+    font-size: 1rem;
+    color: #1a3a7a;
+    transform: rotate(-1.2deg);
+    transform-origin: left top;
+}
+
+.theme-field-notes #cs-bonds-fieldset .bonus-skills-description strong {
+    font-family: 'Caveat', cursive;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #8b1a1a;
+}
+
+/* Motivations textarea — grows with content */
+.theme-field-notes #cs-motivations {
+    min-height: 60px;
+    height: auto;
+    overflow: hidden;
+    resize: none;
+}
+
+/* ── Skill labels ────────────────────────────────────────────────────────── */
+/* Must include the ID to beat #cs-skills .cs-skill-name { 0.9rem } in base CSS */
+.theme-field-notes #cs-skills .cs-skill-name,
+.theme-field-notes #cs-specialty-skills .cs-skill-name,
+.theme-field-notes .cs-skill-name {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #1a1408;
+}
+
+/* ── Bond text box ───────────────────────────────────────────────────────── */
+.theme-field-notes #bondText {
+    background-color: #faf7ee;
+    background-image: linear-gradient(rgba(80, 120, 200, 0.15) 1px, transparent 1px);
+    background-size: 100% 24px;
+    border: 2px solid #1a1408;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.28);
+    color: #1a1408;
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1.2rem;
+    font-weight: 400;
+    text-shadow: none;
+    animation: none;
+}
+
+/* Bond generated text: biro ballpoint — smaller than marker, dark-blue ink */
+.theme-field-notes #bond-text-content {
+    font-family: 'Caveat', cursive;
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: #1a3a7a;
+    line-height: 1.6;
+}
+
+/* Pyramid canvas: not visible here */
+.theme-field-notes #bond-pyramid-canvas,
+.theme-field-notes #sos-bond-sigil,
+.theme-field-notes #sos-sigil {
+    display: none !important;
+}
+
+/* ── Bond entries ────────────────────────────────────────────────────────── */
+.theme-field-notes .bond-entry {
+    background-color: #faf7ee;
+    background-image: linear-gradient(rgba(80, 120, 200, 0.14) 1px, transparent 1px);
+    background-size: 100% 24px;
+    border: 2px solid #1a1408;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.22);
+    color: #1a1408;
+}
+
+.theme-field-notes .bond-entry input,
+.theme-field-notes .bond-entry textarea,
+.theme-field-notes .bond-entry-field {
+    font-family: 'Caveat', cursive !important;
+    font-size: 1.4rem !important;
+    font-weight: 400 !important;
+    color: #1a3a7a !important;
+}
+
+.theme-field-notes .bond-entry label {
+    font-family: 'Courier New', Courier, monospace;
+    color: #5a4a2a;
+    opacity: 1;
+}
+
+/* ── JSON output panel ───────────────────────────────────────────────────── */
+.theme-field-notes #cs-json {
+    background: #f5f0e0 !important;
+    color: #1a1408 !important;
+    border: 2px solid #1a1408 !important;
+    font-family: 'Courier New', Courier, monospace !important;
+}
+
+/* ── Advanced options ────────────────────────────────────────────────────── */
+.theme-field-notes #advanced-options-details summary {
+    color: #f5f0e0;
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+}
+
+.theme-field-notes .advanced-options-body {
+    background: #faf7ee;
+    background-image: linear-gradient(rgba(80, 120, 200, 0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(80, 120, 200, 0.12) 1px, transparent 1px);
+    background-size: 20px 20px;
+    border: 2px solid #1a1408;
+}
+
+.theme-field-notes .json-drop-zone {
+    border: 2px dashed #1a1408;
+    background: #ebe6d4;
+}
+
+.theme-field-notes .json-drop-zone:hover {
+    background: #e0dac8;
+}
+
+/* ── Save/share bar ──────────────────────────────────────────────────────── */
+.theme-field-notes .save-share-bar {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.theme-field-notes #theme-selector {
+    color: #1a1408;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.theme-field-notes .github-link-container a,
+.theme-field-notes .github-link-container svg {
+    color: #1a1408;
+    stroke: #1a1408;
+}
+
+/* ── Dice roller panel ───────────────────────────────────────────────────── */
+.theme-field-notes #dr-panel {
+    background: #1a1408;
+    border: 2px solid #f5f0e0;
+    color: #f5f0e0;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+.theme-field-notes #dr-handle {
+    background: #1a1408;
+    color: #f5f0e0;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.theme-field-notes .dr-die-btn {
+    background: #2e2810;
+    color: #f5f0e0;
+    border: 2px solid #f5f0e0;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.theme-field-notes .dr-die-btn-active,
+.theme-field-notes .dr-die-btn:hover {
+    background: #f5f0e0;
+    color: #1a1408;
+    transform: none;
+    box-shadow: none;
+}
+
+.theme-field-notes .dr-die-face,
+.theme-field-notes .dr-face-num {
+    color: #f5f0e0;
+}
+
+.theme-field-notes #dr-roll-btn {
+    background: #f5f0e0;
+    color: #1a1408;
+    border: 2px solid #f5f0e0;
+}
+
+.theme-field-notes #dr-roll-btn:hover {
+    background: #d8d4c4;
+    transform: none;
+    box-shadow: none;
+}
+
+.theme-field-notes #dr-manual-target {
+    background: #2e2810;
+    color: #f5f0e0;
+    border: 1px solid #6a6040;
+}
+
+/* ── Sanity checkboxes ───────────────────────────────────────────────────── */
+.theme-field-notes .sanity-adaptation-checkbox {
+    accent-color: #1a1408;
+}
+
+.theme-field-notes .sanity-adaptation-checkbox+span {
+    color: #3a2e18;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.8rem;
+}
+
+/* ── BuyMeACoffee ────────────────────────────────────────────────────────── */
+.theme-field-notes .bmc-img[data-theme="xfiles"],
+.theme-field-notes .bmc-img[data-theme="modern"],
+.theme-field-notes .bmc-img[data-theme="son-of-sam"],
+.theme-field-notes .bmc-img[data-theme="mobile"],
+.theme-field-notes .bmc-img[data-theme="morris"] {
+    display: none !important;
+}
+
+.theme-field-notes .bmc-img[data-theme="field-notes"] {
+    display: block !important;
+}
+
+/* ── Custom scrollbar — kraft paper and ink ──────────────────────────────── */
+.theme-field-notes ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.theme-field-notes ::-webkit-scrollbar-track {
+    background: #c4ae88;
+}
+
+.theme-field-notes ::-webkit-scrollbar-thumb {
+    background: #1a1408;
+}
+
+.theme-field-notes ::-webkit-scrollbar-thumb:hover {
+    background: #3a2e18;
+}
+
+/* ── Text selection ──────────────────────────────────────────────────────── */
+.theme-field-notes ::selection {
+    background: rgba(80, 120, 200, 0.28);
+    color: #1a1408;
+}
+
+/* ── Hide LP-only elements (tracker bar, lp-sheet) ───────────────────────── */
+.theme-field-notes #lp-tracker-bar {
+    display: none !important;
+}
+
+.theme-field-notes #lp-sheet {
+    display: none !important;
+}
+
+/* ============================================================================   LIVE PLAY ELEMENTS — hidden by default, shown in Field Document theme   ============================================================================ */
 .lp-only {
     display: none !important;
 }
 
-/* ============================================================================
-   FIELD DOCUMENT (LIVE PLAY) THEME — DD Form 315 aesthetic
-   ============================================================================ */
+/* ============================================================================   FIELD DOCUMENT (LIVE PLAY) THEME — DD Form 315 aesthetic   ============================================================================ */
 .theme-field-doc {
     --primary-color: #1a1408;
     --bg-color: #cac6b8;
@@ -4660,7 +5328,8 @@ input[type="checkbox"]:checked+label {
 .theme-field-doc .bmc-img[data-theme="xfiles"],
 .theme-field-doc .bmc-img[data-theme="modern"],
 .theme-field-doc .bmc-img[data-theme="son-of-sam"],
-.theme-field-doc .bmc-img[data-theme="mobile"] {
+.theme-field-doc .bmc-img[data-theme="mobile"],
+.theme-field-doc .bmc-img[data-theme="field-notes"] {
     display: none !important;
 }
 
@@ -4675,9 +5344,7 @@ input[type="checkbox"]:checked+label {
     display: none !important;
 }
 
-/* ──────────────────────────────────────────────────────────────────
-   LIVE PLAY STICKY TRACKER BAR
-   ────────────────────────────────────────────────────────────────── */
+/* ──────────────────────────────────────────────────────────────────   LIVE PLAY STICKY TRACKER BAR   ────────────────────────────────────────────────────────────────── */
 #lp-tracker-bar {
     display: none;
     align-items: stretch;
@@ -4896,9 +5563,7 @@ input[type="checkbox"]:checked+label {
     display: none;
 }
 
-/* ──────────────────────────────────────────────────────────────────
-   LP SHEET — DD FORM 315 STYLED LIVE SHEET
-   ────────────────────────────────────────────────────────────────── */
+/* ──────────────────────────────────────────────────────────────────   LP SHEET — DD FORM 315 STYLED LIVE SHEET   ────────────────────────────────────────────────────────────────── */
 #lp-sheet {
     display: none;
     background-color: #f9f7f0;
@@ -4966,21 +5631,17 @@ input[type="checkbox"]:checked+label {
     vertical-align: middle;
 }
 
-/* Force all LP table body rows to the same height so left and right
-   columns stay grid-aligned across the full width of the sheet */
+/* Force all LP table body rows to the same height so left and right   columns stay grid-aligned across the full width of the sheet */
 #lp-sheet .lp-full-table tbody tr {
     height: 28px;
 }
 
-/* Last row of any LP table: drop border-bottom so it doesn't stack
-   with .lp-sp-row { border-bottom } and create a 2px line on the left
-   while the right column (textarea) only sees the 1px row separator */
+/* Last row of any LP table: drop border-bottom so it doesn't stack   with .lp-sp-row { border-bottom } and create a 2px line on the left   while the right column (textarea) only sees the 1px row separator */
 #lp-sheet .lp-full-table tr:last-child .lp-tc {
     border-bottom: none;
 }
 
-/* Sub-header row (column labels inside <thead>) — must look clearly
-   lighter than the black .lp-sec-hd bar above it */
+/* Sub-header row (column labels inside <thead>) — must look clearly   lighter than the black .lp-sec-hd bar above it */
 #lp-sheet .lp-full-table thead th.lp-tc {
     background: #e0e0e0;
     color: #000;
@@ -5043,9 +5704,7 @@ input[type="checkbox"]:checked+label {
 /* Textareas */
 .lp-ta {
     background-color: #f5f4ef;
-    background-image:
-        linear-gradient(rgba(60, 100, 220, 0.07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(60, 100, 220, 0.07) 1px, transparent 1px);
+    background-image: linear-gradient(rgba(60, 100, 220, 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(60, 100, 220, 0.07) 1px, transparent 1px);
     background-size: 22px 22px;
     border: none;
     color: #000;
@@ -5162,7 +5821,6 @@ input[type="checkbox"]:checked+label {
 
 /* Keep old names as no-ops so stray references don't error */
 /* .lp-sp-cell, .lp-sp-fill, .lp-stats-col, .lp-psych-col — retired */
-
 /* Section block within a column */
 .lp-section-block {
     border-top: 1px solid #000;
@@ -5434,8 +6092,118 @@ input[type="checkbox"]:checked+label {
     background: #333 !important;
 }
 
-.lp-bond-row {
-    position: relative;
+/* ── Advancement button ─────────────────────────────────────────────────── */
+.lp-btn-advance {
+    background: #7b5e00 !important;
+}
+
+.lp-btn-advance:hover {
+    background: #5a4500 !important;
+}
+
+/* ── Advancement modal overlay ──────────────────────────────────────────── */
+#lp-adv-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 9000;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.lp-adv-dialog {
+    background: #f5f0e8;
+    border: 2px solid #000;
+    max-width: 560px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    color: #000;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.45);
+}
+
+.lp-adv-title {
+    background: #000;
+    color: #fff;
+    font-size: 11pt;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    padding: 6px 10px;
+    text-align: center;
+}
+
+.lp-adv-rule {
+    font-size: 8.5pt;
+    font-style: italic;
+    color: #444;
+    margin: 4px 10px 2px;
+    text-align: center;
+}
+
+.lp-adv-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+    margin: 4px 0 0;
+}
+
+.lp-adv-table th {
+    background: #d6cfc0;
+    font-size: 8pt;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-align: center;
+    padding: 3px 6px;
+    border: 1px solid #888;
+}
+
+.lp-adv-table td {
+    padding: 3px 6px;
+    border: 1px solid #bbb;
+    text-align: center;
+}
+
+.lp-adv-table td:first-child {
+    text-align: left;
+    font-family: 'Permanent Marker', cursive;
+    font-size: 9pt;
+}
+
+.lp-adv-improved {
+    background: #e8f4e8;
+}
+
+.lp-adv-unchanged {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.lp-adv-summary {
+    font-size: 9pt;
+    font-weight: bold;
+    font-style: italic;
+    text-align: center;
+    padding: 6px 10px 4px;
+    border-top: 1px solid #ccc;
+    letter-spacing: 0.5px;
+}
+
+.lp-adv-footer {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    padding: 6px 10px 10px;
+    border-top: 1px solid #bbb;
+}
+
+
+position: relative;
 }
 
 .lp-bond-row[data-desc]:not([data-desc=""]):hover::after {

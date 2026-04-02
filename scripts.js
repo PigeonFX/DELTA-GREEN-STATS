@@ -102,13 +102,15 @@ const CONFIG = {
 };
 
 /**
- * Shared specialty option lists, keyed by CONFIG.SKILLS key.
+ * Suggested specialty options for each skill group.
+ * These populate the convenience dropdowns, but they're just a starting point.
+ * If the rules don't cover what your agent does in the field — add it here.
  * Military Science entries are already in "Skill (X)" format; all others are
- * bare specialty names that should be combined with the base skill label.
+ * bare specialty names combined with the base skill label at render time.
  */
 const SPECIALTY_OPTIONS = {
-    // Suggestions drawn from official rule descriptions. Each list is offered as a convenience
-    // dropdown; players can always type a custom specialty instead.
+    // Drawn from official rulebook descriptions. Add entries freely — the Program
+    // has no jurisdiction over what ends up in this list.
     art: [
         "Acting", "Creative Writing", "Dance", "Flute", "Forgery", "Guitar",
         "Journalism", "Painting", "Photography", "Poetry", "Scriptwriting",
@@ -554,7 +556,14 @@ function renderSpecialtySkills() {
             inst.value = parseInt(valueInput.value) || 0;
             window.dgSaveLoad?.save?.();
         });
-        row.appendChild(valueInput);
+        const pctSpan = document.createElement('span');
+        pctSpan.className = 'cs-skill-pct';
+        pctSpan.textContent = '%';
+        const valueWrap = document.createElement('span');
+        valueWrap.className = 'cs-skill-value-wrap';
+        valueWrap.appendChild(valueInput);
+        valueWrap.appendChild(pctSpan);
+        row.appendChild(valueWrap);
 
         container.appendChild(row);
     });
@@ -586,7 +595,9 @@ function getCompletedSkills() {
 }
 
 /**
- * Adds a blank manual specialty skill instance so the user can pick type + specialty freely.
+ * Adds a blank specialty skill slot for the user to fill in freely.
+ * For when the agent picked something up that the rulebook doesn't quite cover —
+ * or that the Program would prefer remained undocumented.
  */
 function addManualSpecialtySkill() {
     appState.specialtyInstances.push({ id: _genInstId(), key: null, specialty: null, value: 0, source: 'manual' });
@@ -609,7 +620,7 @@ const attributesText = CONFIG.ATTRIBUTES;
 // Professions data is now in professions.js
 
 /**
- * Populates the profession dropdown menu
+ * Populates the profession dropdown with all entries defined in professions.js.
  */
 function populateProfessionDropdown() {
     const select = document.getElementById('cs-profession-select');
@@ -622,12 +633,11 @@ function populateProfessionDropdown() {
 }
 
 /**
- * Generates a random biography.
- * - Name is drawn from the gendered name pool matching the gender dropdown.
- * - Physical description is assembled from component parts and influenced by
- *   the character's current STR and CON stats (build, height tendency).
- * - Employer and Education are drawn from a profession-specific pool when a
- *   profession is already selected, or from the generic pool otherwise.
+ * Assembles a cover identity from available parts: name, physical description
+ * (shaped by current STR/CON values), age, nationality, employer, and education.
+ * Profession-specific employer/education pools are used when a profession is
+ * already selected; generic pools fill in otherwise.
+ * Results are written directly to the biography form fields.
  */
 function generateRandomBio() {
     if (!bioData) {
@@ -748,8 +758,12 @@ function generateRandomBio() {
 }
 
 /**
- * Calculates derived attributes based on ability scores
- * @returns {array} [hp, wp, san, bp] - Array of derived attribute values
+ * Calculates the four derived attributes using Delta Green formulas:
+ *   HP = ⌈(STR + CON) / 2⌉
+ *   WP = POW
+ *   SAN = POW × 5
+ *   BP  = SAN − POW
+ * @returns {number[]} [hp, wp, san, bp]
  */
 function calculateAttributes() {
     const strValue = parseInt(document.getElementById('STR-value').innerText);
@@ -764,6 +778,8 @@ function calculateAttributes() {
 
     return [hp, wp, san, bp];
 }
+
+
 
 /**
  * Returns a descriptive phrase for an ability score
@@ -788,8 +804,8 @@ function getDescriptor(stat, value) {
 }
 
 /**
- * Generates HTML containers for each ability score with controls
- * Creates stat boxes with +/- buttons, x5 values, and descriptors
+ * Renders the stat buy panel — one container per ability score, with +/− buttons,
+ * a ×5 display, and a plain-English descriptor (e.g. "Feeble", "Indomitable").
  */
 function generateStatContainers() {
     const container = document.getElementById('stats');
@@ -819,8 +835,9 @@ function generateStatContainers() {
 }
 
 /**
- * Reads current stat value directly from the visible display span.
+ * Reads a stat's current value from its visible display span.
  * @param {string} stat - e.g. 'STR'
+ * @returns {number}
  */
 function getStatValue(stat) {
     const el = document.getElementById(`${stat}-value`);
@@ -848,10 +865,10 @@ function updateDerivedAttributes() {
 }
 
 /**
- * Adjusts a single ability score by a specified amount
- * Enforces bounds (3-18) and updates derived values
- * @param {string} stat - The ability code (STR, CON, etc.)
- * @param {number} adjustment - Amount to adjust (+1 or -1)
+ * Adjusts an ability score by the given amount, clamped to [3, 18].
+ * Cascades to x5 display, descriptor, remaining points, and derived attributes.
+ * @param {string} stat - Ability code (STR, CON, etc.)
+ * @param {number} adjustment - Amount to adjust (+1 or −1)
  */
 function adjustStat(stat, adjustment) {
     const valueElement = document.getElementById(`${stat}-value`);
@@ -865,8 +882,8 @@ function adjustStat(stat, adjustment) {
 }
 
 /**
- * Updates and displays remaining points available for stat allocation
- * Used with point buy system (CONFIG.POINT_BUY_TOTAL total points)
+ * Recounts used points and updates the remaining-points display.
+ * Called after every stat change in point buy mode.
  */
 function updateTotalPoints() {
     const totalPointsUsed = stats.reduce((total, stat) => total + parseInt(document.getElementById(`${stat}-value`).innerText), 0);
@@ -875,8 +892,9 @@ function updateTotalPoints() {
 }
 
 /**
- * Distributes CONFIG.POINT_BUY_TOTAL points randomly among all ability scores
- * Ensures no stat exceeds CONFIG.STAT_MAX or goes below CONFIG.STAT_MIN
+ * Lets fate distribute CONFIG.POINT_BUY_TOTAL points across all ability scores.
+ * The Handler giveth. The dice taketh away.
+ * No score goes below CONFIG.STAT_MIN or above CONFIG.STAT_MAX.
  */
 function randomStats() {
     stats.forEach(stat => {
@@ -906,6 +924,11 @@ function randomStats() {
     updateTotalPoints();
 }
 
+/**
+ * Rolls CONFIG.DICE_COUNT d6s per stat, keeps the top CONFIG.DICE_KEEP, and assigns
+ * the result clamped to [CONFIG.STAT_MIN, CONFIG.STAT_MAX].
+ * Roughly equivalent to the classic 4d6-drop-lowest method.
+ */
 function randomDiceRoll() {
     stats.forEach(stat => {
         const rolls = Array.from({ length: CONFIG.DICE_COUNT }, () => Math.floor(Math.random() * CONFIG.DICE_SIDES) + 1)
@@ -928,7 +951,12 @@ function resetStats() {
     updateTotalPoints();
 }
 
-/* Character sheet export helpers */
+/**
+ * Rebuilds the character sheet form from current stat spans and appState.
+ * Called on initial load, after theme switches, and before JSON export.
+ * Preserves any profession- or bonus-applied skill values already in the DOM
+ * so re-renders don't silently reset them back to defaults.
+ */
 function populateCharacterSheetForm() {
     const csStatsDiv = document.getElementById('cs-stats');
     csStatsDiv.innerHTML = '';
@@ -1008,8 +1036,15 @@ function populateCharacterSheetForm() {
         lpCb.title = 'Mark skill attempted this session';
         nameSpan.appendChild(lpCb);
 
+        const pctSpan = document.createElement('span');
+        pctSpan.className = 'cs-skill-pct';
+        pctSpan.textContent = '%';
+        const valueWrap = document.createElement('span');
+        valueWrap.className = 'cs-skill-value-wrap';
+        valueWrap.appendChild(inputEl);
+        valueWrap.appendChild(pctSpan);
         pairDiv.appendChild(nameSpan);
-        pairDiv.appendChild(inputEl);
+        pairDiv.appendChild(valueWrap);
         skillsContainer.appendChild(pairDiv);
     });
     // Re-render any specialty instances that survive stat syncs (persisted in appState)
@@ -1031,7 +1066,10 @@ function populateCharacterSheetForm() {
 }
 
 /**
- * Add a new custom skill row
+ * Adds a blank custom skill row to the sheet.
+ * The Program doesn't officially recognise this skill. Add it anyway.
+ * Good for homebrew disciplines, Handler additions, or anything the rulebook
+ * neglected to cover.
  */
 function addCustomSkill() {
     const customSkillsDiv = document.getElementById('cs-custom-skills');
@@ -1083,8 +1121,10 @@ function addCustomSkill() {
 }
 
 /**
- * Select a profession and display its information and optional skills
- * @param {string} professionKey - The key of the selected profession
+ * Handles profession selection: shows the profession description, lists optional
+ * skills as checkboxes, and reveals the Apply button.
+ * Clearing or re-selecting a profession resets the button state.
+ * @param {string} professionKey - Key from the professions.js object
  */
 function selectProfession(professionKey) {
     const infoDiv = document.getElementById('cs-profession-info');
@@ -1302,7 +1342,8 @@ function applyProfessionSkills() {
 }
 
 /**
- * Prepare bonus skills feature - shows the bonus section and populates dropdowns
+ * Collects all user-defined skill rows from the custom skills section.
+ * Returns an array of { name, value } objects for use in bonus dropdowns and Foundry export.
  */
 function getCustomSkills() {
     const customSkillsDiv = document.getElementById('cs-custom-skills');
@@ -1391,8 +1432,8 @@ function populateBonusSkillDropdowns() {
         const subs = SPECIALTY_OPTIONS[key];
         if (subs) {
             subs.forEach(sub => {
-                const value = `${label} (${sub})`;
-                allSkillOptions.push([value, value]);
+                const display = `${label} (${sub})`;
+                allSkillOptions.push([display, display]);
             });
             // Custom entry so the user can boost a specialty they named themselves
             allSkillOptions.push([`${label} (custom)`, `${label} (custom\u2026)`]);
@@ -1406,8 +1447,8 @@ function populateBonusSkillDropdowns() {
         if (CONFIG.SKILLS.some(([k]) => k === key)) return; // already handled above
         const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         subs.forEach(sub => {
-            const value = `${label} (${sub})`;
-            allSkillOptions.push([value, value]);
+            const display = `${label} (${sub})`;
+            allSkillOptions.push([display, display]);
         });
         allSkillOptions.push([`${label} (custom)`, `${label} (custom\u2026)`]);
     });
@@ -1417,6 +1458,16 @@ function populateBonusSkillDropdowns() {
         const alreadyListed = allSkillOptions.some(([v]) => v === skill.name);
         if (!alreadyListed) allSkillOptions.push([skill.name, skill.name]);
     });
+
+    // Homebrew specialty instances (key === 'homebrew', specialty is the custom free-text name)
+    if (typeof appState !== 'undefined') {
+        appState.specialtyInstances
+            .filter(inst => inst.key === 'homebrew' && inst.specialty)
+            .forEach(inst => {
+                const alreadyListed = allSkillOptions.some(([v]) => v === inst.specialty);
+                if (!alreadyListed) allSkillOptions.push([inst.specialty, inst.specialty]);
+            });
+    }
 
     // Create 8 dropdown selectors
     for (let i = 0; i < 8; i++) {
@@ -1450,7 +1501,10 @@ function populateBonusSkillDropdowns() {
 }
 
 /**
- * Apply bonus skill points: +CONFIG.BONUS_SKILL_POINTS to each selected skill (max CONFIG.BONUS_SKILL_COUNT)
+ * Applies bonus skill points from the 8 dropdown selectors.
+ * Each selected skill gets +CONFIG.BONUS_SKILL_POINTS, capped at CONFIG.MAX_SKILL_VALUE.
+ * Specialty instances are boosted in place, or created if they don't exist yet.
+ * Records what was applied in appState.appliedBonuses so resetBonusSkills() can undo it.
  */
 function applyBonusSkills() {
     const selectedSkills = [];
@@ -1608,7 +1662,8 @@ function resetBonusSkills() {
 }
 
 /**
- * Resets profession-applied skills back to defaults and un-marks the Apply button.
+ * Reverses applyProfessionSkills() — resets all profession-applied skills back to
+ * their defaults and restores the Apply button to its pre-clicked state.
  */
 function resetProfessionSkills() {
     clearProfessionSkills();
@@ -1621,9 +1676,11 @@ function resetProfessionSkills() {
 }
 
 /**
- * Add a custom skill from profession selection
- * @param {string} skillName - The name of the skill
- * @param {number} skillValue - The proficiency value
+ * Adds a profession-sourced custom skill row to the sheet when the skill
+ * isn't one of the predefined base slots (e.g. Foreign Language, or any
+ * skill the profession data defines that isn't in CONFIG.SKILLS).
+ * @param {string} skillName  - Display name, may include a specialty in parens
+ * @param {number} skillValue - Starting proficiency value
  */
 function addCustomSkillFromProfession(skillName, skillValue) {
     const customSkillsDiv = document.getElementById('cs-custom-skills');
@@ -1664,7 +1721,6 @@ function addCustomSkillFromProfession(skillName, skillValue) {
         langInput.style.maxWidth = '200px';
         langInput.style.padding = '4px 8px';
         langInput.style.borderRadius = '4px';
-        langInput.style.border = '1px solid rgba(255,255,255,0.2)';
         langInput.style.backgroundColor = 'transparent';
         langInput.style.color = 'inherit';
 
@@ -1814,10 +1870,15 @@ function addCustomSkillFromProfession(skillName, skillValue) {
 }
 
 /**
- * Builds a complete Foundry VTT Delta Green character JSON
- * Gathers all character data from the form and converts it to the proper Foundry actor format
- * @returns {object} Complete actor object ready for Foundry VTT import
- * @throws {Error} If critical character data is missing or invalid
+ * Builds a complete Foundry VTT Delta Green character actor JSON from the current form state.
+ * Covers stats, skills, typed/specialty skills, biography, sanity adaptations, bonds, and items.
+ *
+ * To add weapons, tomes, gear, or other Foundry item objects to the export, paste raw item JSON
+ * into the "Items JSON" textarea (cs-items-json). Equipment picker items merge in automatically.
+ * Custom items follow equipment picker entries; bonds always come first.
+ *
+ * @returns {object} A complete Foundry actor object ready for drag-and-drop import
+ * @throws {Error} If the form data is unreadable or a critical field is malformed
  */
 function buildFoundryJSON() {
     try {
@@ -2040,7 +2101,9 @@ function buildFoundryJSON() {
 }
 
 /**
- * Populates the character sheet form and updates the JSON preview
+ * Toggles the Foundry VTT JSON preview panel.
+ * First call: builds the form, generates the JSON, and shows it.
+ * Second call: hides it again.
  */
 function populateCharacterJSON() {
     const jsonPreviewEl = document.getElementById('cs-json');
@@ -2066,8 +2129,8 @@ function populateCharacterJSON() {
 }
 
 /**
- * Exports the character as a downloadable JSON file
- * Triggers browser download dialog with actor data
+ * Exports the character as a downloadable Foundry VTT .json file.
+ * Triggers a browser download with the actor data — ready for drag-and-drop import.
  */
 function exportCharacterJSON() {
     try {
@@ -2124,8 +2187,11 @@ window.jsonDropZone = {
 };
 
 /**
- * Imports a pasted Foundry VTT character JSON back into the web editor.
- * Populates all stats, skills, typed/custom skills, bonds, equipment, and biography fields.
+ * Reads a pasted Foundry VTT character JSON back into the editor.
+ * Think of it as loading a classified dossier: stats, skills, biography, bonds,
+ * typed/specialty skills, and equipment are all restored from the actor object.
+ * Useful for editing a character that started life in Foundry, or picking up
+ * mid-operation after a browser refresh killed the session.
  */
 function importFoundryJSONToEditor() {
     const textarea = document.getElementById('json-import-area');
@@ -2336,7 +2402,7 @@ window.onload = function () {
     // initialize theme from storage and wire selector
     try {
         const savedTheme = localStorage.getItem('dg_theme') || 'xfiles';
-        setTheme(savedTheme);
+        setTheme(savedTheme, { skipSave: true });
         const sel = document.getElementById('cs-theme-select');
         if (sel) sel.addEventListener('change', (e) => setTheme(e.target.value));
     } catch (e) { }
@@ -2345,9 +2411,10 @@ window.onload = function () {
 };
 
 /**
- * Initialises the rotating wireframe pyramid rendered inside the bond text box.
- * Uses canvas 2D with a perspective projection of a square pyramid.
- * Visibility is controlled by CSS opacity — only shown in the X-Files theme.
+ * Initialises the rotating wireframe pyramid inside the bond text box.
+ * Rendered via canvas 2D with a simple perspective projection.
+ * The animation loop only does real draw work when the X-Files theme is active
+ * (window._pyramidVisible) and pauses automatically during the bond typing effect.
  */
 function initBondPyramid() {
     const canvas = document.getElementById('bond-pyramid-canvas');
@@ -2461,10 +2528,12 @@ function sosPlaceholder(text) {
 }
 
 /**
- * Theme Management: Always applies X-Files theme
- * Theme parameter retained for localStorage persistence only
+ * Applies one of the available visual themes: xfiles, modern, son-of-sam, field-notes, field-doc.
+ * Saves the selection to localStorage, flushes any pending form state, and handles
+ * theme-specific setup — LP sheet build/sync, pyramid visibility, button states,
+ * and Son of Sam's plus-button glyphs.
  */
-function setTheme(theme) {
+function setTheme(theme, { skipSave = false } = {}) {
     try {
         // Flush any LP skill % values the user edited back to the underlying form
         // inputs before saving — but ONLY when we are leaving the LP theme.
@@ -2484,10 +2553,12 @@ function setTheme(theme) {
 
         // Save current state synchronously before switching so no form values are
         // lost through the debounce window.
-        window.dgSaveLoad?.save?.();
+        // Skip this during initial page load — character state hasn't been restored
+        // yet and saving now would overwrite the persisted save with a blank slate.
+        if (!skipSave) window.dgSaveLoad?.save?.();
 
         const body = document.body;
-        body.classList.remove('theme-xfiles', 'theme-modern', 'theme-son-of-sam', 'theme-field-doc');
+        body.classList.remove('theme-xfiles', 'theme-modern', 'theme-son-of-sam', 'theme-field-notes', 'theme-field-doc');
         body.classList.add('theme-' + theme);
         localStorage.setItem('dg_theme', theme);
         const sel = document.getElementById('cs-theme-select');
@@ -2499,6 +2570,11 @@ function setTheme(theme) {
         });
         // Gate pyramid RAF loop — only do real drawing work on xfiles
         window._pyramidVisible = (theme === 'xfiles');
+        // Rebuild the character sheet form so skill/stat DOM elements pick up the
+        // new theme's CSS rather than retaining inline styles from creation time.
+        if (typeof populateCharacterSheetForm === 'function') {
+            populateCharacterSheetForm();
+        }
         // Refresh bond entries so their placeholders update immediately
         if (typeof renderBondsOnSheet === 'function' && window.bondsOnSheet && window.bondsOnSheet.length > 0) {
             renderBondsOnSheet();
@@ -2545,8 +2621,9 @@ function setTheme(theme) {
    ============================================================ */
 
 /**
- * Adjust a derived-attribute tracker value (+/- from the live play bar).
- * Writes directly to the underlying hidden input so save-load picks it up.
+ * Adjusts a derived-attribute tracker value from the live play bar (+/− button).
+ * Writes directly to the underlying form input so save-load and all other views
+ * stay in sync.
  */
 function lpAdjust(inputId, delta) {
     const el = document.getElementById(inputId);
@@ -2558,9 +2635,9 @@ function lpAdjust(inputId, delta) {
 }
 
 /**
- * Sync the live play tracker bar display with the underlying form values.
- * Also syncs max-value cells in the LP sheet.
- * Safe to call even when the tracker bar is not visible.
+ * Syncs the live play tracker bar and LP sheet max cells with the underlying form values.
+ * Handles HP/WP/SAN status labels (DYING, UNCONSCIOUS, BREAKING PT, PERM. MADNESS)
+ * and proxy inputs. Safe to call at any time, even when the tracker bar isn't visible.
  */
 function lpSyncBar() {
     const getVal = id => parseInt(document.getElementById(id)?.value) || 0;
@@ -2620,7 +2697,8 @@ function lpSyncBar() {
 }
 
 /**
- * Reduce a bond's score by 1 from the live play −1 DMG button.
+ * Reduces a bond's score by 1 when the −1 DMG button is pressed in the live play view.
+ * Bonds don't heal easily. That's rather the point.
  */
 function lpDamageBond(btn) {
     const entry = btn.closest('.bond-entry');
@@ -2635,8 +2713,9 @@ function lpDamageBond(btn) {
 }
 
 /**
- * Quick D% roll from the live play tracker bar.
- * Uses the existing dice roller module if available, or falls back to plain random.
+ * Rolls a quick percentile (D%) from the live play tracker bar.
+ * Forwards to the dice roller module for a full animated result if available,
+ * or falls back to plain Math.random(). Press it often enough and something bad will happen.
  */
 function lpQuickRoll() {
     const resultEl = document.getElementById('lp-dice-result');
@@ -2655,10 +2734,11 @@ function lpQuickRoll() {
    ============================================================ */
 
 /**
- * Rebuild only the skills grid inside the LP sheet from the current form state.
- * Handles CONFIG.SKILLS (with specialty labels), form-level custom skills (.custom-skill-row),
- * and preserves LP-only skill rows (added via addLpSkill) and all checkbox states.
- * Called from syncLpFromForm() on every form change and from buildLpSheet() after initial render.
+ * Rebuilds the skills grid inside the LP sheet from the current form state.
+ * Handles CONFIG.SKILLS (with specialty labels), form-level custom skills, and
+ * LP-only rows added via addLpSkill(). Preserves all checkbox states across rebuilds.
+ * Skips the rebuild while the user is actively typing inside the grid.
+ * Called by syncLpFromForm() on every form change and by buildLpSheet() on initial render.
  */
 function _buildLpSkillsGrid() {
     const lp = document.getElementById('lp-sheet');
@@ -2808,9 +2888,10 @@ function _buildLpSkillsGrid() {
 }
 
 /**
- * Build and inject the full DD Form 315-style LP sheet into #lp-sheet.
- * Called once when the field-doc theme is selected.
- * After injection: wires proxies, renders bonds, populates from form.
+ * Builds and injects the full DD Form 315-style live play sheet into #lp-sheet.
+ * Only called once — subsequent theme switches sync without rebuilding, so any
+ * notes, wounds, or weapon rows the player entered mid-session are preserved.
+ * After injection: wires proxies, renders bonds, populates from current form state.
  */
 function buildLpSheet() {
     const container = document.getElementById('lp-sheet');
@@ -3004,6 +3085,7 @@ function buildLpSheet() {
                 <div style="display:flex;gap:6px;">
                     <button type="button" class="lp-btn-sm" onclick="addLpSkill()">+ ADD SKILL</button>
                     <button type="button" class="lp-btn-sm" onclick="lpClearSkillChecks()">CLEAR SESSION MARKS</button>
+                    <button type="button" class="lp-btn-sm lp-btn-advance" onclick="lpRollAdvancement()">ROLL IMPROVEMENTS</button>
                 </div>
             </div>
         </div>
@@ -3096,8 +3178,8 @@ function buildLpSheet() {
 }
 
 /**
- * Populate all LP sheet fields from the current character form.
- * Call after buildLpSheet() and after save-restore.
+ * Populates all LP sheet fields from the current character form.
+ * Call after buildLpSheet() and after save-restore to keep the two views in sync.
  */
 function syncLpFromForm() {
     const lp = document.getElementById('lp-sheet');
@@ -3158,8 +3240,8 @@ function syncLpFromForm() {
 }
 
 /**
- * Render the compact 8-row bonds table in the LP sheet.
- * Reads from window.bondsOnSheet.
+ * Renders the bonds table in the LP sheet from window.bondsOnSheet.
+ * Shows name, score, and a −1 DMG button per entry. The Handler does the rest.
  */
 function renderLpBonds() {
     const tbody = document.getElementById('lp-bonds-tbody');
@@ -3232,8 +3314,9 @@ function renderLpBonds() {
 }
 
 /**
- * Wire all .lp-proxy inputs: changes flow from LP sheet → underlying form inputs.
- * Also wires SAN adaptation checkboxes in the LP sheet.
+ * Wires all .lp-proxy inputs so edits in the LP sheet flow back to the underlying
+ * form inputs (and from there to auto-save and all other views).
+ * Also wires the SAN adaptation checkboxes.
  */
 function _wireLpProxies() {
     const lp = document.getElementById('lp-sheet');
@@ -3302,7 +3385,10 @@ function _wireLpProxies() {
 }
 
 /**
- * Populate the gear and weapons sections in the LP sheet.
+ * Seeds the gear textarea and weapons table in the LP sheet from the equipment
+ * picker loadout. Only overwrites the gear textarea if it's still empty;
+ * weapon rows that came from the loadout are marked so they can be replaced
+ * without disturbing anything the player added by hand.
  */
 function _populateLpGear() {
     const gearTa = document.getElementById('lp-gear-content');
@@ -3351,9 +3437,11 @@ function _populateLpGear() {
 }
 
 /**
- * Append an editable weapon row to the LP weapons table.
- * @param {Object}  w         - weapon data (all fields optional)
- * @param {boolean} fromEquip - true = seeded from equipment loadout
+ * Appends an editable row to the LP weapons table.
+ * Equipment picker items are marked with a CSS class so they can be replaced
+ * cleanly on subsequent gear syncs without touching user-added rows.
+ * @param {Object}  w         - Weapon data object (all fields optional)
+ * @param {boolean} fromEquip - true if seeded from the equipment picker loadout
  */
 function addLpWeapon(w = {}, fromEquip = false) {
     const tbody = document.getElementById('lp-weapons-tbody');
@@ -3413,8 +3501,9 @@ function addLpWeapon(w = {}, fromEquip = false) {
 }
 
 /**
- * Measure and align PHYSICAL DESCRIPTION header with INCIDENTS OF SAN LOSS
- * header by expanding the MOTIVATIONS textarea to fill the gap.
+ * Aligns the PHYSICAL DESCRIPTION and INCIDENTS OF SAN LOSS section headers
+ * vertically by expanding the MOTIVATIONS textarea to fill any height gap between them.
+ * Called after every LP sheet rebuild and after the bond table changes.
  */
 function lpAlignSections() {
     const sheet = document.getElementById('lp-sheet');
@@ -3444,15 +3533,129 @@ function lpAlignSections() {
 }
 
 /**
- * Clear all session skill-use checkboxes in the LP sheet.
+ * Clears all session skill-use checkboxes in the LP sheet.
+ * Call at the end of each session — or whenever the agent needs to forget everything.
  */
 function lpClearSkillChecks() {
     document.querySelectorAll('#lp-sheet .lp-skill-cb').forEach(cb => { cb.checked = false; });
 }
 
+/* ── Character Advancement ────────────────────────────────────────────────── */
+
+// Stores the pending advancement results between roll and confirm
+let _lpAdvancementPending = null;
+
 /**
- * Append a blank, fully-editable custom skill row to the LP skills grid.
- * Rows are appended to the third (right-most) skill column table.
+ * Rolls 1d100 for each checked (failed) skill.
+ * If the roll exceeds the current skill%, improve by 1d4 (capped at 99%).
+ * Shows a confirmation modal before applying any changes.
+ */
+function lpRollAdvancement() {
+    const rows = [];
+    document.querySelectorAll('#lp-sheet .lp-skill-table tbody tr').forEach(tr => {
+        const cb = tr.querySelector('.lp-skill-cb');
+        if (!cb?.checked) return;
+        const valInp = tr.querySelector('.lp-skill-val');
+        const nameInp = tr.querySelector('.lp-skill-name-inp');
+        const nameTd = tr.querySelector('.lp-sk-name-td');
+        const name = nameInp
+            ? (nameInp.value.trim() || '(custom)')
+            : (nameTd?.textContent?.trim() || 'Unknown');
+        const current = parseInt(valInp?.value) || 0;
+        const roll = Math.floor(Math.random() * 100) + 1;
+        const improved = roll > current;
+        const improve = improved ? (Math.floor(Math.random() * 4) + 1) : 0;
+        rows.push({
+            name,
+            current,
+            roll,
+            improved,
+            improve,
+            newVal: improved ? Math.min(99, current + improve) : current,
+            valInp,
+            skillSrc: valInp?.dataset?.skillSrc || null,
+        });
+    });
+
+    if (!rows.length) {
+        alert('No skills are checked. Mark skills you attempted and failed during the session before rolling improvements.');
+        return;
+    }
+
+    _lpAdvancementPending = rows;
+    lpShowAdvancementResults(rows);
+}
+
+function lpShowAdvancementResults(rows) {
+    let modal = document.getElementById('lp-adv-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'lp-adv-modal';
+        modal.innerHTML = `
+            <div class="lp-adv-dialog">
+                <div class="lp-adv-title">END-OF-SESSION ADVANCEMENT</div>
+                <p class="lp-adv-rule">Roll &gt; current % = improve by 1d4 (max 99%)</p>
+                <table class="lp-adv-table">
+                    <thead><tr>
+                        <th>SKILL</th>
+                        <th>CURRENT&nbsp;%</th>
+                        <th>ROLL</th>
+                        <th>RESULT</th>
+                    </tr></thead>
+                    <tbody id="lp-adv-tbody"></tbody>
+                </table>
+                <div id="lp-adv-summary" class="lp-adv-summary"></div>
+                <div class="lp-adv-footer">
+                    <button type="button" class="lp-btn-sm lp-btn-advance" onclick="lpApplyAdvancement()">APPLY &amp; CLEAR MARKS</button>
+                    <button type="button" class="lp-btn-sm" onclick="lpDismissAdvancement()">DISMISS</button>
+                </div>
+            </div>`;
+        document.body.appendChild(modal);
+        modal.addEventListener('click', e => { if (e.target === modal) lpDismissAdvancement(); });
+    }
+
+    const tbody = document.getElementById('lp-adv-tbody');
+    tbody.innerHTML = rows.map(r => `
+        <tr class="${r.improved ? 'lp-adv-improved' : 'lp-adv-unchanged'}">
+            <td>${r.name}</td>
+            <td>${r.current}%</td>
+            <td>${r.roll}</td>
+            <td>${r.improved ? `+${r.improve} &rarr; <strong>${r.newVal}%</strong>` : 'No change'}</td>
+        </tr>`).join('');
+
+    const improved = rows.filter(r => r.improved).length;
+    document.getElementById('lp-adv-summary').textContent =
+        `${improved} of ${rows.length} skill${rows.length !== 1 ? 's' : ''} improved`;
+
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function lpApplyAdvancement() {
+    if (!_lpAdvancementPending) return;
+    _lpAdvancementPending.forEach(r => {
+        if (!r.improved) return;
+        if (r.valInp) r.valInp.value = r.newVal + '%';
+        if (r.skillSrc) {
+            const src = document.getElementById(r.skillSrc);
+            if (src) src.value = r.newVal;
+        }
+    });
+    lpClearSkillChecks();
+    lpDismissAdvancement();
+}
+
+function lpDismissAdvancement() {
+    const modal = document.getElementById('lp-adv-modal');
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+    _lpAdvancementPending = null;
+}
+
+/**
+ * Appends a blank, fully-editable skill row to the LP skills grid (right-most column).
+ * Use this to track skills the agent picked up since the last print, or ones the
+ * Handler invented five minutes ago.
  */
 function addLpSkill() {
     const grid = document.querySelector('#lp-sheet .lp-skills-grid');
@@ -3480,7 +3683,7 @@ function addLpSkill() {
 }
 
 /**
- * Auto-expand a textarea to fit its content (no scroll).
+ * Auto-expands a textarea to fit its content, eliminating the scrollbar.
  */
 function lpAutoExpand(ta) {
     ta.style.height = 'auto';
@@ -3492,7 +3695,7 @@ document.addEventListener('input', e => {
     if (e.target.matches('#lp-sheet .lp-ta[overflow-hidden], #lp-sheet textarea[style*="overflow:hidden"]')) {
         lpAutoExpand(e.target);
     }
-    if (e.target.matches('#lp-wounds, #lp-gear-content, #lp-remarks, #lp-sheet [data-src="cs-motivations"]')) {
+    if (e.target.matches('#lp-wounds, #lp-gear-content, #lp-remarks, #lp-sheet [data-src="cs-motivations"], #cs-motivations')) {
         lpAutoExpand(e.target);
     }
 });
@@ -3562,10 +3765,12 @@ window.addEventListener('load', function () {
     window.addEventListener('resize', () => { panel.style.display = 'none'; });
 });
 
+
 /**
- * Generates a random bond from selected categories with typing effect.
- * Stores the result in appState.currentBond for later addition to sheet
- * Bond data from bonds.js: { name, relationship, description }
+ * Picks a random bond from the checked categories and types it out character by character.
+ * The result is held in appState.currentBond until the agent decides what to do with it.
+ * Bond data is defined in bonds.js as { name, relationship, description } objects.
+ * The pyramid animation pauses while typing — some things deserve your full attention.
  */
 function generateRandomBond() {
     const bondButton = document.getElementById('bonds-button');
@@ -3588,9 +3793,10 @@ function generateRandomBond() {
         // Build display segments from bond object properties; wrap relationship in parens.
         // Using createTextNode avoids the innerHTML re-parse/re-serialize cost
         // on every character, which was the main source of per-character jank on all themes.
-        const relDisplay = randomBond.relationship ? '(' + randomBond.relationship + ')' : '';
+        const relDisplay = randomBond.relationship ? `(${randomBond.relationship})` : '';
         const segments = [randomBond.name, relDisplay, randomBond.description].filter(Boolean);
 
+        // Build a flat list of {type, text} tokens: 'text' chars interleaved with 'br' breaks
         const tokens = [];
         segments.forEach((seg, idx) => {
             for (const ch of seg) tokens.push({ type: 'char', ch });
@@ -3652,7 +3858,9 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /**
- * Adds a blank bond entry to the sheet for manual entry
+ * Adds a blank bond to the sheet for manual entry.
+ * Default score is set to the agent's current CHA value — the Program's
+ * rough measure of how much someone can still stand to lose.
  */
 function addEmptyBond() {
     const bondId = 'bond-' + Date.now() + Math.random().toString(36).substring(2, 11);
@@ -3678,9 +3886,10 @@ function addEmptyBond() {
 }
 
 /**
- * Adds the currently generated bond to the character's bond sheet
- * Reads name, relationship, and description from the appState.currentBond object
- * Generates unique ID and renders the bond on the sheet
+ * Commits the currently generated bond to the character sheet.
+ * Reads name, relationship, and description from appState.currentBond, assigns a unique
+ * ID, and renders the entry. Son of Sam theme gets a runic reveal animation because
+ * some bonds deserve to carve themselves into existence.
  */
 function addBondToSheet() {
     if (!appState.currentBond) {
@@ -3752,7 +3961,7 @@ function addBondToSheet() {
 }
 
 /**
- * Removes a bond from the character sheet by ID
+ * Permanently removes a bond from the character sheet by ID.
  * @param {string} bondId - Unique identifier for the bond to remove
  */
 function removeBondFromSheet(bondId) {
@@ -3815,9 +4024,9 @@ function updateBondScore(bondId, newScore) {
 }
 
 /**
- * Renders all bonds on the character sheet as editable entries
- * Creates individual bond panels with fields for name, relationship, and score
- * Also includes Foundry JSON preview for each bond
+ * Renders all current bonds as editable entries on the character sheet.
+ * Each bond gets fields for name, description, relationship, and score.
+ * Also keeps the LP sheet bond table in sync if it has been built.
  */
 function renderBondsOnSheet() {
     _saveBonds();
@@ -3869,8 +4078,9 @@ function renderBondsOnSheet() {
 }
 
 /**
- * Updates the sanity adaptations based on checkbox states.
- * Stores the state in the form for JSON export
+ * Reads the Violence and Helplessness incident checkboxes and caches their
+ * state as data attributes on the character sheet element for Foundry JSON export.
+ * Three checked incidents of the same type = the agent has adapted. Progress, of a sort.
  */
 function updateSanityAdaptations() {
     // Get all checkbox states

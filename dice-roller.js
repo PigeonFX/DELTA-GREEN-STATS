@@ -133,13 +133,14 @@
     }
 
     function resetResult() {
-        const { resultLabel, resultBox, targetDisp, singleNum, tensNum, unitsNum } = _e;
-        if (resultLabel) { resultLabel.textContent = ''; resultLabel.style.color = ''; }
-        if (resultBox)   resultBox.className = 'dr-result-box';
-        if (targetDisp)  targetDisp.textContent = '';
-        if (singleNum)   singleNum.textContent = '--';
-        if (tensNum)     tensNum.textContent    = '--';
-        if (unitsNum)    unitsNum.textContent   = '--';
+        const { resultLabel, resultBox, targetDisp, singleNum, tensNum, unitsNum, breakdownEl } = _e;
+        if (resultLabel)  { resultLabel.textContent = ''; resultLabel.style.color = ''; }
+        if (resultBox)    resultBox.className = 'dr-result-box';
+        if (targetDisp)   targetDisp.textContent = '';
+        if (singleNum)    singleNum.textContent = '--';
+        if (tensNum)      tensNum.textContent    = '--';
+        if (unitsNum)     unitsNum.textContent   = '--';
+        if (breakdownEl)  breakdownEl.textContent = '';
     }
 
     /* ── Core roll ────────────────────────────────────────────────── */
@@ -154,9 +155,10 @@
 
         const { resultLabel, resultBox, targetDisp, nameEl, manualEl, panel, singleFace } = _e;
 
-        if (nameEl)      nameEl.textContent    = skillName || '';
-        if (resultLabel) { resultLabel.textContent = ''; resultLabel.style.color = ''; }
-        if (resultBox)   resultBox.className   = 'dr-result-box dr-rolling';
+        if (nameEl)          nameEl.textContent          = skillName || '';
+        if (_e.breakdownEl)  _e.breakdownEl.textContent  = '';
+        if (resultLabel)     { resultLabel.textContent = ''; resultLabel.style.color = ''; }
+        if (resultBox)       resultBox.className        = 'dr-result-box dr-rolling';
 
         const target = typeof targetOverride === 'number' && targetOverride > 0
             ? targetOverride
@@ -197,9 +199,74 @@
         rollDie(target, skillName);
     }
 
+    /* ── Dice expression parser ─────────────────────────────────────── */
+    // Accepts: d6, 2d6, 3d8+2, d4-1, 4d6, d20, etc. (1–20 dice, d2–d100)
+    function parseExpr(str) {
+        if (!str) return null;
+        const m = str.trim().replace(/\s+/g, '').match(/^(\d*)d(\d+)([+-]\d+)?$/i);
+        if (!m) return null;
+        const count    = m[1] === '' ? 1 : parseInt(m[1], 10);
+        const sides    = parseInt(m[2], 10);
+        const modifier = m[3] ? parseInt(m[3], 10) : 0;
+        if (!count || count < 1 || count > 20 || sides < 2 || sides > 100) return null;
+        return { count, sides, modifier };
+    }
+
+    /* ── Expression roll ─────────────────────────────────────────────── */
+    function rollExpr(expr) {
+        if (_rolling) return;
+        _rolling = true;
+
+        const rolls   = Array.from({ length: expr.count }, () => Math.floor(Math.random() * expr.sides) + 1);
+        const total   = rolls.reduce((a, b) => a + b, 0) + expr.modifier;
+
+        const { resultLabel, resultBox, targetDisp, nameEl,
+                faceSingle, facePct, faceLabel, breakdownEl } = _e;
+
+        if (facePct)    facePct.style.display    = 'none';
+        if (faceSingle) faceSingle.style.display = 'flex';
+
+        if (nameEl)      nameEl.textContent      = '';
+        if (targetDisp)  targetDisp.textContent  = '';
+        if (resultLabel) { resultLabel.textContent = ''; resultLabel.style.color = ''; }
+        if (resultBox)   resultBox.className      = 'dr-result-box dr-rolling';
+        if (breakdownEl) breakdownEl.textContent  = '';
+
+        // Update die shape to match the expression die sides
+        const shapeId = ['d4','d6','d8','d10','d12','d20']
+            .find(key => DICE_MAP.get(key)?.sides === expr.sides) || 'd10';
+        _e.faceDivs.forEach(el => {
+            el.classList.remove(...SHAPE_CLASSES);
+            el.classList.add(`dr-shape-${shapeId}`);
+            const svgWrap = el.querySelector('.dr-die-svg-wrap');
+            if (svgWrap) svgWrap.innerHTML = DIE_SVGS[shapeId] || DIE_SVGS.d10;
+        });
+        if (faceLabel) {
+            const mod = expr.modifier > 0 ? `+${expr.modifier}` : expr.modifier < 0 ? `${expr.modifier}` : '';
+            faceLabel.textContent = `${expr.count > 1 ? expr.count : ''}D${expr.sides}${mod}`;
+        }
+
+        animateSingle(_e.singleFace, expr.count * expr.sides, total, () => {
+            if (resultLabel) { resultLabel.textContent = String(total); resultLabel.style.color = ''; }
+            if (resultBox)   resultBox.className = 'dr-result-box';
+            if (breakdownEl && (expr.count > 1 || expr.modifier !== 0)) {
+                const rollStr = expr.count > 1 ? `[${rolls.join(', ')}]` : `${rolls[0]}`;
+                const modStr  = expr.modifier > 0 ? ` + ${expr.modifier}`
+                              : expr.modifier < 0 ? ` \u2212 ${Math.abs(expr.modifier)}` : '';
+                breakdownEl.textContent = `${rollStr}${modStr}`;
+            }
+            _rolling = false;
+        });
+
+        if (_e.panel?.classList.contains('dr-collapsed')) togglePanel();
+    }
+
     /* ── Manual roll button ───────────────────────────────────────── */
     function rollManual() {
-        rollDie(parseInt(_e.manualEl?.value) || 0);
+        const val  = _e.manualEl?.value?.trim() || '';
+        const expr = parseExpr(val);
+        if (expr) { rollExpr(expr); return; }
+        rollDie(parseInt(val) || 0);
     }
 
     /* ── Panel toggle ─────────────────────────────────────────────── */
@@ -284,12 +351,13 @@
     <div id="dr-target-display"></div>
     <div id="dr-result-label"></div>
   </div>
+  <div id="dr-breakdown"></div>
   <div id="dr-skill-name"></div>
   <div id="dr-manual-row">
-    <input type="number" id="dr-manual-target" min="1" max="99" placeholder="Target % for D%" title="Enter a target number to roll your D% against">
+    <input type="text" id="dr-manual-target" placeholder="target %, 2d6+3" title="Enter a target % to roll D% against, or a dice expression like 2d6+3 or d4-1">
     <button type="button" id="dr-roll-btn" title="Roll the selected die">ROLL</button>
   </div>
-  <div id="dr-hint">Click any skill value on the sheet to roll D%</div>
+  <div id="dr-hint">Click a skill value to roll D% · type 2d6+3 for custom rolls</div>
 </div>`;
 
         document.body.appendChild(panel);
@@ -304,6 +372,7 @@
             resultBox:   $('dr-result-box'),
             targetDisp:  $('dr-target-display'),
             nameEl:      $('dr-skill-name'),
+            breakdownEl: $('dr-breakdown'),
             manualEl:    $('dr-manual-target'),
             faceSingle:  $('dr-face-single'),
             facePct:     $('dr-face-percent'),
@@ -322,6 +391,7 @@
         _e.arrow.addEventListener('click', togglePanel);
         _e.dieBtns.forEach(b => b.addEventListener('click', () => selectDie(b.dataset.die)));
         $('dr-roll-btn').addEventListener('click', rollManual);
+        _e.manualEl.addEventListener('keydown', e => { if (e.key === 'Enter') rollManual(); });
 
         // Start collapsed by default
         panel.classList.add('dr-collapsed');

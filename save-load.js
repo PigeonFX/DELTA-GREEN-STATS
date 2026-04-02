@@ -159,7 +159,22 @@
         const appliedBonuses = (typeof appState !== 'undefined') ? { ...appState.appliedBonuses } : {};
         const specialtyInstances = (typeof appState !== 'undefined') ? appState.specialtyInstances.map(i => ({ ...i })) : [];
 
-        return { v: 1, stats, csStats, derived, bio, skills, skillSpecs, customSkills, bonds, sanity, theme, protoJson, itemsJson, bondCats, equipment, lpNotes, lpWeapons, lpFeat, bonusSkills, bonusApplied, appliedBonuses, specialtyInstances };
+        // LP skill check state — which skills are marked as failed this session
+        const lpCheckedSkills = [];
+        document.querySelectorAll('#lp-sheet .lp-skill-cb:checked').forEach(cb => {
+            const tr = cb.closest('tr');
+            const valInp = tr?.querySelector('.lp-skill-val');
+            if (valInp?.dataset.skillSrc) {
+                lpCheckedSkills.push({ type: 'key', key: valInp.dataset.skillSrc.replace('cs-skill-', '') });
+            } else {
+                const nameInp = tr?.querySelector('.lp-skill-name-inp');
+                const nameTd = tr?.querySelector('.lp-sk-name-td');
+                const name = nameInp ? nameInp.value.trim() : nameTd?.textContent?.trim();
+                if (name) lpCheckedSkills.push({ type: 'name', name });
+            }
+        });
+
+        return { v: 1, stats, csStats, derived, bio, skills, skillSpecs, customSkills, bonds, sanity, theme, protoJson, itemsJson, bondCats, equipment, lpNotes, lpWeapons, lpFeat, bonusSkills, bonusApplied, appliedBonuses, specialtyInstances, lpCheckedSkills };
     }
 
     /* =========================================================================
@@ -365,6 +380,12 @@
 
             _restoring = false;
 
+            // Auto-expand any textarea that was restored with content
+            if (typeof lpAutoExpand === 'function') {
+                const _motEl = document.getElementById('cs-motivations');
+                if (_motEl) lpAutoExpand(_motEl);
+            }
+
             // Re-connect the observer now that all form state is restored.
             // This must happen BEFORE lpSyncBar / syncLpFromForm so any subsequent
             // stat changes by the user are picked up normally.
@@ -419,6 +440,26 @@
                 });
             }
 
+            // LP skill check state — restore "failed this session" marks
+            if (state.lpCheckedSkills?.length) {
+                state.lpCheckedSkills.forEach(entry => {
+                    if (entry.type === 'key') {
+                        const cb = document.getElementById(`lp-sk-cb-${entry.key}`);
+                        if (cb) cb.checked = true;
+                    } else if (entry.type === 'name') {
+                        document.querySelectorAll('#lp-sheet .lp-skill-table tbody tr').forEach(tr => {
+                            const nameInp = tr.querySelector('.lp-skill-name-inp');
+                            const nameTd = tr.querySelector('.lp-sk-name-td');
+                            const rowName = nameInp ? nameInp.value.trim() : nameTd?.textContent?.trim();
+                            if (rowName === entry.name) {
+                                const cb = tr.querySelector('.lp-skill-cb');
+                                if (cb) cb.checked = true;
+                            }
+                        });
+                    }
+                });
+            }
+
             // Bonus skill selections
             if (state.bonusSkills?.length) {
                 state.bonusSkills.forEach((val, i) => {
@@ -461,7 +502,17 @@
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
             if (!raw) return false;
+            // Capture the user's explicit theme preference BEFORE applyState can overwrite it.
+            // applyState dispatches a 'change' event which calls setTheme(state.theme), which
+            // writes dg_theme — so we must read it now while it's still correct.
+            const prefTheme = localStorage.getItem('dg_theme');
             applyState(JSON.parse(raw));
+            // Re-apply the preferred theme after state restore.  applyState may have applied
+            // a stale 'xfiles' from a previously-corrupted character save; dg_theme is only
+            // written on explicit user interaction, so it is the authoritative preference.
+            if (prefTheme && typeof setTheme === 'function') {
+                setTheme(prefTheme, { skipSave: true });
+            }
             return true;
         } catch (e) {
             console.warn('[DG Load]', e);
@@ -679,5 +730,12 @@
         setTimeout(() => {
             if (!loadFromURL()) loadLocal();
         }, 200);
+    });
+
+    // Flush save immediately when the page is about to unload (tab close, refresh, navigate).
+    // This ensures in-progress state (checked skills, edits within the 1.5 s debounce window)
+    // is always committed to localStorage before the page disappears.
+    window.addEventListener('beforeunload', () => {
+        if (!_restoring) try { save(); } catch (e) {}
     });
 })();
