@@ -1849,7 +1849,8 @@ select {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    margin-left: 0;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .stats-section h2 {
@@ -2035,8 +2036,7 @@ button:disabled,
     display: flex;
     justify-content: center;
     gap: var(--spacing-md);
-    margin-top: var(--spacing-2xl);
-    margin-bottom: 40px;
+    margin: var(--spacing-2xl) auto 40px;
     flex-wrap: wrap;
     width: 100%;
     max-width: 960px;
