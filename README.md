@@ -281,7 +281,7 @@ Contributions welcome.
 
 ## License
 
-MIT License. Free to use, modify, and distribute. Keep it in the spirit of the game.
+[PolyForm Noncommercial License 1.0.0](LICENSE) — free to use, modify, and share for any noncommercial purpose. Commercial use is not permitted without explicit written permission from the author.
 
 ---
 

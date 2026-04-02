@@ -6208,8 +6208,8 @@ input[type="checkbox"]:checked+label {
     border-top: 1px solid #bbb;
 }
 
-
-position: relative;
+.lp-bond-row {
+    position: relative;
 }
 
 .lp-bond-row[data-desc]:not([data-desc=""]):hover::after {
