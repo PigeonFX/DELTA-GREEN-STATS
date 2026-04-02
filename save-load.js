@@ -520,8 +520,11 @@
         }
     }
 
+    let _clearing = false;
+
     function clearSave() {
         if (!confirm('Clear all saved character data? This cannot be undone.')) return;
+        _clearing = true;
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem('dg-equipment-loadout');
         localStorage.removeItem('dg-bonds-sheet');
@@ -736,6 +739,6 @@
     // This ensures in-progress state (checked skills, edits within the 1.5 s debounce window)
     // is always committed to localStorage before the page disappears.
     window.addEventListener('beforeunload', () => {
-        if (!_restoring) try { save(); } catch (e) {}
+        if (!_restoring && !_clearing) try { save(); } catch (e) {}
     });
 })();

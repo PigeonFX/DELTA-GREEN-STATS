@@ -2840,9 +2840,10 @@ function _buildLpSkillsGrid() {
                 : checkedCustomNames.has(sk.rawName || '');
             const cbName = sk.key ? `lp-skill-cb-${sk.key}` : `lp-skill-cb-cust`;
             const valName = sk.key ? `lp-skill-val-${sk.key}` : `lp-skill-val-cust`;
+            const isZero = !sk.val;
             return `<tr>
                 <td class="lp-tc lp-sk-cb-td">
-                    <input type="checkbox" class="lp-skill-cb" name="${cbName}" autocomplete="off"${cbId}${isChecked ? ' checked' : ''}>
+                    <input type="checkbox" class="lp-skill-cb${isZero ? ' lp-skill-cb-zero' : ''}" name="${cbName}" autocomplete="off"${cbId}${isChecked && !isZero ? ' checked' : ''}${isZero ? ' disabled' : ''}>
                 </td>
                 <td class="lp-tc lp-sk-name-td" title="${sk.display}">${sk.display}</td>
                 <td class="lp-tc lp-sk-val-td">
@@ -3331,6 +3332,15 @@ function _wireLpProxies() {
         skillGrid.addEventListener('input', e => {
             const inp = e.target;
             if (!inp.classList.contains('lp-skill-val')) return;
+            // Live-toggle checkbox disabled state as value is typed
+            const cb = inp.closest('tr')?.querySelector('.lp-skill-cb');
+            if (cb) {
+                const raw = parseInt(inp.value.replace('%', ''));
+                const isZero = isNaN(raw) || raw < 1;
+                cb.disabled = isZero;
+                cb.classList.toggle('lp-skill-cb-zero', isZero);
+                if (isZero) cb.checked = false;
+            }
             const srcId = inp.dataset.skillSrc;
             if (!srcId) return;
             const srcEl = document.getElementById(srcId);

@@ -228,18 +228,8 @@ One-click export of a complete Foundry VTT `agent` actor JSON:
 | **X-Files** *(default)* | Dark grey terminal — retro TV surveillance |
 | **Modern** | Catppuccin Mocha — soft dark purples and blues |
 | **Son of Sam** | Black/red high contrast — animated occult sigil, glitch legend headers |
-| **Field Notes** | Kraft paper notebook — hand-written biro annotations, Permanent Marker headings, Caveat script body text, coffee-stained parchment background |
+| **Field Notes** | Kraft paper notebook — aged parchment background, Permanent Marker headings, Caveat hand-written script, biro annotations, coffee stains |
 | **Live Play (Field Notes)** | DD Form 315 classified document — Field Notes aesthetic applied to the in-session play interface |
-
-### Field Notes
-The **Field Notes** theme reimagines the character sheet as a physical agent dossier — a spiral-bound field notebook pulled from a jacket pocket.
-
-- **Background** — aged kraft paper texture with subtle grain
-- **Typography** — *Bebas Neue* for stamped headings and buttons; *Permanent Marker* for labels, stat names, and skill values; *Caveat* for hand-written body text and bond entries
-- **Biro annotations** — description hints and reminder text rendered in angled blue-ink script, key terms in red correction ink
-- **Inputs** — transparent fields that blend into the paper, with ruled underlines instead of boxes
-- **Section legends** — rubber-stamp style uppercase lettering
-- All five Buy Me A Coffee badge variants are theme-aware; the orange badge is shown in Field Notes
 
 ---
 

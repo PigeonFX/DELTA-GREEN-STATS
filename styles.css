@@ -6034,6 +6034,12 @@ input[type="checkbox"]:checked+label {
     accent-color: #000;
 }
 
+.lp-skill-cb.lp-skill-cb-zero,
+.lp-skill-cb:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
 .lp-skill-val {
     background: transparent;
     border: none;
