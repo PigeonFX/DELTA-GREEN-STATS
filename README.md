@@ -13,27 +13,58 @@ A full-featured character creation, management, and live play tool for the **Del
 
 ## Screenshot Gallery
 
-<div style="text-align: center; margin: 20px 0;">
-  <img src="assets/art/Screenshot launch.png" alt="X-Files Theme Launch Screen" style="max-width: 100%; height: auto; max-height: 400px; border: 2px solid #00b521; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-</div>
+<!-- GALLERY: each theme has a blank (1) and filled (2) version. Click any thumbnail to view full size. -->
+
+<details open>
+<summary><strong>🖥️ X-Files Theme</strong> — CRT green-on-black terminal aesthetic</summary>
+
+| Empty form | Filled out |
+|:---:|:---:|
+| [![X-Files blank](assets/art/X-Files%201.png)](assets/art/X-Files%201.png) | [![X-Files filled](assets/art/X-Files%202.png)](assets/art/X-Files%202.png) |
+
+</details>
 
 <details>
-<summary style="text-align: center; cursor: pointer; font-size: 16px; font-weight: bold; padding: 10px;">Click to view all themes →</summary>
+<summary><strong>🌙 Modern Theme</strong> — Catppuccin Mocha palette, JetBrains Mono</summary>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 20px;">
-  <a href="assets/art/Screenshot%20X-Files.png" target="_blank" style="text-decoration: none;">
-    <img src="assets/art/Screenshot%20X-Files.png" alt="X-Files Theme" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #00b521; border-radius: 4px; cursor: pointer;">
-  </a>
-  <a href="assets/art/Screenshot%20Modern.png" target="_blank" style="text-decoration: none;">
-    <img src="assets/art/Screenshot%20Modern.png" alt="Modern Theme" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #89b4fa; border-radius: 4px; cursor: pointer;">
-  </a>
-  <a href="assets/art/Screenshot%20Son%20of%20sam.png" target="_blank" style="text-decoration: none;">
-    <img src="assets/art/Screenshot%20Son%20of%20sam.png" alt="Son of Sam Theme" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #ff5555; border-radius: 4px; cursor: pointer;">
-  </a>
-  <a href="assets/art/HTML%20Sheet.png" target="_blank" style="text-decoration: none;">
-    <img src="assets/art/HTML%20Sheet.png" alt="Printable Sheet Export" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #d0d0d0; border-radius: 4px; cursor: pointer;">
-  </a>
-</div>
+| Empty form | Filled out |
+|:---:|:---:|
+| [![Modern blank](assets/art/Modern%201.png)](assets/art/Modern%201.png) | [![Modern filled](assets/art/Modern%202.png)](assets/art/Modern%202.png) |
+
+</details>
+
+<details>
+<summary><strong>🔴 Son of Sam Theme</strong> — Occult ritual manuscript aesthetic</summary>
+
+| Empty form | Filled out |
+|:---:|:---:|
+| [![Son of Sam blank](assets/art/Son%20of%20Sam%201.png)](assets/art/Son%20of%20Sam%201.png) | [![Son of Sam filled](assets/art/Son%20of%20Sam%202.png)](assets/art/Son%20of%20Sam%202.png) |
+
+</details>
+
+<details>
+<summary><strong>📋 Field Notes Theme</strong> — Graph-paper notebook, Permanent Marker font</summary>
+
+| Empty form | Filled out |
+|:---:|:---:|
+| [![Field Notes blank](assets/art/Field%20notes%201.png)](assets/art/Field%20notes%201.png) | [![Field Notes filled](assets/art/Field%20notes%202.png)](assets/art/Field%20notes%202.png) |
+
+</details>
+
+<details>
+<summary><strong>🎲 Live Play Theme</strong> — DD Form 315 in-session tracking sheet</summary>
+
+| Empty form | Filled out |
+|:---:|:---:|
+| [![Live Play blank](assets/art/Live%20Play%201.png)](assets/art/Live%20Play%201.png) | [![Live Play filled](assets/art/Live%20Play%202.png)](assets/art/Live%20Play%202.png) |
+
+</details>
+
+<details>
+<summary><strong>🖨️ Printable Sheet</strong> — Exported DD Form 315 HTML sheet</summary>
+
+[![Printable Sheet](assets/art/printable%20sheet.png)](assets/art/printable%20sheet.png)
+
 </details>
 
 ---
