@@ -1839,6 +1839,11 @@ select {
     gap: var(--spacing-lg);
 }
 
+/* Main content area — must be full-width as a flex child of .content */
+#app-main {
+    width: 100%;
+}
+
 .stats-section {
     display: flex;
     flex-direction: column;
@@ -1848,7 +1853,8 @@ select {
 }
 
 .stats-section h2 {
-    margin-top: 0px;
+    margin-top: 0;
+    text-align: center;
 }
 
 /* Stat grid: 6 cards on desktop, collapses on smaller screens */
