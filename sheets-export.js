@@ -93,41 +93,79 @@
 
     /**
      * Patch a cell's value directly in worksheet XML, preserving its style (s="N").
-     * Handles blank self-closing cells AND existing value/formula cells.
-     *  – numbers  → <c r="ADDR" s="N"><v>42</v></c>
-     *  – strings  → <c r="ADDR" s="N" t="inlineStr"><is><t>text</t></is></c>
+     *
+     * Cell types handled:
+     *  - Blank self-closing:   <c r="ADDR" s="N"/>
+     *  - Boolean (t="b"):      <c r="ADDR" s="N" t="b"><v>0</v></c>
+     *                          → writes 1 (true) or 0 (false), keeps t="b"
+     *  - Shared-string label:  <c r="ADDR" s="N" t="s"><v>N</v></c>
+     *                          → never overwritten (label cells)
+     *  - Formula (t="str"):    <c r="ADDR" s="N" t="str"><f ...>...</f><v></v></c>
+     *                          → overwritten: formula removed, becomes plain value cell
+     *
+     * Output formats:
+     *  – number  → <c r="ADDR" s="N"><v>42</v></c>
+     *  – boolean → <c r="ADDR" s="N" t="b"><v>1</v></c>
+     *  – string  → <c r="ADDR" s="N" t="inlineStr"><is><t>text</t></is></c>
      */
     function writeCell(xml, addr, value) {
         if (value === null || value === undefined) return xml;
-        const v = typeof value === "number" ? value : String(value).trim();
-        if (typeof v === "string" && !v) return xml;
+        const raw = typeof value === "number" ? value : (typeof value === "boolean" ? value : String(value).trim());
+        if (typeof raw === "string" && !raw) return xml;
 
-        const esc = typeof v === "string"
-            ? v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-            : v;
+        // Find the cell opening tag: <c r="ADDR" ...
+        const openTag = `<c r="${addr}"`;
+        const openIdx = xml.indexOf(openTag);
+        if (openIdx < 0) return xml; // cell not in this sheet
 
-        const buildReplacement = (attrs) => {
-            const sMatch = attrs.match(/s="(\d+)"/);
-            const s = sMatch ? ` s="${sMatch[1]}"` : "";
-            if (typeof v === "number") {
-                return `<c r="${addr}"${s}><v>${v}</v></c>`;
-            }
-            const sp = String(v).includes("\n") ? ' xml:space="preserve"' : "";
-            return `<c r="${addr}"${s} t="inlineStr"><is><t${sp}>${esc}</t></is></c>`;
-        };
+        // Read to end of the opening tag (find the >)
+        const gtIdx = xml.indexOf(">", openIdx);
+        if (gtIdx < 0) return xml;
 
-        // Self-closing blank cell: <c r="ADDR" s="N"/>
-        let result = xml.replace(
-            new RegExp(`<c r="${addr}"([^/]*)\\s*\\/>`),
-            (_, attrs) => buildReplacement(attrs)
-        );
-        if (result !== xml) return result;
+        const tagContent = xml.slice(openIdx, gtIdx + 1); // includes the >
 
-        // Cell with children (formula / existing value): <c r="ADDR" ...>...</c>
-        return xml.replace(
-            new RegExp(`<c r="${addr}"([^>]*)>.*?<\\/c>`),
-            (_, attrs) => buildReplacement(attrs)
-        );
+        // Extract style index from the opening tag attrs
+        const sMatch = tagContent.match(/s="(\d+)"/);
+        const s = sMatch ? ` s="${sMatch[1]}"` : "";
+
+        // ── Shared-string labels (t="s"): never overwrite ────────────────
+        if (/\bt="s"/.test(tagContent)) return xml;
+
+        // ── Self-closing cell (tag ends with />) ─────────────────────────
+        if (tagContent.endsWith("/>")) {
+            const replacement = buildCellXml(addr, s, raw);
+            return xml.slice(0, openIdx) + replacement + xml.slice(openIdx + tagContent.length);
+        }
+
+        // ── Cell with children — find the matching </c> ───────────────────
+        // The XML is a single long line. Children are at most 2 levels deep
+        // (<f> and <v> tags). We find </c> by scanning forward from gtIdx.
+        const closeTag = "</c>";
+        const closeIdx = xml.indexOf(closeTag, gtIdx);
+        if (closeIdx < 0) return xml;
+
+        const fullCell = xml.slice(openIdx, closeIdx + closeTag.length);
+
+        // ── Boolean cell (t="b"): flip numeric boolean value ─────────────
+        if (/\bt="b"/.test(tagContent)) {
+            const boolVal = (raw === true || raw === 1 || raw === "1"
+                || String(raw).toLowerCase() === "true") ? "1" : "0";
+            const boolReplacement = `${tagContent}<v>${boolVal}</v>${closeTag}`;
+            return xml.slice(0, openIdx) + boolReplacement + xml.slice(openIdx + fullCell.length);
+        }
+
+        // ── All other cells with children (formula, existing value) ──────
+        const replacement = buildCellXml(addr, s, raw);
+        return xml.slice(0, openIdx) + replacement + xml.slice(openIdx + fullCell.length);
+    }
+
+    function buildCellXml(addr, sAttr, raw) {
+        if (typeof raw === "number") {
+            return `<c r="${addr}"${sAttr}><v>${raw}</v></c>`;
+        }
+        const esc = raw.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        const sp  = raw.includes("\n") ? ' xml:space="preserve"' : "";
+        return `<c r="${addr}"${sAttr} t="inlineStr"><is><t${sp}>${esc}</t></is></c>`;
     }
 
     function getWeaponRows(lpWeapons) {
@@ -220,13 +258,14 @@
             });
 
             // ── Front: SAN checkboxes ────────────────────────────────────
+            // These are t="b" boolean cells — pass true/false (writeCell handles the 1/0 conversion)
             (sanity.violence     || []).forEach((v, i) => {
                 const cols = ["X", "Y", "Z"];
-                if (cols[i]) s1 = writeCell(s1, cols[i] + "26", v ? "True" : "False");
+                if (cols[i]) s1 = writeCell(s1, cols[i] + "26", !!v);
             });
             (sanity.helplessness || []).forEach((v, i) => {
                 const cols = ["AG", "AH", "AI"];
-                if (cols[i]) s1 = writeCell(s1, cols[i] + "26", v ? "True" : "False");
+                if (cols[i]) s1 = writeCell(s1, cols[i] + "26", !!v);
             });
 
             // ── Front: Specialty skills ───────────────────────────────────
