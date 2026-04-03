@@ -1,0 +1,351 @@
+/**
+ * DELTA GREEN STATS — Google Sheets / Excel Export
+ *
+ * Uses JSZip to open the .xlsx template as a zip, patches only the cell
+ * values in the worksheet XML (leaving styles, merged cells, borders, images,
+ * and every other byte completely intact), then re-downloads the patched .xlsx.
+ * The user uploads it to Google Drive → instant Sheet with full formatting.
+ *
+ * Cell addresses were mapped from the template's merged-cell structure.
+ */
+(function () {
+    "use strict";
+
+    const TEMPLATE_URL = "assets/Delta-Green-character-sheet-template.xlsx";
+    const JSZIP_CDN    = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+
+    // ── Skill key → score cell (Front sheet) ────────────────────────────
+    const SKILL_CELL = {
+        // Left column (score in L)
+        accounting:       "L28",
+        alertness:        "L29",
+        anthropology:     "L30",
+        archeology:       "L31",
+        art:              "L32",
+        artillery:        "L34",
+        athletics:        "L35",
+        bureaucracy:      "L36",
+        computer_science: "L37",
+        craft:            "L38",
+        criminology:      "L40",
+        demolitions:      "L41",
+        disguise:         "L42",
+        dodge:            "L43",
+        drive:            "L44",
+        firearms:         "L45",
+        // Middle column (score in X)
+        first_aid:        "X28",
+        forensics:        "X29",
+        heavy_machiner:   "X30",
+        heavy_weapons:    "X31",
+        history:          "X32",
+        humint:           "X33",
+        law:              "X34",
+        medicine:         "X35",
+        melee_weapons:    "X36",
+        military_science: "X37",
+        navigate:         "X39",
+        occult:           "X40",
+        persuade:         "X41",
+        pharmacy:         "X42",
+        pilot:            "X43",
+        psychotherapy:    "X45",
+        // Right column (score in AJ)
+        ride:             "AJ28",
+        science:          "AJ29",
+        search:           "AJ31",
+        sigint:           "AJ32",
+        stealth:          "AJ33",
+        surgery:          "AJ34",
+        survival:         "AJ35",
+        swim:             "AJ36",
+        unarmed_combat:   "AJ37",
+        unnatural:        "AJ38",
+    };
+
+    // Specialty type label cells (second row of each expandable skill area)
+    const SPECIALTY_LABEL_CELL = {
+        art:              "D33",
+        craft:            "D39",
+        military_science: "P38",   // label col for middle skill column
+        pilot:            "P44",
+        science:          "AB30",  // label col for right skill column
+    };
+    const SPECIALTY_BASE_NAME = {
+        art: "Art", craft: "Craft", science: "Science",
+        pilot: "Pilot", military_science: "Military Science",
+    };
+
+    // Foreign language overflow rows (name → AB, score → AJ)
+    const FOREIGN_ROWS = [40, 41, 42, 43, 44, 45];
+
+    // ── JSZip loader ─────────────────────────────────────────────────────
+    function loadJSZip() {
+        return new Promise((resolve, reject) => {
+            if (window.JSZip) { resolve(); return; }
+            const s = document.createElement("script");
+            s.src = JSZIP_CDN;
+            s.onload = resolve;
+            s.onerror = () => reject(new Error("Could not load JSZip from CDN."));
+            document.head.appendChild(s);
+        });
+    }
+
+    /**
+     * Patch a cell's value directly in worksheet XML, preserving its style (s="N").
+     * Handles blank self-closing cells AND existing value/formula cells.
+     *  – numbers  → <c r="ADDR" s="N"><v>42</v></c>
+     *  – strings  → <c r="ADDR" s="N" t="inlineStr"><is><t>text</t></is></c>
+     */
+    function writeCell(xml, addr, value) {
+        if (value === null || value === undefined) return xml;
+        const v = typeof value === "number" ? value : String(value).trim();
+        if (typeof v === "string" && !v) return xml;
+
+        const esc = typeof v === "string"
+            ? v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+            : v;
+
+        const buildReplacement = (attrs) => {
+            const sMatch = attrs.match(/s="(\d+)"/);
+            const s = sMatch ? ` s="${sMatch[1]}"` : "";
+            if (typeof v === "number") {
+                return `<c r="${addr}"${s}><v>${v}</v></c>`;
+            }
+            const sp = String(v).includes("\n") ? ' xml:space="preserve"' : "";
+            return `<c r="${addr}"${s} t="inlineStr"><is><t${sp}>${esc}</t></is></c>`;
+        };
+
+        // Self-closing blank cell: <c r="ADDR" s="N"/>
+        let result = xml.replace(
+            new RegExp(`<c r="${addr}"([^/]*)\\s*\\/>`),
+            (_, attrs) => buildReplacement(attrs)
+        );
+        if (result !== xml) return result;
+
+        // Cell with children (formula / existing value): <c r="ADDR" ...>...</c>
+        return xml.replace(
+            new RegExp(`<c r="${addr}"([^>]*)>.*?<\\/c>`),
+            (_, attrs) => buildReplacement(attrs)
+        );
+    }
+
+    function getWeaponRows(lpWeapons) {
+        if (lpWeapons.length > 0) return lpWeapons;
+        if (typeof window.dgEquipment?.getLoadout !== "function") return [];
+        return window.dgEquipment.getLoadout()
+            .filter(item => item && item.type === "weapon")
+            .map(item => {
+                const s = item.system || {};
+                const skillInput = document.getElementById("cs-skill-" + s.skill);
+                const skillPct = skillInput ? (parseInt(skillInput.value) || 0) + "%" : "";
+                return {
+                    name:       item.name || "",
+                    skillPct,
+                    range:      s.range || "",
+                    damage:     s.isLethal ? "" : (s.damage || ""),
+                    lethality:  s.lethality ? s.lethality + "%" : "",
+                    killRadius: s.killRadius || s.kill_radius || "",
+                    ammo:       s.ammo !== undefined ? String(s.ammo) : "",
+                };
+            });
+    }
+
+    // ── Main export ──────────────────────────────────────────────────────
+    async function exportToSheets() {
+        if (window.showToast) showToast("Building spreadsheet\u2026");
+        try {
+            await loadJSZip();
+
+            const bytes = await fetch(TEMPLATE_URL).then(r => {
+                if (!r.ok) throw new Error("Template not found (HTTP " + r.status + ").");
+                return r.arrayBuffer();
+            });
+
+            // Open the .xlsx as a zip — all styles/images/merges stay untouched
+            const zip = await JSZip.loadAsync(bytes);
+            let s1 = await zip.file("xl/worksheets/sheet1.xml").async("string");
+            let s2 = await zip.file("xl/worksheets/sheet2.xml").async("string");
+
+            const state              = window.dgSaveLoad.collectState();
+            const bio                = state.bio || {};
+            const stats              = state.csStats || state.stats || {};
+            const derived            = state.derived || {};
+            const skills             = state.skills || {};
+            const skillSpec          = state.skillSpecs || {};
+            const specialtyInstances = state.specialtyInstances || [];
+            const bonds              = state.bonds || [];
+            const custom             = state.customSkills || [];
+            const sanity             = state.sanity || {};
+            const lpNotes            = state.lpNotes || {};
+            const lpFeat             = state.lpFeat || {};
+            const lpWeapons          = state.lpWeapons || [];
+            const equipment          = state.equipment || [];
+
+            // ── Front: Personal data ─────────────────────────────────────
+            s1 = writeCell(s1, "C6",  bio.name);
+            s1 = writeCell(s1, "U6",  bio.profession);
+            s1 = writeCell(s1, "C8",  bio.employer);
+            s1 = writeCell(s1, "U8",  bio.nationality);
+            s1 = writeCell(s1, "C10", bio.sex);
+            s1 = writeCell(s1, "K10", bio.age);
+            s1 = writeCell(s1, "Q10", bio.education);
+            s1 = writeCell(s1, "C25", bio.physicalDesc);
+            s1 = writeCell(s1, "V20", bio.motivations);
+
+            // ── Front: Stats + distinguishing features ───────────────────
+            ["STR", "CON", "DEX", "INT", "POW", "CHA"].forEach((st, i) => {
+                const row = 13 + i;
+                const val = parseInt(stats[st]) || 0;
+                if (val) s1 = writeCell(s1, "H" + row, val);
+                const feat = lpFeat[st]
+                    || document.getElementById(st + "-descriptor")?.textContent?.trim()
+                    || "";
+                if (feat) s1 = writeCell(s1, "L" + row, feat);
+            });
+
+            // ── Front: Derived current values (max/formula cells untouched)
+            if (derived.hp) s1 = writeCell(s1, "P20", parseInt(derived.hp));
+            if (derived.wp) s1 = writeCell(s1, "P21", parseInt(derived.wp));
+
+            // ── Front: Bonds ─────────────────────────────────────────────
+            bonds.slice(0, 6).forEach((b, i) => {
+                const row   = 13 + i;
+                const name  = b.name || b.label || "";
+                const rel   = b.relationship || "";
+                const label = name && rel ? name + " (" + rel + ")" : name || rel;
+                if (label) s1 = writeCell(s1, "V" + row, label);
+                // Overwrite default formula cell with actual stored bond score
+                if (b.score != null) s1 = writeCell(s1, "AJ" + row, parseInt(b.score) || 0);
+            });
+
+            // ── Front: SAN checkboxes ────────────────────────────────────
+            (sanity.violence     || []).forEach((v, i) => {
+                const cols = ["X", "Y", "Z"];
+                if (cols[i]) s1 = writeCell(s1, cols[i] + "26", v ? "True" : "False");
+            });
+            (sanity.helplessness || []).forEach((v, i) => {
+                const cols = ["AG", "AH", "AI"];
+                if (cols[i]) s1 = writeCell(s1, cols[i] + "26", v ? "True" : "False");
+            });
+
+            // ── Front: Specialty skills ───────────────────────────────────
+            const SPECIALTY_KEYS      = Object.keys(SPECIALTY_LABEL_CELL);
+            const overflowSpecialties = [];
+
+            // Foreign languages — all instances go to overflow rows
+            specialtyInstances
+                .filter(i => i.key === "foreign_language" && i.value > 0)
+                .sort((a, b) => b.value - a.value)
+                .forEach(inst => overflowSpecialties.push({
+                    name:  inst.specialty || "Foreign Language",
+                    value: inst.value,
+                }));
+
+            SPECIALTY_KEYS.forEach(key => {
+                const instances = specialtyInstances
+                    .filter(i => i.key === key && i.value > 0)
+                    .sort((a, b) => b.value - a.value);
+                if (instances.length === 0) {
+                    const val = skills[key];
+                    if (val && val > 0) {
+                        s1 = writeCell(s1, SKILL_CELL[key], val);
+                        const spec = skillSpec[key];
+                        if (spec) s1 = writeCell(s1, SPECIALTY_LABEL_CELL[key], spec);
+                    }
+                    return;
+                }
+                s1 = writeCell(s1, SKILL_CELL[key], instances[0].value);
+                s1 = writeCell(s1, SPECIALTY_LABEL_CELL[key],
+                    instances[0].specialty || SPECIALTY_BASE_NAME[key]);
+                instances.slice(1).forEach(inst => {
+                    const label = inst.specialty
+                        ? SPECIALTY_BASE_NAME[key] + " (" + inst.specialty + ")"
+                        : SPECIALTY_BASE_NAME[key];
+                    overflowSpecialties.push({ name: label, value: inst.value });
+                });
+            });
+
+            // Non-specialty skills
+            Object.entries(SKILL_CELL).forEach(([key, addr]) => {
+                if (SPECIALTY_KEYS.includes(key)) return;
+                const val = skills[key];
+                if (val && val > 0) s1 = writeCell(s1, addr, val);
+            });
+
+            // ── Front: Foreign languages / overflow → rows 40-45 ─────────
+            const overflowNames = new Set(overflowSpecialties.map(s => s.name.toLowerCase()));
+            const foreignSlots  = [
+                ...overflowSpecialties,
+                ...custom.filter(s => s.value > 0 && !overflowNames.has(s.name.toLowerCase())),
+            ].slice(0, 6);
+            foreignSlots.forEach((sk, i) => {
+                const row = FOREIGN_ROWS[i];
+                if (sk.name)  s1 = writeCell(s1, "AB" + row, sk.name);
+                if (sk.value) s1 = writeCell(s1, "AJ" + row, sk.value);
+            });
+
+            // ── Back: Wounds ─────────────────────────────────────────────
+            if (lpNotes.wounds) s2 = writeCell(s2, "C3", lpNotes.wounds);
+
+            // ── Back: Armor and gear ──────────────────────────────────────
+            const gearLines = [];
+            if (lpNotes.gear) gearLines.push(lpNotes.gear);
+            if (typeof window.dgEquipment?.getLoadout === "function") {
+                window.dgEquipment.getLoadout()
+                    .filter(item => item && item.type !== "weapon")
+                    .forEach(item => { if (item.name) gearLines.push(item.name); });
+            } else {
+                equipment.forEach(n => { if (n) gearLines.push(n); });
+            }
+            if (gearLines.length) s2 = writeCell(s2, "C12", gearLines.join("\n"));
+
+            // ── Back: Weapons table ───────────────────────────────────────
+            getWeaponRows(lpWeapons).slice(0, 7).forEach((w, i) => {
+                const row = 21 + i;
+                s2 = writeCell(s2, "D"  + row, w.name);
+                s2 = writeCell(s2, "L"  + row, w.skillPct);
+                s2 = writeCell(s2, "N"  + row, w.range);
+                s2 = writeCell(s2, "R"  + row, w.damage);
+                s2 = writeCell(s2, "AA" + row, w.lethality);
+                s2 = writeCell(s2, "AE" + row, w.killRadius);
+                s2 = writeCell(s2, "AI" + row, w.ammo);
+            });
+
+            // ── Back: Personal notes ──────────────────────────────────────
+            if (lpNotes.remarks) s2 = writeCell(s2, "C30", lpNotes.remarks);
+
+            // ── Write patched XML back and repack ─────────────────────────
+            zip.file("xl/worksheets/sheet1.xml", s1);
+            zip.file("xl/worksheets/sheet2.xml", s2);
+
+            const outBytes = await zip.generateAsync({
+                type:               "arraybuffer",
+                compression:        "DEFLATE",
+                compressionOptions: { level: 6 },
+            });
+
+            // ── Download ──────────────────────────────────────────────────
+            const blob = new Blob([outBytes], {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            });
+            const url      = URL.createObjectURL(blob);
+            const safeName = (bio.name || "Agent").replace(/[^a-z0-9 \-_]/gi, "").trim() || "Agent";
+            const a = Object.assign(document.createElement("a"), {
+                href:     url,
+                download: safeName + " - Delta Green Character Sheet.xlsx",
+            });
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 8000);
+
+            if (window.showToast) showToast("Spreadsheet downloaded!");
+        } catch (err) {
+            console.error("[DG Sheets Export]", err);
+            if (window.showToast) showToast("Spreadsheet export failed \u2014 see console for details.");
+        }
+    }
+
+    window.exportToSheets = exportToSheets;
+})();
