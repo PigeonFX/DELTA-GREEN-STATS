@@ -2964,16 +2964,16 @@ legend {
 #advanced-options-details>summary {
     color: var(--bg-color);
     background: var(--primary-color);
-    padding: 5px 12px;
+    padding: 8px 14px;
     font-weight: 700;
-    font-size: 0.72rem;
-    letter-spacing: 1.5px;
+    font-size: 0.85rem;
+    letter-spacing: 1.2px;
     text-transform: uppercase;
     cursor: pointer;
     list-style: none;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     user-select: none;
 }
 
@@ -2998,11 +2998,13 @@ legend {
 }
 
 .advanced-options-hints {
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     font-style: italic;
-    opacity: 0.55;
+    opacity: 0.6;
     margin-left: 6px;
     font-weight: normal;
+    text-transform: none;
+    letter-spacing: 0;
 }
 
 #advanced-options-details[open] .advanced-options-hints {
