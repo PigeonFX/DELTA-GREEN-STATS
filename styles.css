@@ -6636,6 +6636,28 @@ input[type="checkbox"]:checked+label {
     letter-spacing: 0.02em;
 }
 
+/* ── Specialty skills: single column on mobile ──────────────────────── */
+.theme-mobile #cs-specialty-skills {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xs);
+}
+
+.theme-mobile .specialty-skill-row {
+    grid-template-columns: 1fr auto;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.theme-mobile .specialty-controls {
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.theme-mobile .specialty-skill-name {
+    white-space: normal;
+    min-width: 0;
+}
+
 /* ── Select dropdowns ───────────────────────────────────────────────── */
 .theme-mobile select {
     background: #f0ecdf;
