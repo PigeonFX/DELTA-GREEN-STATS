@@ -84,7 +84,7 @@ A full-featured character creation, management, and live play tool for the **Del
 4. **Tune your skills** — adjust specialties, add custom skills, and spend bonus skill points
 5. **Generate bonds** — pull from five NPC pools or write your own
 6. **Pick your gear** — browse the equipment catalog and build your loadout
-7. **Export** — download a Foundry VTT actor JSON, a printable HTML sheet, or a shareable link
+7. **Export** — download a Foundry VTT actor JSON, a printable HTML sheet, a filled DD Form 315 PDF, or a shareable link
 8. **Play** — switch to *Live Play (Field Notes)* for an in-session tracking sheet with HP/WP/SAN controls
 
 ---
@@ -249,6 +249,22 @@ Export a self-contained `.html` file formatted as a **DD Form 315 Delta Green Ag
 - Sanity adaptations checkboxes
 - Can also be generated from an imported Foundry VTT actor `.json`
 
+### DD Form 315 PDF Export
+Exports a filled, editable **DD Form 315** PDF — the official Delta Green character sheet — directly from your browser with no server required.
+
+- All AcroForm fields populated by exact field name from the official template
+- Personal data: name, profession, employer, nationality, sex, age, education, physical description, motivations
+- Stats and ×5 values; distinguishing features per stat (descriptor on standard themes, custom text on Live Play theme)
+- Full skill grid including specialty skills — multiple instances of the same specialty (e.g. Science (Chemistry) and Science (Physics)) place the highest-value instance in the main skill row and overflow extras into the Foreign Languages / Other Skills slots
+- Foreign languages exported as just the language name (e.g. `Arabic`, not `Foreign Language (Arabic)`)
+- Bonds with name and relationship combined (e.g. `Harriet Clarke (MI6 Analyst)`) plus bond score
+- Weapons table populated from the Live Play weapons rows or, on other themes, from the equipment picker loadout
+- Gear and armour field populated from non-weapon loadout items only (weapons go to the weapons table)
+- SAN incident checkboxes (violence and helplessness)
+- Wounds & ailments, personal details and notes from the Live Play sheet
+- PDF remains fully editable after download — fields are not flattened
+- `pdf-lib` lazy-loaded from CDN on first click — no impact on initial page load
+
 ### Foundry VTT Export
 One-click export of a complete Foundry VTT `agent` actor JSON:
 
@@ -287,6 +303,7 @@ DELTA-GREEN-STATS/
 ├── equipment-picker.js  # Equipment picker UI and loadout management
 ├── dice-roller.js       # Floating dice panel and roll logic
 ├── printable-sheet.js   # HTML printable sheet generator
+├── pdf-export.js        # DD Form 315 PDF export (AcroForm field filling via pdf-lib)
 ├── save-load.js         # Auto-save, share links, import/export
 └── assets/
     └── art/             # Screenshots, icons, artwork
@@ -298,7 +315,8 @@ DELTA-GREEN-STATS/
 
 - **HTML5** — semantic markup, no framework
 - **CSS3** — custom properties, grid, flexbox, theme switching
-- **Vanilla JavaScript** — ES6+, zero dependencies
+- **Vanilla JavaScript** — ES6+, zero runtime dependencies
+- **pdf-lib 1.17.1** — lazy-loaded from CDN for PDF AcroForm field filling; not bundled
 - **Foundry VTT** — compatible with the Delta Green system
 
 ---
