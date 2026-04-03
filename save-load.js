@@ -748,7 +748,7 @@
     /* =========================================================================
        PUBLIC API
     ========================================================================= */
-    window.dgSaveLoad = { save, loadLocal, share, clearSave, clearSheet, downloadSheet, uploadSheet };
+    window.dgSaveLoad = { save, loadLocal, share, clearSave, clearSheet, downloadSheet, uploadSheet, collectState };
 
     /* =========================================================================
        INIT — run after scripts.js window.onload (and its 50 ms inner timer)
