@@ -4241,11 +4241,44 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /**
+ * Returns the max bonds allowed by the selected profession when the wizard
+ * is active, or null when the wizard is inactive (no restriction applies).
+ */
+function _wizardBondLimit() {
+    if (window.dgWizard?._currentStep() === null || window.dgWizard?._currentStep() === undefined) return null;
+    const profSelect = document.getElementById('cs-profession-select');
+    const key = profSelect ? profSelect.value : '';
+    if (!key || !professions[key]) return null;
+    const m = professions[key].description.match(/BONDS:\s*(\d+)/);
+    return m ? parseInt(m[1]) : null;
+}
+
+/**
+ * Disables/enables the bond add buttons when the wizard is open and the
+ * profession bond limit has been reached. No effect outside the wizard.
+ */
+function _updateWizardBondButtons() {
+    const limit = _wizardBondLimit();
+    const atLimit = limit !== null && window.bondsOnSheet.length >= limit;
+    [document.getElementById('add-bond-button'), document.getElementById('new-empty-bond-button')].forEach(btn => {
+        if (!btn) return;
+        if (!btn.dataset.origTitle) btn.dataset.origTitle = btn.title;
+        btn.disabled = atLimit;
+        btn.title = atLimit ? `Bond limit reached (${limit} for this profession)` : btn.dataset.origTitle;
+    });
+}
+
+/**
  * Adds a blank bond to the sheet for manual entry.
  * Default score is set to the agent's current CHA value — the Program's
  * rough measure of how much someone can still stand to lose.
  */
 function addEmptyBond() {
+    const _limit = _wizardBondLimit();
+    if (_limit !== null && window.bondsOnSheet.length >= _limit) {
+        window.dgSaveLoad?.showToast?.(`Bond limit reached — ${_limit} bonds allowed for this profession.`);
+        return;
+    }
     const bondId = 'bond-' + Date.now() + Math.random().toString(36).substring(2, 11);
     const chaEl = document.getElementById('CHA-value');
     const defaultScore = chaEl ? (parseInt(chaEl.innerText) || 10) : 10;
@@ -4277,6 +4310,11 @@ function addEmptyBond() {
 function addBondToSheet() {
     if (!appState.currentBond) {
         alert('Generate a bond first!');
+        return;
+    }
+    const _limit = _wizardBondLimit();
+    if (_limit !== null && window.bondsOnSheet.length >= _limit) {
+        window.dgSaveLoad?.showToast?.(`Bond limit reached — ${_limit} bonds allowed for this profession.`);
         return;
     }
 
@@ -4477,6 +4515,8 @@ function renderBondsOnSheet() {
     if (document.getElementById('lp-bonds-tbody') && typeof renderLpBonds === 'function') {
         renderLpBonds();
     }
+    // Update add-bond button state when the wizard is open
+    _updateWizardBondButtons();
 }
 
 /**
