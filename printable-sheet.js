@@ -72,6 +72,7 @@ function _dataFromDOM() {
     age: document.getElementById('cs-bio-age')?.value || '',
     description: document.getElementById('cs-physical-desc')?.value || '',
     motivations: document.getElementById('cs-motivations')?.value || '',
+    personalDetails: document.getElementById('cs-personal-details')?.value || '',
     employer: document.getElementById('cs-bio-employer')?.value || '',
     education: document.getElementById('cs-bio-education')?.value || ''
   };
@@ -196,6 +197,7 @@ function _dataFromFoundryJSON(obj) {
     age: biography.age !== undefined ? String(biography.age) : '',
     description: sys.physical?.description || '',
     motivations: biography.motivations || '',
+    personalDetails: biography.notes || '',
     employer: biography.employer || '',
     education: biography.education || ''
   };
@@ -310,8 +312,11 @@ function _dataFromFoundryJSON(obj) {
 // ─── HTML generation ─────────────────────────────────────────────────────────
 
 /** Build the complete printable HTML document from a normalised data object.
- *  Layout matches the official DD Form 315 Delta Green Agent Documentation Sheet. */
-function _buildPrintableHTML(data) {
+ *  Layout matches the official DD Form 315 Delta Green Agent Documentation Sheet.
+ * @param {object} data - normalised character data
+ * @param {string|null} [stateJSON] - optional serialised collectState() blob to embed for re-import
+ */
+function _buildPrintableHTML(data, stateJSON = null) {
   const { name, professionTitle, statsArr, attributes, bio, skillsList, adaptations, weapons, gear, bonds, lpWounds, lpRemarks } = data;
   const now = new Date();
 
@@ -593,9 +598,9 @@ function _buildPrintableHTML(data) {
         <div style="flex:1;padding:3px 4px;font-size:8pt;">${_esc(bio.motivations || '').replace(/\n/g, '<br>')}</div>
       </div>
 
-      <!-- Section 13: SAN incidents -->
+      <!-- Section 14: SAN incidents -->
       <div style="border-top:1px solid #000;">
-        <div class="sec-hd" style="font-size:7.5pt;">13.&nbsp;INCIDENTS OF SAN LOSS WITHOUT GOING INSANE</div>
+        <div class="sec-hd" style="font-size:7.5pt;">14.&nbsp;INCIDENTS OF SAN LOSS WITHOUT GOING INSANE</div>
         <div style="padding:3px 6px;font-size:8pt;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
           <span>Violence&nbsp;${cb(v[0])}${cb(v[1])}${cb(v[2])}&nbsp;<em>adapted</em></span>
           <span>Helplessness&nbsp;${cb(h[0])}${cb(h[1])}${cb(h[2])}&nbsp;<em>adapted</em></span>
@@ -670,7 +675,7 @@ function _buildPrintableHTML(data) {
         <!-- 17: Personal Details -->
         <div style="flex:1;display:flex;flex-direction:column;border-right:1px solid #000;">
           <div class="sec-hd">17.&nbsp;&nbsp;PERSONAL DETAILS AND NOTES</div>
-          <div style="flex:1;padding:4px;font-size:8pt;white-space:pre-wrap;">${_esc(lpRemarks || '')}</div>
+          <div style="flex:1;padding:4px;font-size:8pt;white-space:pre-wrap;">${_esc(bio.personalDetails || lpRemarks || '')}</div>
         </div>
         <!-- 18 + 19 stacked -->
         <div style="flex:1;display:flex;flex-direction:column;">
@@ -724,6 +729,7 @@ function _buildPrintableHTML(data) {
 </div><!-- /page 2 -->
 
 <script>window.addEventListener('load', function() { window.print(); });</script>
+${stateJSON ? `<!-- dg-state-embed --><script id="dg-state-blob" type="application/json">${stateJSON.replace(/<\/script>/gi, '<\\/script>')}</script>` : ''}
 </body>
 </html>`;
 }
@@ -732,11 +738,18 @@ function _buildPrintableHTML(data) {
 
 /**
  * Export the current character sheet as a printable HTML file (existing behaviour).
+ * The full character state is embedded in the HTML so it can be re-imported later.
  */
 function exportPrintable() {
   try {
     const data = _dataFromDOM();
-    _dlHTML(_buildPrintableHTML(data), data.name);
+    let stateJSON = null;
+    try {
+      if (typeof window.dgSaveLoad?.collectState === 'function') {
+        stateJSON = JSON.stringify(window.dgSaveLoad.collectState());
+      }
+    } catch (_) { /* non-fatal — sheet still exports without the blob */ }
+    _dlHTML(_buildPrintableHTML(data, stateJSON), data.name);
   } catch (err) {
     console.error('Error generating printable sheet:', err);
     alert('Error generating printable sheet. Check browser console for details.');

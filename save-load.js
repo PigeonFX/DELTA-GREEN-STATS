@@ -62,6 +62,7 @@
             education: g('cs-bio-education'),
             physicalDesc: g('cs-physical-desc'),
             motivations: g('cs-motivations'),
+            personalDetails: g('cs-personal-details'),
         };
 
         // Predefined skills (values)
@@ -113,8 +114,10 @@
         const bondCats = {};
         BOND_CATS.forEach(cat => { bondCats[cat] = document.getElementById(cat)?.checked || false; });
 
-        // Equipment loadout (item names from equipment picker)
-        const equipment = (window.dgEquipment?.getLoadout?.() || []).map(i => i.name);
+        // Equipment loadout — catalog items saved by name; custom items as { isCustom, name } objects
+        const equipment = (window.dgEquipment?.getLoadout?.() || []).map(i =>
+            i.isCustom ? { isCustom: true, name: i.name } : i.name
+        );
 
         // LP sheet free-text fields (only present when field-doc theme is active)
         const lpNotes = {
@@ -149,7 +152,15 @@
             if (el) lpFeat[st] = el.value || '';
         });
 
+        // Optional profession skill checkboxes — save which indices are checked
+        const optionalSkillChecked = [];
+        document.querySelectorAll('.profession-optional-skill').forEach((cb, idx) => {
+            if (cb.checked) optionalSkillChecked.push(idx);
+        });
+
         // Bonus skill selections and whether they've been applied
+        const bonusPrepared = document.getElementById('bonus-skills-section')?.style.display !== 'none'
+            && document.getElementById('bonus-skills-section') !== null;
         const bonusSkills = [];
         for (let i = 0; i < 8; i++) {
             const el = document.getElementById(`cs-bonus-skill-${i}`);
@@ -158,6 +169,7 @@
         const bonusApplied = document.getElementById('apply-bonus-button')?.classList.contains('apply-bonus-done') || false;
         const appliedBonuses = (typeof appState !== 'undefined') ? { ...appState.appliedBonuses } : {};
         const specialtyInstances = (typeof appState !== 'undefined') ? appState.specialtyInstances.map(i => ({ ...i })) : [];
+        const professionSkillsApplied = document.getElementById('apply-profession-button')?.classList.contains('apply-profession-done') || false;
 
         // LP skill check state — which skills are marked as failed this session
         const lpCheckedSkills = [];
@@ -182,7 +194,7 @@
             if (valInp) lpCustomSkills.push({ name: nameInp.value.trim(), val: valInp.value.trim() });
         });
 
-        return { v: 1, stats, csStats, derived, bio, skills, skillSpecs, customSkills, bonds, sanity, theme, protoJson, itemsJson, bondCats, equipment, lpNotes, lpWeapons, lpFeat, bonusSkills, bonusApplied, appliedBonuses, specialtyInstances, lpCheckedSkills, lpCustomSkills };
+        return { v: 1, stats, csStats, derived, bio, skills, skillSpecs, customSkills, bonds, sanity, theme, protoJson, itemsJson, bondCats, equipment, lpNotes, lpWeapons, lpFeat, optionalSkillChecked, bonusPrepared, bonusSkills, bonusApplied, appliedBonuses, specialtyInstances, lpCheckedSkills, lpCustomSkills, professionSkillsApplied };
     }
 
     /* =========================================================================
@@ -215,6 +227,7 @@
             set('cs-bio-education', state.bio.education);
             set('cs-physical-desc', state.bio.physicalDesc);
             if (state.bio.motivations !== undefined) set('cs-motivations', state.bio.motivations);
+            if (state.bio.personalDetails !== undefined) set('cs-personal-details', state.bio.personalDetails);
         }
 
         // Misc JSON
@@ -282,6 +295,26 @@
                     sel.value = state.bio.profession;
                     if (typeof selectProfession === 'function') selectProfession(state.bio.profession);
                 }
+            }
+
+            // Restore optional skill checkbox state (checkboxes exist after selectProfession)
+            if (state.optionalSkillChecked?.length) {
+                const allCbs = document.querySelectorAll('.profession-optional-skill');
+                state.optionalSkillChecked.forEach(idx => {
+                    if (allCbs[idx]) {
+                        allCbs[idx].checked = true;
+                        allCbs[idx].dispatchEvent(new Event('change'));
+                    }
+                });
+            }
+
+            // Profession skills applied — mark button done without re-running applyProfessionSkills().
+            // Must come after selectProfession() which resets the button to its default state.
+            if (state.professionSkillsApplied) {
+                const btn = document.getElementById('apply-profession-button');
+                if (btn) { btn.classList.add('apply-profession-done'); btn.textContent = 'Professional Skills Applied'; }
+                const reminder = document.getElementById('reminder-apply-profession');
+                if (reminder) reminder.style.display = 'none';
             }
 
             // Predefined skill values
@@ -381,8 +414,12 @@
             // Equipment loadout
             if (state.equipment?.length) {
                 if (typeof window.dgEquipment?.clear === 'function') window.dgEquipment.clear();
-                state.equipment.forEach(name => {
-                    if (typeof window.dgEquipment?.add === 'function') window.dgEquipment.add(name);
+                state.equipment.forEach(entry => {
+                    if (typeof entry === 'object' && entry.isCustom) {
+                        if (typeof window.dgEquipment?.addCustom === 'function') window.dgEquipment.addCustom(entry.name);
+                    } else if (typeof entry === 'string') {
+                        if (typeof window.dgEquipment?.add === 'function') window.dgEquipment.add(entry);
+                    }
                 });
             }
 
@@ -484,7 +521,10 @@
                 });
             }
 
-            // Bonus skill selections
+            // Bonus skill selections — must call prepareBonusSkills() first to create the dropdowns
+            if (state.bonusPrepared || state.bonusSkills?.some(v => v)) {
+                if (typeof prepareBonusSkills === 'function') prepareBonusSkills();
+            }
             if (state.bonusSkills?.length) {
                 state.bonusSkills.forEach((val, i) => {
                     const el = document.getElementById(`cs-bonus-skill-${i}`);
@@ -604,29 +644,51 @@
             // Build base64 without spread (avoids call-stack limit on large arrays)
             let binary = '';
             for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-            const b64 = btoa(binary);
-            const url = `${location.origin}${location.pathname}#dg=${b64}`;
+            // URL-safe base64: replace +→- /→_ and strip = padding so the hash
+            // survives copy-paste through email/messaging without getting mangled.
+            const b64 = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+            const longUrl = `${location.origin}${location.pathname}#dg=${b64}`;
 
-            if (navigator.clipboard?.writeText) {
-                navigator.clipboard.writeText(url)
-                    .then(() => showToast('Share link copied to clipboard!'))
-                    .catch(() => _fallbackCopy(url));
-            } else {
-                _fallbackCopy(url);
-            }
+            // Attempt TinyURL shortening; fall back to full URL on error or timeout.
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5000);
+            fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`, { signal: controller.signal })
+                .then(r => r.ok ? r.text() : Promise.reject(new Error('TinyURL error')))
+                .then(short => {
+                    clearTimeout(timeout);
+                    const url = short.trim().startsWith('http') ? short.trim() : longUrl;
+                    _copyToClipboard(url, url === longUrl);
+                })
+                .catch(() => {
+                    clearTimeout(timeout);
+                    _copyToClipboard(longUrl, true);
+                });
         } catch (e) {
             console.warn('[DG Share]', e);
             showToast('Could not generate share link.');
         }
     }
 
-    function _fallbackCopy(text) {
+    function _copyToClipboard(url, isLong) {
+        const msg = isLong
+            ? 'Share link copied! (full URL — TinyURL unavailable)'
+            : 'Short share link copied to clipboard!';
+        if (navigator.clipboard?.writeText) {
+            navigator.clipboard.writeText(url)
+                .then(() => showToast(msg))
+                .catch(() => _fallbackCopy(url, msg));
+        } else {
+            _fallbackCopy(url, msg);
+        }
+    }
+
+    function _fallbackCopy(text, msg) {
         const ta = document.createElement('textarea');
         ta.value = text;
         ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
         document.body.appendChild(ta);
         ta.select();
-        try { document.execCommand('copy'); showToast('Share link copied to clipboard!'); }
+        try { document.execCommand('copy'); showToast(msg || 'Share link copied to clipboard!'); }
         catch (_) { showToast('Could not copy — check the URL bar.'); history.replaceState(null, '', location.pathname + text.slice(text.indexOf('#'))); }
         ta.remove();
     }
@@ -635,7 +697,10 @@
         try {
             const hash = location.hash;
             if (!hash.startsWith('#dg=')) return false;
-            const b64 = hash.slice(4);
+            // Reverse URL-safe base64 back to standard base64 before decoding.
+            // Also accept legacy links that used standard base64 (with + / =).
+            const raw = hash.slice(4).replace(/-/g, '+').replace(/_/g, '/');
+            const b64 = raw.padEnd(raw.length + (4 - raw.length % 4) % 4, '=');
             const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
             const json = new TextDecoder().decode(bytes);
             const state = JSON.parse(json);
@@ -693,6 +758,41 @@
     document.addEventListener('change', _onUserChange);
 
     /* =========================================================================
+       IMPORT FROM PRINTABLE SHEET HTML
+    ========================================================================= */
+    /**
+     * Reads a .html file exported by this site's "Export Printable Sheet" feature,
+     * extracts the embedded state JSON, and restores the character.
+     * @param {File} file
+     */
+    function importFromSheet(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const html = e.target.result;
+            // The state blob is embedded as a <script id="dg-state-blob" type="application/json">
+            const match = html.match(/<script[^>]+id=["']dg-state-blob["'][^>]*>([\/\s\S]*?)<\/script>/i)
+                || html.match(/<script[^>]+type=["']application\/json["'][^>]*id=["']dg-state-blob["'][^>]*>([\/\s\S]*?)<\/script>/i);
+            if (!match) {
+                alert('No embedded character data found.\n\nOnly .html files exported by this site (not PDFs saved from the browser) contain importable data. Make sure you are loading the downloaded .html file directly.');
+                return;
+            }
+            let state;
+            try {
+                // Reverse the </script> escaping applied during export
+                state = JSON.parse(match[1].replace(/<\\\/script>/gi, '</script>'));
+            } catch (ex) {
+                alert('Could not parse character data: ' + ex.message);
+                return;
+            }
+            applyState(state);
+            setTimeout(() => { save(); if (typeof syncLpFromForm === 'function') syncLpFromForm(); }, 300);
+            showToast('Character loaded from printable sheet!');
+        };
+        reader.readAsText(file);
+    }
+
+    /* =========================================================================
        DOWNLOAD / UPLOAD JSON
     ========================================================================= */
     function downloadSheet() {
@@ -748,7 +848,7 @@
     /* =========================================================================
        PUBLIC API
     ========================================================================= */
-    window.dgSaveLoad = { save, loadLocal, share, clearSave, clearSheet, downloadSheet, uploadSheet, collectState };
+    window.dgSaveLoad = { save, loadLocal, share, clearSave, clearSheet, downloadSheet, uploadSheet, collectState, applyState, importFromSheet };
 
     /* =========================================================================
        INIT — run after scripts.js window.onload (and its 50 ms inner timer)

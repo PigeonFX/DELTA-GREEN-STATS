@@ -187,16 +187,24 @@
 
     function _saveLoadout() {
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(_loadout.map(function (i) { return i.name; })));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(_loadout.map(function (i) {
+                return i.isCustom ? { isCustom: true, name: i.name } : i.name;
+            })));
         } catch (e) { /* storage unavailable */ }
     }
 
     function _loadLoadout() {
         try {
-            var names = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            var entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             var map = _getCatalogMap();
-            _loadout = names.map(function (n) {
-                var found = map.get(n);
+            _loadout = entries.map(function (e) {
+                if (typeof e === 'object' && e.isCustom) {
+                    return {
+                        name: e.name, type: 'gear', category: 'Custom', isCustom: true,
+                        system: { description: '', expense: '' }
+                    };
+                }
+                var found = map.get(e);
                 return found ? JSON.parse(JSON.stringify(found)) : null;
             }).filter(Boolean);
         } catch (e) {
@@ -210,6 +218,18 @@
         var item = _getCatalogMap().get(name);
         if (!item) return;
         _loadout.push(JSON.parse(JSON.stringify(item)));
+        _saveLoadout();
+        _render();
+    }
+
+    /** Add a plain-text custom item not found in the catalog. */
+    function addCustomItem(name) {
+        name = (name || '').trim();
+        if (!name) return;
+        _loadout.push({
+            name: name, type: 'gear', category: 'Custom', isCustom: true,
+            system: { description: '', expense: '' }
+        });
         _saveLoadout();
         _render();
     }
@@ -266,6 +286,11 @@
             '<button type="button" id="eq-clear-btn" class="eq-clear-btn" title="Clear all items">CLEAR</button>' +
             '</div>' +
             '<div id="eq-loadout-list" class="eq-scrolllist"></div>' +
+            '<div class="eq-custom-add-row">' +
+            '<input type="text" id="eq-custom-name" class="eq-custom-name-input"' +
+            ' placeholder="Add custom item\u2026" autocomplete="off" spellcheck="false" />' +
+            '<button type="button" id="eq-custom-add-btn" class="eq-custom-add-btn">+ Add</button>' +
+            '</div>' +
             '</div>' +
             '</div>' +
             '<p class="eq-hint">Items in the loadout are included when exporting to Foundry VTT.</p>';
@@ -288,6 +313,19 @@
             if (btn) removeItem(parseInt(btn.dataset.index, 10));
         });
 
+        document.getElementById('eq-custom-add-btn').addEventListener('click', function () {
+            var inp = document.getElementById('eq-custom-name');
+            var val = (inp.value || '').trim();
+            if (!val) return;
+            addCustomItem(val);
+            inp.value = '';
+            inp.focus();
+        });
+
+        document.getElementById('eq-custom-name').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); document.getElementById('eq-custom-add-btn').click(); }
+        });
+
         _render();
     }
 
@@ -295,6 +333,7 @@
 
     window.dgEquipment = {
         add: addItem,
+        addCustom: addCustomItem,
         remove: removeItem,
         clear: clearLoadout,
         getLoadout: getLoadout

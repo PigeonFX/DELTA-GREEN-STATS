@@ -106,9 +106,8 @@ const SPECIALTY_OPTIONS = {
     // Drawn from official rulebook descriptions. Add entries freely — the Program
     // has no jurisdiction over what ends up in this list.
     art: [
-        "Acting", "Creative Writing", "Dance", "Flute", "Forgery", "Guitar",
-        "Journalism", "Painting", "Photography", "Poetry", "Scriptwriting",
-        "Sculpture", "Singing", "Violin", "Illustration"
+        "Acting", "Creative Writing", "Forgery", "Journalism", "Painting",
+        "Photography", "Scriptwriting", "Illustration"
     ],
     craft: [
         "Architect", "Carpenter", "Electrician", "Gunsmith", "Locksmith",
@@ -136,6 +135,156 @@ const SPECIALTY_OPTIONS = {
 
 /** Set of CONFIG.SKILLS keys that require a specialty sub-option and are stored as instances. */
 const SPECIALTY_SKILL_KEYS = new Set(Object.keys(SPECIALTY_OPTIONS));
+
+/**
+ * Module-level cache of [value, displayText] options built by populateBonusSkillDropdowns().
+ * Used by fillBonusPackage() to rebuild filtered dropdowns without re-scanning the DOM.
+ */
+let _bonusAllSkillOptions = [];
+
+/**
+ * Human-readable placeholder text for each typed choose-slot sentinel.
+ * Shown in the dropdown's empty option when a package fills a slot with a required category.
+ */
+const PKG_HINTS = {
+    '?art': '\u2193 Choose an Art specialty',
+    '?craft': '\u2193 Choose a Craft specialty',
+    '?foreign_language': '\u2193 Choose a Foreign Language',
+    '?military_science': '\u2193 Choose a Military Science specialty',
+    '?pilot': '\u2193 Choose a Pilot specialty',
+    '?science': '\u2193 Choose a Science specialty',
+    '?any': '\u2193 Choose any skill',
+    '?anthro_arch': '\u2193 Choose Anthropology or Archeology',
+    '?any_from_list': '\u2193 Choose from the list above',
+};
+
+/**
+ * Filter functions for typed choose-slot sentinels.
+ * Matches against the option VALUE (specialty options use display text as value).
+ */
+const PKG_HINT_FILTER = {
+    '?art': ([v]) => v.startsWith('Art ('),
+    '?craft': ([v]) => v.startsWith('Craft ('),
+    '?foreign_language': ([v]) => v.startsWith('Foreign Language ('),
+    '?military_science': ([v]) => v.startsWith('Military Science ('),
+    '?pilot': ([v]) => v.startsWith('Pilot ('),
+    '?science': ([v]) => v.startsWith('Science ('),
+    '?anthro_arch': ([v]) => v === 'anthropology' || v === 'archeology',
+    // '?any' and '?any_from_list' intentionally absent — no filter, full list kept
+};
+
+/**
+ * Optional Bonus Skill Point Packages from the Delta Green rulebook (p.20).
+ * '?xxx' sentinels = typed choose-slots; fillBonusPackage() filters the dropdown to that category.
+ * Plain strings = CONFIG.SKILLS keys or specialty display text (e.g. 'Craft (Electrician)').
+ */
+const BONUS_PACKAGES = [
+    {
+        label: 'Artist, Actor, or Musician',
+        skills: ['alertness', '?craft', 'disguise', 'persuade', '?art', '?art', '?art', 'humint'],
+        desc: 'Alertness \u00b7 Craft (choose one) \u00b7 Disguise \u00b7 Persuade \u00b7 Art (choose one) \u00b7 Art (choose another) \u00b7 Art (choose another) \u00b7 HUMINT'
+    },
+    {
+        label: 'Athlete',
+        skills: ['alertness', 'athletics', 'dodge', 'first_aid', 'humint', 'persuade', 'swim', 'unarmed_combat'],
+        desc: 'Alertness \u00b7 Athletics \u00b7 Dodge \u00b7 First Aid \u00b7 HUMINT \u00b7 Persuade \u00b7 Swim \u00b7 Unarmed Combat'
+    },
+    {
+        label: 'Author, Editor, or Journalist',
+        skills: ['anthropology', '?art', 'bureaucracy', 'history', 'humint', 'law', 'occult', 'persuade'],
+        desc: 'Anthropology \u00b7 Art (choose one: Creative Writing, Journalism, Scriptwriting, etc.) \u00b7 Bureaucracy \u00b7 History \u00b7 HUMINT \u00b7 Law \u00b7 Occult \u00b7 Persuade'
+    },
+    {
+        label: '\u201cBlack Bag\u201d Training',
+        skills: ['alertness', 'athletics', 'Craft (Electrician)', 'Craft (Locksmith)', 'criminology', 'disguise', 'search', 'stealth'],
+        desc: 'Alertness \u00b7 Athletics \u00b7 Craft (Electrician) \u00b7 Craft (Locksmith) \u00b7 Criminology \u00b7 Disguise \u00b7 Search \u00b7 Stealth'
+    },
+    {
+        label: 'Blue-Collar Worker',
+        skills: ['alertness', '?craft', '?craft', 'drive', 'first_aid', 'heavy_machiner', 'navigate', 'search'],
+        desc: 'Alertness \u00b7 Craft (choose one) \u00b7 Craft (choose another) \u00b7 Drive \u00b7 First Aid \u00b7 Heavy Machinery \u00b7 Navigate \u00b7 Search'
+    },
+    {
+        label: 'Bureaucrat',
+        skills: ['accounting', 'bureaucracy', 'computer_science', 'criminology', 'humint', 'law', 'persuade', '?any'],
+        desc: 'Accounting \u00b7 Bureaucracy \u00b7 Computer Science \u00b7 Criminology \u00b7 HUMINT \u00b7 Law \u00b7 Persuade \u00b7 personal specialty (choose one)'
+    },
+    {
+        label: 'Clergy',
+        skills: ['?foreign_language', '?foreign_language', '?foreign_language', 'history', 'humint', 'occult', 'persuade', 'psychotherapy'],
+        desc: 'Foreign Language (choose one) \u00b7 Foreign Language (choose another) \u00b7 Foreign Language (choose another) \u00b7 History \u00b7 HUMINT \u00b7 Occult \u00b7 Persuade \u00b7 Psychotherapy'
+    },
+    {
+        label: 'Combat Veteran',
+        skills: ['alertness', 'dodge', 'firearms', 'first_aid', 'heavy_weapons', 'melee_weapons', 'stealth', 'unarmed_combat'],
+        desc: 'Alertness \u00b7 Dodge \u00b7 Firearms \u00b7 First Aid \u00b7 Heavy Weapons \u00b7 Melee Weapons \u00b7 Stealth \u00b7 Unarmed Combat'
+    },
+    {
+        label: 'Computer Enthusiast or Hacker',
+        skills: ['computer_science', 'Craft (Microelectronics)', 'Science (Mathematics)', 'sigint', '?any', '?any', '?any', '?any'],
+        desc: 'Computer Science \u00b7 Craft (Microelectronics) \u00b7 Science (Mathematics) \u00b7 SIGINT \u00b7 personal specialties \u00d74 (choose freely)'
+    },
+    {
+        label: 'Counselor',
+        skills: ['bureaucracy', 'first_aid', '?foreign_language', 'humint', 'law', 'persuade', 'psychotherapy', 'search'],
+        desc: 'Bureaucracy \u00b7 First Aid \u00b7 Foreign Language (choose one) \u00b7 HUMINT \u00b7 Law \u00b7 Persuade \u00b7 Psychotherapy \u00b7 Search'
+    },
+    {
+        label: 'Criminalist',
+        skills: ['accounting', 'bureaucracy', 'computer_science', 'criminology', 'forensics', 'law', 'pharmacy', 'search'],
+        desc: 'Accounting \u00b7 Bureaucracy \u00b7 Computer Science \u00b7 Criminology \u00b7 Forensics \u00b7 Law \u00b7 Pharmacy \u00b7 Search'
+    },
+    {
+        label: 'Firefighter',
+        skills: ['alertness', 'demolitions', 'drive', 'first_aid', 'forensics', 'heavy_machiner', 'navigate', 'search'],
+        desc: 'Alertness \u00b7 Demolitions \u00b7 Drive \u00b7 First Aid \u00b7 Forensics \u00b7 Heavy Machinery \u00b7 Navigate \u00b7 Search'
+    },
+    {
+        label: 'Gangster or Deep Cover',
+        skills: ['alertness', 'criminology', 'dodge', 'drive', 'persuade', 'stealth', '?any_from_list', '?any_from_list'],
+        desc: 'Alertness \u00b7 Criminology \u00b7 Dodge \u00b7 Drive \u00b7 Persuade \u00b7 Stealth \u00b7 choose 2 from: Athletics, Foreign Language, Firearms, HUMINT, Melee Weapons, Pharmacy, Unarmed Combat'
+    },
+    {
+        label: 'Interrogator',
+        skills: ['criminology', '?foreign_language', '?foreign_language', 'humint', 'law', 'persuade', 'pharmacy', 'search'],
+        desc: 'Criminology \u00b7 Foreign Language (choose one) \u00b7 Foreign Language (choose another) \u00b7 HUMINT \u00b7 Law \u00b7 Persuade \u00b7 Pharmacy \u00b7 Search'
+    },
+    {
+        label: 'Liberal Arts Degree',
+        skills: ['?anthro_arch', '?art', '?foreign_language', 'history', 'persuade', '?any', '?any', '?any'],
+        desc: 'Anthropology or Archeology (choose) \u00b7 Art (choose one) \u00b7 Foreign Language (choose one) \u00b7 History \u00b7 Persuade \u00b7 personal specialties \u00d73 (choose freely)'
+    },
+    {
+        label: 'Military Officer',
+        skills: ['bureaucracy', 'firearms', 'history', '?military_science', 'navigate', 'persuade', 'unarmed_combat', '?any_from_list'],
+        desc: 'Bureaucracy \u00b7 Firearms \u00b7 History \u00b7 Military Science (choose one) \u00b7 Navigate \u00b7 Persuade \u00b7 Unarmed Combat \u00b7 choose 1 from: Artillery, Heavy Machinery, Heavy Weapons, HUMINT, Pilot, SIGINT'
+    },
+    {
+        label: 'MBA',
+        skills: ['accounting', 'bureaucracy', 'humint', 'law', 'persuade', '?any', '?any', '?any'],
+        desc: 'Accounting \u00b7 Bureaucracy \u00b7 HUMINT \u00b7 Law \u00b7 Persuade \u00b7 personal specialties \u00d73 (choose freely)'
+    },
+    {
+        label: 'Nurse, Paramedic, or Pre-Med',
+        skills: ['alertness', 'first_aid', 'medicine', 'persuade', 'pharmacy', 'psychotherapy', 'Science (Biology)', 'search'],
+        desc: 'Alertness \u00b7 First Aid \u00b7 Medicine \u00b7 Persuade \u00b7 Pharmacy \u00b7 Psychotherapy \u00b7 Science (Biology) \u00b7 Search'
+    },
+    {
+        label: 'Occult Investigator or Conspiracy Theorist',
+        skills: ['anthropology', 'archeology', 'computer_science', 'criminology', 'history', 'occult', 'persuade', 'search'],
+        desc: 'Anthropology \u00b7 Archeology \u00b7 Computer Science \u00b7 Criminology \u00b7 History \u00b7 Occult \u00b7 Persuade \u00b7 Search'
+    },
+    {
+        label: 'Outdoorsman',
+        skills: ['alertness', 'athletics', 'firearms', 'navigate', 'ride', 'search', 'stealth', 'survival'],
+        desc: 'Alertness \u00b7 Athletics \u00b7 Firearms \u00b7 Navigate \u00b7 Ride \u00b7 Search \u00b7 Stealth \u00b7 Survival'
+    },
+    {
+        label: 'Photographer',
+        skills: ['alertness', 'Art (Photography)', 'computer_science', 'persuade', 'search', 'stealth', '?any', '?any'],
+        desc: 'Alertness \u00b7 Art (Photography) \u00b7 Computer Science \u00b7 Persuade \u00b7 Search \u00b7 Stealth \u00b7 personal specialties \u00d72 (choose freely)'
+    },
+];
 
 /**
  * Hover tooltip text shown on the ⓘ icon next to each specialty skill type label.
@@ -331,7 +480,23 @@ ADAPTING TO VIOLENCE: Your Agent's empathy suffers — permanently lose 1D6 CHA 
 
 ADAPTING TO HELPLESSNESS: Your Agent's personal drive suffers — permanently lose 1D6 POW.
 
-ADAPTING TO THE UNNATURAL: There is no adapting to the Unnatural. Every encounter is a fresh shock. The only way to reach equilibrium is 0 SAN, whereupon the horrors make perfect sense and no longer inflict mental damage.`
+ADAPTING TO THE UNNATURAL: There is no adapting to the Unnatural. Every encounter is a fresh shock. The only way to reach equilibrium is 0 SAN, whereupon the horrors make perfect sense and no longer inflict mental damage.`,
+
+    // ── Biography fields ─────────────────────────────────────────────────────
+    bio_name:
+        `Name\n\nWhat's your Agent's name? Delta Green games are most effective when they feel grounded in the real world, so make the name sound real. Avoid clichés and silliness.`,
+    bio_employer:
+        `Employer\n\nWhich agency or company does your Agent work for? Include your Agent's job title or rank if appropriate.`,
+    bio_nationality:
+        `Nationality\n\nThe Delta Green organization exists within the U.S. government, so most Agents are American. But if your game is set in another country, your Agents could be local, unofficial "friendlies" who conduct Delta Green operations with the guidance of a Delta Green control officer — someone from the CIA or the military — played by the Handler.`,
+    bio_sex_age:
+        `Sex and Age\n\nDelta Green mostly recruits Agents in their thirties, old enough to be established in challenging careers. Most Agents stay in the group until retirement age if they live that long. If your Agent is younger, what special skills or circumstances brought him or her into the group? If older, what causes your Agent to stay?`,
+    bio_education:
+        `Education and Occupational History\n\nMost Agents are in professions that require higher education, a bachelor's degree or a graduate degree. Describe an education that fits your Agent's skills.`,
+    bio_motivations:
+        `Motivations and Mental Disorders\n\nYour Agent starts with five motivations: personal beliefs, drives, or obsessions. Motivations aren't as powerful as Bonds, so they don't have scores. Bring them up in play to show what motivates and supports your Agent and makes life worth living.\n\nEach time SAN hits the Breaking Point, replace a motivation with your Agent's new mental disorder.`,
+    bio_personal_details:
+        `Personal Details and Notes\n\nDon't overlook the intangibles that make an Agent memorable. What's something admirable about your Agent? What's something that people often dislike about your Agent? What brought your Agent to Delta Green? Why does Delta Green trust your Agent? Why does your Agent help Delta Green despite the terrible risks?`
 };
 /** Generates a unique ID for a specialty skill instance. */
 function _genInstId() {
@@ -1229,7 +1394,9 @@ function selectProfession(professionKey) {
 
     if (applyRow) applyRow.style.display = profession.requiredSkills.length > 0 ? 'flex' : 'none';
     // Reset button/reminder state for the newly selected profession
-    if (applyBtn) applyBtn.classList.remove('apply-profession-done');
+    if (applyBtn) { applyBtn.classList.remove('apply-profession-done'); applyBtn.style.display = ''; applyBtn.textContent = 'Apply Professional Skills'; }
+    const badge = document.getElementById('apply-profession-done-badge');
+    if (badge) badge.style.display = 'none';
     const reminder = document.getElementById('reminder-apply-profession');
     if (reminder) reminder.style.display = '';
 }
@@ -1325,7 +1492,7 @@ function applyProfessionSkills() {
         const reminder = document.getElementById('reminder-apply-profession');
         if (reminder) reminder.style.display = 'none';
         const btn = document.getElementById('apply-profession-button');
-        if (btn) btn.classList.add('apply-profession-done');
+        if (btn) { btn.classList.add('apply-profession-done'); btn.textContent = 'Professional Skills Applied'; }
     } else {
         alert('No skills were applied. Make sure the skills exist in the character sheet.');
     }
@@ -1391,6 +1558,25 @@ function getCustomSkills() {
     return customSkills;
 }
 
+/**
+ * Called from the wizard tips panel package dropdown.
+ * Renders the chosen package's skills as a bullet list in the detail box.
+ */
+function _wizShowBonusPkg(idx) {
+    const d = document.getElementById('wiz-pkg-detail');
+    if (!d) return;
+    if (idx === '' || typeof BONUS_PACKAGES === 'undefined') { d.style.display = 'none'; return; }
+    const p = BONUS_PACKAGES[parseInt(idx)];
+    if (!p) { d.style.display = 'none'; return; }
+    const items = p.desc.split(' \u00b7 ');
+    d.innerHTML = '<strong style="display:block;margin-bottom:4px">'
+        + p.label + '</strong>'
+        + '<ul style="margin:0 0 0 16px;padding:0;list-style:disc">'
+        + items.map(s => '<li>' + s + '</li>').join('')
+        + '</ul>';
+    d.style.display = '';
+}
+
 function prepareBonusSkills() {
     // Show the bonus fieldset and populate the dropdowns.
     // Specialty skills are tracked in appState.specialtyInstances;
@@ -1402,7 +1588,7 @@ function prepareBonusSkills() {
     populateBonusSkillDropdowns();
 
     const btn = document.getElementById('prepare-bonus-button');
-    if (btn) btn.classList.add('prepare-bonus-done');
+    if (btn) { btn.classList.add('prepare-bonus-done'); btn.textContent = 'Skills Prepared for Bonus Points'; }
     const reminder = document.getElementById('reminder-prepare-bonus');
     if (reminder) reminder.style.display = 'none';
 }
@@ -1415,6 +1601,26 @@ function prepareBonusSkills() {
 function populateBonusSkillDropdowns() {
     const bonusSkillsDiv = document.getElementById('bonus-dropdowns');
     bonusSkillsDiv.innerHTML = '';
+
+    // Populate the package picker row (already exists in HTML; populate once).
+    let pkgRow = document.getElementById('bonus-package-row');
+    if (pkgRow && !document.getElementById('bonus-package-select')) {
+        pkgRow.className = 'bonus-package-row';
+        pkgRow.innerHTML =
+            '<div class="bonus-package-controls">'
+            + '<label for="bonus-package-select">Background package:</label>'
+            + '<select id="bonus-package-select"><option value="">\u2014 Choose a background \u2014</option></select>'
+            + '<button type="button" onclick="fillBonusPackage()">Fill Dropdowns</button>'
+            + '</div>'
+            + '<p id="bonus-package-desc" class="bonus-package-desc"></p>';
+        const pkgSelect = document.getElementById('bonus-package-select');
+        BONUS_PACKAGES.forEach((pkg, i) => {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = pkg.label;
+            pkgSelect.appendChild(opt);
+        });
+    }
 
     const allSkillOptions = []; // [ [value, displayText], ... ]
 
@@ -1461,6 +1667,9 @@ function populateBonusSkillDropdowns() {
             });
     }
 
+    // Cache for fillBonusPackage() to rebuild filtered dropdowns
+    _bonusAllSkillOptions = allSkillOptions;
+
     // Create 8 dropdown selectors
     for (let i = 0; i < 8; i++) {
         const wrapper = document.createElement('label');
@@ -1487,9 +1696,90 @@ function populateBonusSkillDropdowns() {
             select.appendChild(option);
         });
 
+        // Remove highlight when a value is chosen; restore it if the user goes back to
+        // an empty sentinel slot (placeholder text starts with ↓).
+        select.addEventListener('change', function () {
+            if (this.value) {
+                this.classList.remove('highlight-empty-input');
+            } else {
+                const emptyOpt = this.querySelector('option[value=""]');
+                if (emptyOpt && emptyOpt.textContent.startsWith('\u2193')) {
+                    this.classList.add('highlight-empty-input');
+                }
+            }
+        });
+
         wrapper.appendChild(select);
         bonusSkillsDiv.appendChild(wrapper);
     }
+}
+
+/**
+ * Pre-fills the 8 bonus skill dropdowns from a chosen BONUS_PACKAGES entry.
+ * Null slots in the package are left as "-- Select Skill --" for the player to choose.
+ */
+/**
+ * Rebuilds a bonus skill <select> with a given subset of options.
+ * @param {HTMLSelectElement} select
+ * @param {Array} options   - [[value, text], ...]
+ * @param {string} emptyText - placeholder text for the blank first option
+ */
+function _rebuildBonusDropdown(select, options, emptyText) {
+    select.innerHTML = '';
+    const emptyOpt = document.createElement('option');
+    emptyOpt.value = '';
+    emptyOpt.textContent = emptyText;
+    select.appendChild(emptyOpt);
+    options.forEach(([val, text]) => {
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = text;
+        select.appendChild(opt);
+    });
+}
+
+function fillBonusPackage() {
+    const sel = document.getElementById('bonus-package-select');
+    if (!sel || sel.value === '') return;
+    const pkg = BONUS_PACKAGES[parseInt(sel.value)];
+    if (!pkg) return;
+
+    // First pass: restore all 8 dropdowns to the full option list and clear any highlights.
+    for (let i = 0; i < 8; i++) {
+        const dd = document.getElementById(`cs-bonus-skill-${i}`);
+        if (dd && _bonusAllSkillOptions.length) {
+            _rebuildBonusDropdown(dd, _bonusAllSkillOptions, '-- Select Skill --');
+            dd.classList.remove('highlight-empty-input');
+        }
+    }
+
+    // Second pass: fill values or apply category filters.
+    pkg.skills.forEach((val, i) => {
+        const dd = document.getElementById(`cs-bonus-skill-${i}`);
+        if (!dd) return;
+        if (val && val.startsWith('?')) {
+            const filter = PKG_HINT_FILTER[val];
+            const hint = PKG_HINTS[val] || '\u2193 Choose a skill';
+            if (filter && _bonusAllSkillOptions.length) {
+                // Rebuild dropdown with only the matching category options.
+                _rebuildBonusDropdown(dd, _bonusAllSkillOptions.filter(filter), hint);
+            } else {
+                // ?any / ?any_from_list: keep full list, just update placeholder.
+                const emptyOpt = dd.querySelector('option[value=""]');
+                if (emptyOpt) emptyOpt.textContent = hint;
+            }
+            dd.value = '';
+            dd.classList.add('highlight-empty-input');
+        } else if (val) {
+            dd.value = val;
+            if (dd.value !== val) dd.value = '';
+        } else {
+            dd.value = '';
+        }
+    });
+
+    const descEl = document.getElementById('bonus-package-desc');
+    if (descEl) { descEl.textContent = pkg.desc; descEl.style.display = ''; }
 }
 
 /**
@@ -1572,7 +1862,7 @@ function applyBonusSkills() {
         alert(`Applied +${CONFIG.BONUS_SKILL_POINTS} bonus to ${appliedCount} skill(s)!`);
         // Turn button green and hide reminder
         const btn = document.getElementById('apply-bonus-button');
-        if (btn) btn.classList.add('apply-bonus-done');
+        if (btn) { btn.classList.add('apply-bonus-done'); btn.textContent = 'Bonuses Applied'; }
         const reminder = document.getElementById('reminder-apply-bonus');
         if (reminder) reminder.style.display = 'none';
         const resetBtn = document.getElementById('reset-bonus-button');
@@ -1643,7 +1933,7 @@ function resetBonusSkills() {
     renderSpecialtySkills();
 
     const btn = document.getElementById('apply-bonus-button');
-    if (btn) btn.classList.remove('apply-bonus-done');
+    if (btn) { btn.classList.remove('apply-bonus-done'); btn.textContent = 'Apply Bonuses'; }
     const reminder = document.getElementById('reminder-apply-bonus');
     if (reminder) reminder.style.display = '';
     const resetBtn = document.getElementById('reset-bonus-button');
@@ -1660,7 +1950,9 @@ function resetBonusSkills() {
 function resetProfessionSkills() {
     clearProfessionSkills();
     const btn = document.getElementById('apply-profession-button');
-    if (btn) btn.classList.remove('apply-profession-done');
+    if (btn) { btn.classList.remove('apply-profession-done'); btn.style.display = ''; btn.textContent = 'Apply Professional Skills'; }
+    const badge = document.getElementById('apply-profession-done-badge');
+    if (badge) badge.style.display = 'none';
     const reminder = document.getElementById('reminder-apply-profession');
     if (reminder) reminder.style.display = '';
     if (typeof syncLpFromForm === 'function') syncLpFromForm();
@@ -1899,6 +2191,7 @@ function buildFoundryJSON() {
         const breakingPoint = (document.getElementById('cs-breaking-point') && parseInt(document.getElementById('cs-breaking-point').value)) ? parseInt(document.getElementById('cs-breaking-point').value) : (sanityValue - statsObj.pow.value);
         const physicalDesc = (document.getElementById('cs-physical-desc') && document.getElementById('cs-physical-desc').value) ? document.getElementById('cs-physical-desc').value : '';
         const motivations = document.getElementById('cs-motivations')?.value || '';
+        const personalDetails = document.getElementById('cs-personal-details')?.value || '';
         // Derive profession title from the dropdown's selected option (single source of truth)
         const profSelect = document.getElementById('cs-profession-select');
         const bioProfession = profSelect && profSelect.selectedIndex > 0
@@ -2093,7 +2386,7 @@ function buildFoundryJSON() {
                 schemaVersion: 1,
                 sanity: { value: sanityValue, currentBreakingPoint: breakingPoint, adaptations: { violence: violenceAdaptations, helplessness: helplessnessAdaptations } },
                 physical: { description: physicalDesc, wounds: lpWounds, firstAidAttempted: false, exhausted: false, exhaustedPenalty: -20 },
-                biography: { profession: bioProfession, employer: bioEmployer, nationality: bioNationality, sex: bioSex, age: bioAge, education: bioEducation },
+                biography: { profession: bioProfession, employer: bioEmployer, nationality: bioNationality, sex: bioSex, age: bioAge, education: bioEducation, notes: personalDetails },
                 corruption: { value: corruptionValue, haveSeenTheYellowSign: false, gift: '', insight: '' }
             },
             items: items.concat(motivationItems),
@@ -2302,6 +2595,10 @@ function importFoundryJSONToEditor() {
                 : (sys.biography?.motivations || '');
         }
 
+        // Personal details — stored in sys.biography.notes
+        const personalDetailsEl = document.getElementById('cs-personal-details');
+        if (personalDetailsEl) personalDetailsEl.value = sys.biography?.notes || '';
+
         // Sanity adaptation checkboxes
         const adaptations = sys.sanity?.adaptations || {};
         ['violence', 'helplessness'].forEach(type => {
@@ -2362,7 +2659,7 @@ function importFoundryJSONToEditor() {
     // Apply button states after the observer is back and any pending repaints have settled.
     setTimeout(() => {
         const prepBtn = document.getElementById('prepare-bonus-button');
-        if (prepBtn) prepBtn.classList.add('prepare-bonus-done');
+        if (prepBtn) { prepBtn.classList.add('prepare-bonus-done'); prepBtn.textContent = 'Skills Prepared for Bonus Points'; }
         const prepReminder = document.getElementById('reminder-prepare-bonus');
         if (prepReminder) prepReminder.style.display = 'none';
         const bonusSection = document.getElementById('bonus-skills-section');
@@ -2370,7 +2667,7 @@ function importFoundryJSONToEditor() {
         populateBonusSkillDropdowns();
 
         const applyBonusBtn = document.getElementById('apply-bonus-button');
-        if (applyBonusBtn) applyBonusBtn.classList.add('apply-bonus-done');
+        if (applyBonusBtn) { applyBonusBtn.classList.add('apply-bonus-done'); applyBonusBtn.textContent = 'Bonuses Applied'; }
         const applyBonusReminder = document.getElementById('reminder-apply-bonus');
         if (applyBonusReminder) applyBonusReminder.style.display = 'none';
     }, 0);
@@ -2406,6 +2703,12 @@ window.onload = function () {
     // Bond container event delegation — handles all bond field changes and removals
     const bondsEl = document.getElementById('cs-bonds');
     if (bondsEl) {
+        bondsEl.addEventListener('input', (e) => {
+            if (e.target.tagName === 'TEXTAREA' && e.target.classList.contains('bond-entry-field')) {
+                e.target.style.height = 'auto';
+                e.target.style.height = e.target.scrollHeight + 'px';
+            }
+        });
         bondsEl.addEventListener('change', (e) => {
             const entry = e.target.closest('.bond-entry');
             if (!entry) return;
@@ -2587,6 +2890,12 @@ function setTheme(theme, { skipSave = false } = {}) {
         if (!skipSave) window.dgSaveLoad?.save?.();
 
         const body = document.body;
+        // Deactivate wizard before class swap so panels return to their original DOM positions;
+        // remember the active step so we can re-activate after the theme swap.
+        const _wizActive = document.getElementById('wiz-outer') !== null;
+        const _wizStep = _wizActive ? (window.dgWizard?._currentStep?.() ?? 0) : null;
+        window.dgWizard?.deactivate();
+
         body.classList.remove('theme-xfiles', 'theme-modern', 'theme-son-of-sam', 'theme-field-notes', 'theme-field-doc', 'theme-mobile');
         body.classList.add('theme-' + theme);
         localStorage.setItem('dg_theme', theme);
@@ -2607,6 +2916,11 @@ function setTheme(theme, { skipSave = false } = {}) {
         // Refresh bond entries so their placeholders update immediately
         if (typeof renderBondsOnSheet === 'function' && window.bondsOnSheet && window.bondsOnSheet.length > 0) {
             renderBondsOnSheet();
+        }
+        // Re-activate wizard on the same step if it was running when the theme changed
+        if (_wizStep !== null && !isNaN(_wizStep) && typeof window.dgWizard?.activate === 'function') {
+            localStorage.setItem('dg-wiz-step', String(_wizStep));
+            window.dgWizard.activate();
         }
         // Show download/upload buttons only in field-doc; show copy/clear in all other themes
         const dlBtn = document.getElementById('download-sheet-btn');
@@ -4134,7 +4448,7 @@ function renderBondsOnSheet() {
                     <button type="button" class="bond-remove-button" title="Permanently remove this bond from your character sheet.">Remove</button>
                 </div>
                 <div style="margin-bottom:6px;">
-                    <textarea class="bond-entry-field" name="bond-desc-${safeId}" autocomplete="off" placeholder="${sosPlaceholder('Bond Description/Text')}" data-field="description" style="height:80px;resize:vertical;">${safeDescription}</textarea>
+                    <textarea class="bond-entry-field" name="bond-desc-${safeId}" autocomplete="off" placeholder="${sosPlaceholder('Bond Description/Text')}" data-field="description" style="min-height:80px;height:auto;overflow:hidden;resize:none;">${safeDescription}</textarea>
                 </div>
                 <div style="display:flex;gap:8px;">
                     <div style="flex:1;">
@@ -4154,6 +4468,11 @@ function renderBondsOnSheet() {
     });
 
     bondsContainer.innerHTML = html;
+    // Auto-size description textareas to their content
+    bondsContainer.querySelectorAll('textarea.bond-entry-field').forEach(ta => {
+        ta.style.height = 'auto';
+        ta.style.height = ta.scrollHeight + 'px';
+    });
     // Keep LP sheet bond table in sync
     if (document.getElementById('lp-bonds-tbody') && typeof renderLpBonds === 'function') {
         renderLpBonds();

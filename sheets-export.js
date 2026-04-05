@@ -417,7 +417,8 @@
             });
 
             // ── Back: Personal notes ──────────────────────────────────────
-            if (lpNotes.remarks) s2 = writeCell(s2, "C30", lpNotes.remarks);
+            const _personalNotesVal = bio.personalDetails || lpNotes.remarks || '';
+            if (_personalNotesVal) s2 = writeCell(s2, "C30", _personalNotesVal);
 
             // ── Write patched XML back and repack ─────────────────────────
             s1 = cleanOrphanedSharedFormulas(s1);

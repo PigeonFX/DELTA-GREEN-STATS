@@ -114,6 +114,29 @@
                 Export to <strong>Foundry VTT</strong> or print your sheet — with five themes including
                 "Live Play" theme for use at the table.
             </p>
+            <div id="theme-selector">
+                <label>Theme:</label>
+                <select id="cs-theme-select" aria-label="Theme selector">
+                    <option value="xfiles">X-Files</option>
+                    <option value="modern">Modern</option>
+                    <option value="son-of-sam">Son of Sam</option>
+                    <option value="field-notes">Field Notes</option>
+                    <option value="field-doc">Live Play (Field Notes)</option>
+                    <option value="mobile">Mobile</option>
+                </select>
+            </div>
+            <!-- ── Character Creation Wizard promo block ── -->
+            <div id="wiz-promo" class="wiz-promo">
+                <div class="wiz-promo-text">
+                    <strong>Character Creation Wizard</strong>
+                    <span>New to Delta Green or this site? The wizard walks you through each step in order — statistics,
+                        profession, biography, skills, bonds, and gear — with explanations and tips along the way.
+                        Recommended for new players and new users. Already familiar with the system? Skip the wizard and
+                        fill in the fields below from top to bottom.</span>
+                </div>
+                <button type="button" id="wiz-toggle-btn" onclick="window.dgWizard?.toggle()">&#10022; Character
+                    Creation Wizard</button>
+            </div>
             <div class="stats-section" id="stats-buy-section">
                 <h2>STATISTICS:</h2>
                 <div id="stats"></div>
@@ -223,7 +246,8 @@
                                 <option value="non-binary">Non-binary</option>
                             </select>
                         </div>
-                        <label>Name: <input type="text" id="cs-name" value="Agent"></label><br>
+                        <label><span data-tooltip-key="bio_name">Name:</span> <input type="text" id="cs-name"
+                                value="Agent"></label><br>
 
                         <!-- Profession lives here — selecting it expands the description + skills inline -->
                         <div id="bio-profession-row">
@@ -240,23 +264,31 @@
                                     before continuing</span>
                                 <button type="button" id="apply-profession-button"
                                     title="Applies the selected profession's skill bonuses to your character sheet. Do this before spending bonus skill points."
-                                    onclick="applyProfessionSkills()">Apply
-                                    Professional Skills</button>
+                                    onclick="applyProfessionSkills()">Apply Professional Skills</button>
                                 <button type="button" id="reset-profession-button"
                                     title="Resets all profession-applied skills back to their defaults so you can choose a different profession."
                                     onclick="resetProfessionSkills()">Reset Profession Skills</button>
                             </div>
                         </div>
 
-                        <label>Employer: <input type="text" id="cs-bio-employer" value=""></label>
-                        <label>Nationality: <input type="text" id="cs-bio-nationality" value=""></label>
-                        <label>Sex: <input type="text" id="cs-bio-sex" value=""></label>
-                        <label>Age: <input type="number" id="cs-bio-age" value="" min="0"></label>
-                        <label>Education: <input type="text" id="cs-bio-education" value=""></label>
+                        <label><span data-tooltip-key="bio_employer">Employer:</span> <input type="text"
+                                id="cs-bio-employer" value=""></label>
+                        <label><span data-tooltip-key="bio_nationality">Nationality:</span> <input type="text"
+                                id="cs-bio-nationality" value=""></label>
+                        <label><span data-tooltip-key="bio_sex_age">Sex:</span> <input type="text" id="cs-bio-sex"
+                                value=""></label>
+                        <label><span data-tooltip-key="bio_sex_age">Age:</span> <input type="number" id="cs-bio-age"
+                                value="" min="0"></label>
+                        <label><span data-tooltip-key="bio_education">Education:</span> <input type="text"
+                                id="cs-bio-education" value=""></label>
                         <label>Physical Description: <textarea id="cs-physical-desc" autocomplete="off"
                                 placeholder="Physical description of agent"></textarea></label>
-                        <label>Motivations and Mental Disorders: <textarea id="cs-motivations" autocomplete="off"
+                        <label><span data-tooltip-key="bio_motivations">Motivations and Mental Disorders:</span>
+                            <textarea id="cs-motivations" autocomplete="off"
                                 placeholder="You may define up to 5 Motivations — deeply held beliefs, ideals, or drives that keep your agent going. Once per session, acting on a Motivation can restore lost Willpower. When your agent develops a Mental Disorder, it replaces one of their Motivations."></textarea></label>
+                        <label><span data-tooltip-key="bio_personal_details">Personal Details and Notes:</span>
+                            <textarea id="cs-personal-details" autocomplete="off"
+                                placeholder="Personal details, notes, and other information about your agent."></textarea></label>
                     </fieldset>
                     <h2 class="visually-hidden">Skills</h2>
                     <fieldset class="panel panel-skills fieldset-default">
@@ -265,65 +297,67 @@
                         <!-- Specialty skill instances (Art, Craft, Science, Pilot, Military Science).
                          Rendered from appState.specialtyInstances by renderSpecialtySkills(). -->
                         <div id="cs-specialty-skills"></div>
-                        <div class="skills-footer-row specialty-add-row">
-                            <button type="button" class="specialty-add-btn"
-                                title="Adds a blank specialty-skill row so you can manually pick the type (Art, Craft, Science, Pilot, Military Science) and sub-option."
-                                onclick="addManualSpecialtySkill()">Add Specialty Skill</button>
-                        </div>
-                        <div class="skills-footer-row">
-                            <div class="sanity-adaptations-section">
-                                <div class="sanity-adaptations-title" data-tooltip-key="sanity_adaptations">Sanity
-                                    Adaptations:</div>
-                                <div class="sanity-adaptations-list">
-                                    <div class="sanity-row">
-                                        <label class="sanity-category-label">Violence:</label>
-                                        <div class="sanity-checkboxes">
-                                            <label class="sanity-checkbox-label">
-                                                <input type="checkbox" id="cs-violence-incident1"
-                                                    class="sanity-adaptation-checkbox"
-                                                    onchange="updateSanityAdaptations()">
-                                                <span>1</span>
-                                            </label>
-                                            <label class="sanity-checkbox-label">
-                                                <input type="checkbox" id="cs-violence-incident2"
-                                                    class="sanity-adaptation-checkbox"
-                                                    onchange="updateSanityAdaptations()">
-                                                <span>2</span>
-                                            </label>
-                                            <label class="sanity-checkbox-label">
-                                                <input type="checkbox" id="cs-violence-incident3"
-                                                    class="sanity-adaptation-checkbox"
-                                                    onchange="updateSanityAdaptations()">
-                                                <span>3</span>
-                                            </label>
+                        <div class="skills-advanced-warning-box">
+                            <div class="skills-footer-row specialty-add-row">
+                                <button type="button" class="specialty-add-btn"
+                                    title="Adds a blank specialty-skill row so you can manually pick the type (Art, Craft, Science, Pilot, Military Science) and sub-option."
+                                    onclick="addManualSpecialtySkill()">Add Specialty Skill</button>
+                            </div>
+                            <div class="skills-footer-row">
+                                <div class="sanity-adaptations-section">
+                                    <div class="sanity-adaptations-title" data-tooltip-key="sanity_adaptations">Sanity
+                                        Adaptations:</div>
+                                    <div class="sanity-adaptations-list">
+                                        <div class="sanity-row">
+                                            <label class="sanity-category-label">Violence:</label>
+                                            <div class="sanity-checkboxes">
+                                                <label class="sanity-checkbox-label">
+                                                    <input type="checkbox" id="cs-violence-incident1"
+                                                        class="sanity-adaptation-checkbox"
+                                                        onchange="updateSanityAdaptations()">
+                                                    <span>1</span>
+                                                </label>
+                                                <label class="sanity-checkbox-label">
+                                                    <input type="checkbox" id="cs-violence-incident2"
+                                                        class="sanity-adaptation-checkbox"
+                                                        onchange="updateSanityAdaptations()">
+                                                    <span>2</span>
+                                                </label>
+                                                <label class="sanity-checkbox-label">
+                                                    <input type="checkbox" id="cs-violence-incident3"
+                                                        class="sanity-adaptation-checkbox"
+                                                        onchange="updateSanityAdaptations()">
+                                                    <span>3</span>
+                                                </label>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="sanity-row">
-                                        <label class="sanity-category-label">Helplessness:</label>
-                                        <div class="sanity-checkboxes">
-                                            <label class="sanity-checkbox-label">
-                                                <input type="checkbox" id="cs-helplessness-incident1"
-                                                    class="sanity-adaptation-checkbox"
-                                                    onchange="updateSanityAdaptations()">
-                                                <span>1</span>
-                                            </label>
-                                            <label class="sanity-checkbox-label">
-                                                <input type="checkbox" id="cs-helplessness-incident2"
-                                                    class="sanity-adaptation-checkbox"
-                                                    onchange="updateSanityAdaptations()">
-                                                <span>2</span>
-                                            </label>
-                                            <label class="sanity-checkbox-label">
-                                                <input type="checkbox" id="cs-helplessness-incident3"
-                                                    class="sanity-adaptation-checkbox"
-                                                    onchange="updateSanityAdaptations()">
-                                                <span>3</span>
-                                            </label>
+                                        <div class="sanity-row">
+                                            <label class="sanity-category-label">Helplessness:</label>
+                                            <div class="sanity-checkboxes">
+                                                <label class="sanity-checkbox-label">
+                                                    <input type="checkbox" id="cs-helplessness-incident1"
+                                                        class="sanity-adaptation-checkbox"
+                                                        onchange="updateSanityAdaptations()">
+                                                    <span>1</span>
+                                                </label>
+                                                <label class="sanity-checkbox-label">
+                                                    <input type="checkbox" id="cs-helplessness-incident2"
+                                                        class="sanity-adaptation-checkbox"
+                                                        onchange="updateSanityAdaptations()">
+                                                    <span>2</span>
+                                                </label>
+                                                <label class="sanity-checkbox-label">
+                                                    <input type="checkbox" id="cs-helplessness-incident3"
+                                                        class="sanity-adaptation-checkbox"
+                                                        onchange="updateSanityAdaptations()">
+                                                    <span>3</span>
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div><!-- /.skills-advanced-warning-box -->
                         <div id="cs-custom-skills"></div>
                     </fieldset>
 
@@ -339,14 +373,33 @@
                         </div>
                         <div id="bonus-skills-section">
                             <p class="bonus-skills-description">
-                                BONUS SKILL POINTS: Pick any eight skills and add 20 points to each. This allows your
-                                Agent
-                                to specialize in certain professional skills or to
-                                learn a little about skills not included in his or her profession. You can even boost a
-                                single skill more than once, adding +20 each time. Unless the Handler says otherwise,
-                                you
-                                can't raise a skill higher than 80% during Agent creation.</p>
-                            <div id="bonus-dropdowns"></div>
+                                Add <strong>+20 points</strong> to any eight skills — these represent your Agent's life
+                                outside the job. You can boost the same skill multiple times, but no skill can exceed
+                                <strong>80%</strong> during character creation.
+                            </p>
+                            <p class="bonus-skills-description" style="margin-top:6px">
+                                You have two ways to spend them:</p>
+
+                            <div class="bonus-method-block">
+                                <div class="bonus-method-label">&#9654; Option 1 — Use a background package</div>
+                                <p class="bonus-skills-description" style="margin:4px 0 8px">Pre-built sets from the
+                                    rulebook. Pick a background that fits your Agent's history and the eight skills are
+                                    chosen for you — slots marked <em>choose</em> stay blank for you to fill in.</p>
+                                <div id="bonus-package-row"></div>
+                            </div>
+
+                            <div class="bonus-method-separator">
+                                <span>— or build your own —</span>
+                            </div>
+
+                            <div class="bonus-method-block">
+                                <div class="bonus-method-label">&#9654; Option 2 — Pick manually</div>
+                                <p class="bonus-skills-description" style="margin:4px 0 8px">Choose any eight skills
+                                    from the dropdowns below for a fully custom build. You can repeat a skill to stack
+                                    the bonus.</p>
+                                <div id="bonus-dropdowns"></div>
+                            </div>
+
                             <div class="bonus-apply-row">
                                 <span class="reminder-text" id="reminder-apply-bonus">↓ Press me before
                                     continuing</span>
@@ -492,30 +545,75 @@
                     </div>
 
                     <details id="advanced-options-details">
-                        <summary>Export &amp; Import Options <span class="advanced-options-hints">— Print &nbsp;·&nbsp;
-                                PDF &nbsp;·&nbsp; Export to Google Sheets &nbsp;·&nbsp; Export to VTT &nbsp;·&nbsp;
-                                Import from VTT &nbsp;·&nbsp; Download / Upload Live Play Character</span></summary>
+                        <summary>Advanced — Export &amp; Import</summary>
                         <div class="advanced-options-body">
 
                             <div class="export-actions-grid">
                                 <div class="export-action-group">
-                                    <div class="export-action-group-label">Print</div>
-                                    <div class="section-buttons">
-                                        <button type="button" id="export-printable" onclick="exportPrintable()"
-                                            title="Generates a clean, printer-friendly HTML character sheet from the current form — open it in your browser and use Print to PDF."
-                                            style="display:flex;flex-direction:column;align-items:center;gap:4px;"><span
-                                                style="font-size:2.4em;line-height:1;">⎙</span>Export Printable
-                                            Sheet</button>
-                                        <button type="button" id="export-pdf" onclick="exportToPDF()"
-                                            title="Downloads your character as a filled DD Form 315 PDF — the official Delta Green character sheet."
-                                            style="display:flex;flex-direction:column;align-items:center;gap:4px;"><span
-                                                style="font-size:2.4em;line-height:1;">⬇</span>Export PDF
-                                            Character Sheet</button>
-                                        <button type="button" id="export-sheets" onclick="exportToSheets()"
-                                            title="Downloads a filled .xlsx spreadsheet &mdash; upload to Google Drive to open as a Google Sheet."
-                                            style="display:flex;flex-direction:column;align-items:center;gap:4px;"><span
-                                                style="font-size:2.4em;line-height:1;">⊞</span>Export Google
-                                            Sheet</button>
+                                    <div class="export-action-group-label">Export</div>
+                                    <div class="io-option-list">
+                                        <div class="io-option">
+                                            <button type="button" id="export-printable" onclick="exportPrintable()"
+                                                style="display:flex;flex-direction:column;align-items:center;gap:4px;"><span
+                                                    style="font-size:2.4em;line-height:1;">⎙</span>Export
+                                                Printable<br>Sheet</button>
+                                            <p class="io-option-desc">Generates a printer-friendly HTML file. Open it in
+                                                your browser and use <em>Print &rarr; Save as PDF</em>. The file also
+                                                embeds your full character state, so it can be loaded back into the
+                                                editor using <strong>Import from Sheet HTML</strong> &mdash; a perfect
+                                                round-trip.</p>
+                                        </div>
+                                        <div class="io-option">
+                                            <button type="button" id="export-pdf" onclick="exportToPDF()"
+                                                style="display:flex;flex-direction:column;align-items:center;gap:4px;"><span
+                                                    style="font-size:2.4em;line-height:1;">⬇</span>Export
+                                                PDF<br>Character Sheet</button>
+                                            <p class="io-option-desc">Fills and downloads the official <strong>DD Form
+                                                    315</strong> as a PDF. Stats, skills, biography, bonds, and gear are
+                                                all written into the form fields. This PDF can be imported back using
+                                                <strong>Import from PDF Sheet</strong>.</p>
+                                        </div>
+                                        <div class="io-option">
+                                            <button type="button" id="export-sheets" onclick="exportToSheets()"
+                                                style="display:flex;flex-direction:column;align-items:center;gap:4px;"><span
+                                                    style="font-size:2.4em;line-height:1;">⊞</span>Export
+                                                Google<br>Sheet</button>
+                                            <p class="io-option-desc">Downloads a filled <strong>.xlsx</strong>
+                                                spreadsheet. Upload to Google Drive and open as a Google Sheet for easy
+                                                viewing or sharing.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="export-action-group">
+                                    <div class="export-action-group-label">Import</div>
+                                    <div class="io-option-list">
+                                        <div class="io-option">
+                                            <button type="button" id="import-sheet-btn"
+                                                onclick="document.getElementById('import-sheet-file').click()"
+                                                style="display:flex;flex-direction:column;align-items:center;gap:4px;"><span
+                                                    style="font-size:2.4em;line-height:1;">⬆</span>Import from<br>Sheet
+                                                HTML</button>
+                                            <input type="file" id="import-sheet-file" accept=".html,text/html"
+                                                style="display:none"
+                                                onchange="dgSaveLoad.importFromSheet(this.files[0]); this.value=''">
+                                            <p class="io-option-desc">Loads a previously exported <strong>Printable
+                                                    Sheet .html file</strong> back into the editor. This is a perfect
+                                                round-trip &mdash; every stat, skill, bond, equipment item, and setting
+                                                is restored exactly as exported.</p>
+                                        </div>
+                                        <div class="io-option">
+                                            <button type="button" id="import-pdf-btn" onclick="importFromPDF()"
+                                                style="display:flex;flex-direction:column;align-items:center;gap:4px;"><span
+                                                    style="font-size:2.4em;line-height:1;">⬆</span>Import from<br>PDF
+                                                Sheet</button>
+                                            <p class="io-option-desc">Reads back a <strong>DD Form 315 PDF</strong>
+                                                exported by this site. Recovers stats, skills, biography, bonds, and
+                                                gear. <strong>Limitation:</strong> specialty skills (e.g. Foreign
+                                                Language, Art) and some bond detail cannot be precisely recovered from
+                                                PDF form fields alone &mdash; these may need manual re-entry after
+                                                import.</p>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -612,18 +710,6 @@
                     </details>
                 </div>
             </div>
-            <!-- Theme selector -->
-            <div id="theme-selector">
-                <label>Theme:</label>
-                <select id="cs-theme-select" aria-label="Theme selector">
-                    <option value="xfiles">X-Files</option>
-                    <option value="modern">Modern</option>
-                    <option value="son-of-sam">Son of Sam</option>
-                    <option value="field-notes">Field Notes</option>
-                    <option value="field-doc">Live Play (Field Notes)</option>
-                    <option value="mobile">Mobile</option>
-                </select>
-            </div>
         </main>
         <footer class="site-footer">
             <div class="github-link-container">
@@ -666,6 +752,7 @@
         <script src="dice-roller.js"></script>
         <script src="equipment-data.js"></script>
         <script src="equipment-picker.js"></script>
+        <script src="wizard.js"></script>
 
         <!-- Shared fixed-position tooltip panel for specialty skill ⓘ icons -->
         <div id="specialty-tooltip-panel" role="tooltip" aria-hidden="true"></div>

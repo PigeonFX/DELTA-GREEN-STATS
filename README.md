@@ -91,6 +91,34 @@ A full-featured character creation, management, and live play tool for the **Del
 
 ## Features
 
+### Character Creation Wizard
+New to Delta Green or to this site? Click **✶ Character Creation Wizard** at the top of the page to activate a guided step-by-step overlay that walks you through the entire character-building process in order. It replaces freeform scrolling with a focused one-section-at-a-time flow, with context and tips visible at every step.
+
+**How it works:**
+- The rest of the page is hidden; only the current step's section is shown
+- A progress bar and step label at the top of the shell track where you are
+- The left sidebar shows a **TIPS & CONTEXT** panel with rules text, drop-down reference tables, and worked examples relevant to the current step
+- Back and Next buttons navigate between steps
+- You can change theme at any time — the wizard resumes on the same step after the switch
+- Click **Finish ✓** on the last step to close the wizard and return to the full sheet with all your choices intact
+
+**Steps:**
+
+| # | Step | What you do |
+|---|---|---|
+| 1 | **Statistics** | Set STR, DEX, CON, INT, POW, CHA via point buy, random allocation, or 4d6 drop-lowest |
+| 2 | **Profession** | Pick from 18 official professions — skills are applied automatically |
+| 3 | **Biography** | Fill name, employer, education, and description — or hit *Random Bio* for a procedurally generated background |
+| 4 | **Skills** | Review your skill list; assign any specialty skills (Craft, Foreign Language, Science, etc.) that need a sub-type chosen |
+| 5 | **Bonus Skills** | Spend 8 × +20 bonus skill points (cap 80%); optionally pick a ready-made background package from the rulebook |
+| 6 | **Bonds** | Define bonds by name and relationship — your profession determines how many you start with |
+| 7 | **Equipment** | Browse the gear catalog and build your loadout; use the profession-specific loadout examples in the tips sidebar for guidance |
+| 8 | **Save & Export** | Copy a share link, export to a printable sheet, DD Form 315 PDF, Google Sheet, or Foundry VTT actor |
+
+The wizard is **optional** — experienced players can skip it and fill in the form sections directly from top to bottom.
+
+---
+
 ### Stat Generation
 - **Point Buy** — distribute a fixed pool of points across STR, DEX, CON, INT, POW, CHA
 - **Random Allocation** — 72 points spread randomly
@@ -305,6 +333,7 @@ DELTA-GREEN-STATS/
 ├── printable-sheet.js   # HTML printable sheet generator
 ├── pdf-export.js        # DD Form 315 PDF export (AcroForm field filling via pdf-lib)
 ├── save-load.js         # Auto-save, share links, import/export
+├── wizard.js            # Step-by-step guided creation overlay (window.dgWizard)
 └── assets/
     └── art/             # Screenshots, icons, artwork
 ```

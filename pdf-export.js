@@ -274,7 +274,7 @@
             }
             setField(form, "15 ARMOR AND GEAR", gearLines.join("\n").trim());
 
-            setField(form, "17 PERSONAL DETAILS AND NOTES", lpNotes.remarks);
+            setField(form, "17 PERSONAL DETAILS AND NOTES", bio.personalDetails || lpNotes.remarks || '');
 
             // Weapons — exact field names from PDF AcroForm dictionary
             const weaponRows = getWeaponRows(lpWeapons);
@@ -317,4 +317,132 @@
     }
 
     window.exportToPDF = exportToPDF;
+
+    // ─── Import from DD Form 315 PDF ────────────────────────────────────────
+
+    /**
+     * Read back a DD Form 315 PDF exported by this site and restore as much of
+     * the character state as the AcroForm fields carry.
+     *
+     * What is recovered: all stats, all skills, biography, derived attributes,
+     *   SAN incident checkboxes, bonds (name+score only), LP wounds/remarks, and
+     *   gear text (imported as custom loadout items).
+     * What is NOT recovered: theme, bonus-skill state, specialty instances,
+     *   full bond detail, LP weapon rows, and any data outside the form fields.
+     */
+    async function importFromPDF() {
+        let input = document.getElementById('dg-pdf-import-input');
+        if (!input) {
+            input = document.createElement('input');
+            input.type = 'file';
+            input.id = 'dg-pdf-import-input';
+            input.accept = '.pdf,application/pdf';
+            input.style.cssText = 'display:none;position:fixed;top:0;left:0';
+            document.body.appendChild(input);
+        }
+        input.value = '';
+        input.onchange = async function (e) {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            if (window.showToast) showToast('Reading PDF\u2026');
+            try {
+                await loadPdfLib();
+                const { PDFDocument } = window.PDFLib;
+                const bytes = await file.arrayBuffer();
+                const pdfDoc = await PDFDocument.load(bytes);
+                const form = pdfDoc.getForm();
+
+                function readField(name) {
+                    try { return form.getTextField(name).getText() || ''; } catch (_) { return ''; }
+                }
+                function readCheck(name) {
+                    try { return form.getCheckBox(name).isChecked(); } catch (_) { return false; }
+                }
+
+                const bio = {
+                    name: readField('1 LAST NAME FIRST NAME MIDDLE INITIAL'),
+                    profession: readField('2 PROFESSION RANK IF APPLICABLE'),
+                    employer: readField('3 EMPLOYER'),
+                    nationality: readField('4 NATIONALITY'),
+                    sex: readField('SEX'),
+                    age: readField('6 AGE AND DOB'),
+                    education: readField('7 EDUCATION AND OCCUPATION'),
+                    physicalDesc: readField('10 PHYSICAL DESCRIPTION'),
+                    motivations: readField('12 MOTIVATIONS AND MENTAL DISORDERSPSYCHOLOGICAL DATA'),
+                    personalDetails: readField('17 PERSONAL DETAILS AND NOTES'),
+                };
+
+                const csStats = {};
+                ['STR', 'CON', 'DEX', 'INT', 'POW', 'CHA'].forEach(st => {
+                    csStats[st] = parseInt(readField(st)) || 3;
+                });
+
+                const skills = {};
+                Object.entries(SKILL_FIELD).forEach(([key, fieldName]) => {
+                    const val = parseInt(readField(fieldName));
+                    if (val > 0) skills[key] = val;
+                });
+
+                const derived = {
+                    hp: parseInt(readField('CURRENTHit Points HP')) || parseInt(readField('MAXIMUMHit Points HP')) || 0,
+                    wp: parseInt(readField('CURRENTWillpower Points WP')) || parseInt(readField('MAXIMUMWillpower Points WP')) || 0,
+                    san: parseInt(readField('CURRENTSanity Points SAN')) || parseInt(readField('MAXIMUMSanity Points SAN')) || 0,
+                    bp: parseInt(readField('CURRENTBreaking Point BP')) || 0,
+                };
+
+                const sanity = {
+                    violence: [1, 2, 3].map(n => readCheck('Check Box' + n)),
+                    helplessness: [1, 2, 3].map(n => readCheck('Check Box' + (n + 3))),
+                };
+
+                // Bonds — up to 6
+                const bonds = [];
+                for (let i = 1; i <= 6; i++) {
+                    const label = readField('BOND ' + i);
+                    const score = parseInt(readField('BOND ' + i + ' SCORE')) || 0;
+                    if (label) {
+                        // Best-effort: split "Name (relationship)" back apart
+                        const m = label.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+                        bonds.push({ name: m ? m[1].trim() : label, relationship: m ? m[2].trim() : '', score });
+                    }
+                }
+
+                // Gear — split the armor/gear text field into individual custom items
+                const gearText = readField('15 ARMOR AND GEAR');
+                const equipment = gearText
+                    ? gearText.split('\n').map(l => l.trim()).filter(Boolean)
+                        .map(n => ({ isCustom: true, name: n }))
+                    : [];
+
+                const lpNotes = {
+                    wounds: readField('14 WOUNDS AND AILMENTS_2'),
+                    gear: '',
+                    remarks: '',
+                };
+
+                const state = {
+                    v: 1, bio, stats: csStats, csStats, derived, skills,
+                    skillSpecs: {}, customSkills: [], bonds, sanity, equipment,
+                    lpNotes, lpWeapons: [], lpFeat: {}, optionalSkillChecked: [],
+                    bonusPrepared: false, bonusSkills: [], bonusApplied: false,
+                    appliedBonuses: {}, specialtyInstances: [], lpCheckedSkills: [],
+                    lpCustomSkills: [], professionSkillsApplied: false,
+                };
+
+                if (typeof window.dgSaveLoad?.applyState === 'function') {
+                    window.dgSaveLoad.applyState(state);
+                    setTimeout(() => { window.dgSaveLoad.save?.(); if (typeof syncLpFromForm === 'function') syncLpFromForm(); }, 300);
+                    if (window.showToast) showToast('Character imported from PDF! Review stats and skills \u2014 specialties must be re-entered manually.');
+                } else {
+                    alert('Import function not available.');
+                }
+            } catch (err) {
+                console.error('[DG PDF Import]', err);
+                if (window.showToast) showToast('PDF import failed \u2014 see console for details.');
+            }
+        };
+        input.click();
+    }
+
+    window.importFromPDF = importFromPDF;
 })();
